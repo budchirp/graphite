@@ -6,6 +6,7 @@
 #include "frontend/lexer/position.hpp"
 #include "frontend/token/grammar.hpp"
 #include "frontend/token/token_type.hpp"
+#include "utils/logger/logger.hpp"
 
 using namespace std;
 
@@ -27,8 +28,7 @@ void Lexer::eat_char() {
 }
 
 void Lexer::eat_whitespace() {
-  while ((current_char == ' ' || current_char == '\t') &&
-         current_char != '\0') {
+  while (current_char == ' ' || current_char == '\t' || current_char == '\n') {
     eat_char();
   }
 }
@@ -55,6 +55,24 @@ Token Lexer::tokenize(i8 character) {
     }
     break;
 
+  case '&':
+    if (next_char == '&') {
+      eat_char();
+      token = Token(TokenType::TOKEN_AND, "&&");
+    } else {
+      token = Token(TokenType::TOKEN_AMPERSAND, "&");
+    }
+    break;
+
+  case '|':
+    if (next_char == '|') {
+      eat_char();
+      token = Token(TokenType::TOKEN_OR, "||");
+    } else {
+      Logger::error("Unknown char " + ::to_string(current_char));
+    }
+    break;
+
   case '<':
     token = Token(TokenType::TOKEN_LESS_THAN, "<");
     break;
@@ -68,7 +86,12 @@ Token Lexer::tokenize(i8 character) {
     break;
 
   case '-':
-    token = Token(TokenType::TOKEN_MINUS, "-");
+    if (next_char == '>') {
+      eat_char();
+      token = Token(TokenType::TOKEN_ARROW, "->");
+    } else {
+      token = Token(TokenType::TOKEN_MINUS, "-");
+    }
     break;
 
   case '*':
@@ -77,6 +100,11 @@ Token Lexer::tokenize(i8 character) {
 
   case '/':
     token = Token(TokenType::TOKEN_SLASH, "/");
+    break;
+
+  case ':':
+    token = Token(TokenType::TOKEN_COLON, ":");
+
     break;
 
   case ';':
@@ -98,6 +126,19 @@ Token Lexer::tokenize(i8 character) {
   case '{':
     token = Token(TokenType::TOKEN_LEFT_BRACE, "{");
     break;
+
+  case '"': {
+    eat_char(); // eat "
+
+    string str;
+    do {
+      str += current_char;
+      eat_char();
+    } while (current_char != '"');
+
+    token = Token(TokenType::TOKEN_STRING, str);
+    break;
+  }
 
   case '}':
     token = Token(TokenType::TOKEN_RIGHT_BRACE, "}");
@@ -135,7 +176,7 @@ Token Lexer::tokenize(i8 character) {
 
       token = Token(TokenType::TOKEN_INT, number);
     } else {
-      token = Token(TokenType::TOKEN_EOF, "");
+      Logger::error("Unknown char " + ::to_string(current_char));
     }
   }
 

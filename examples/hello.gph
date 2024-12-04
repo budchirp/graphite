@@ -1,0 +1,7 @@
+extern printf(str: string) -> void
+
+fn main() -> i32 {
+  printf("hi")
+
+  return 0;
+}

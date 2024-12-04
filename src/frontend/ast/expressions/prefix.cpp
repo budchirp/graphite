@@ -1,5 +1,6 @@
-#include "frontend/ast/expressions/prefix.hpp"
 #include <string>
+
+#include "frontend/ast/expressions/prefix.hpp"
 
 PrefixExpression::PrefixExpression(Token prefix, unique_ptr<Expression> right) {
   this->prefix = prefix;
@@ -8,7 +9,7 @@ PrefixExpression::PrefixExpression(Token prefix, unique_ptr<Expression> right) {
 }
 
 string PrefixExpression::to_string() const {
-  return prefix.to_string() + " " + right->to_string();
+  return prefix.to_string() + right->to_string();
 }
 
 string PrefixExpression::to_string_tree() const {

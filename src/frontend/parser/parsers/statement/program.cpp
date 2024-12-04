@@ -8,7 +8,7 @@ ProgramParser::ProgramParser(shared_ptr<Parser> parser) {
   this->parser = parser;
 }
 
-unique_ptr<Program> ProgramParser::parse() {
+shared_ptr<Program> ProgramParser::parse() {
   auto statement_parser = StatementParser(parser);
 
   auto statements = std::vector<std::unique_ptr<Statement>>();
@@ -19,5 +19,5 @@ unique_ptr<Program> ProgramParser::parse() {
     }
   }
 
-  return std::make_unique<Program>(std::move(statements));
+  return std::make_shared<Program>(std::move(statements));
 }

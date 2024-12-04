@@ -1,5 +1,6 @@
-#include "frontend/ast/expressions/integer.hpp"
 #include <string>
+
+#include "frontend/ast/expressions/integer.hpp"
 
 IntegerExpression::IntegerExpression(i32 value) { this->value = value; }
 

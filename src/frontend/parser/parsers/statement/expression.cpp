@@ -4,12 +4,14 @@
 
 #include "frontend/ast/expression.hpp"
 #include "frontend/parser/parsers/expression/binary.hpp"
+#include "frontend/parser/parsers/expression/boolean.hpp"
 #include "frontend/parser/parsers/expression/call.hpp"
 #include "frontend/parser/parsers/expression/group.hpp"
 #include "frontend/parser/parsers/expression/identifier.hpp"
 #include "frontend/parser/parsers/expression/integer.hpp"
 #include "frontend/parser/parsers/expression/parser.hpp"
 #include "frontend/parser/parsers/expression/prefix.hpp"
+#include "frontend/parser/parsers/expression/string.hpp"
 #include "frontend/parser/parsers/statement/expression.hpp"
 #include "frontend/parser/precedence.hpp"
 #include "utils/logger/logger.hpp"
@@ -36,7 +38,27 @@ std::map<TokenType, std::function<std::unique_ptr<ExpressionParser>(
          [](std::shared_ptr<Parser> parser) {
            return std::make_unique<IntegerExpressionParser>(parser);
          }},
+        {TokenType::TOKEN_STRING,
+         [](std::shared_ptr<Parser> parser) {
+           return std::make_unique<StringExpressionParser>(parser);
+         }},
+        {TokenType::TOKEN_TRUE,
+         [](std::shared_ptr<Parser> parser) {
+           return std::make_unique<BooleanExpressionParser>(parser);
+         }},
+        {TokenType::TOKEN_FALSE,
+         [](std::shared_ptr<Parser> parser) {
+           return std::make_unique<BooleanExpressionParser>(parser);
+         }},
         {TokenType::TOKEN_BANG,
+         [](std::shared_ptr<Parser> parser) {
+           return std::make_unique<PrefixExpressionParser>(parser);
+         }},
+        {TokenType::TOKEN_ASTERISK,
+         [](std::shared_ptr<Parser> parser) {
+           return std::make_unique<PrefixExpressionParser>(parser);
+         }},
+        {TokenType::TOKEN_AMPERSAND,
          [](std::shared_ptr<Parser> parser) {
            return std::make_unique<PrefixExpressionParser>(parser);
          }},
@@ -116,6 +138,7 @@ ExpressionStatementParser::parse_expression(Precedence precedence) {
 
   while (PrecedenceHelper::precedence_for(parser->current_token.type) >
          precedence) {
+
     auto infix_parser_it = binary_parse_fns.find(parser->current_token.type);
     if (infix_parser_it == binary_parse_fns.end()) {
       break;

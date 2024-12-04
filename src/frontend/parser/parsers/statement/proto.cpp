@@ -1,8 +1,7 @@
 #include <memory>
 
-#include "frontend/parser/parsers/statement/expression.hpp"
+#include "frontend/parser/parsers/expression/identifier.hpp"
 #include "frontend/parser/parsers/statement/proto.hpp"
-#include "frontend/parser/precedence.hpp"
 #include "frontend/token/token_type.hpp"
 #include "utils/logger/logger.hpp"
 
@@ -16,10 +15,9 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
-  auto expression_statement_parser = ExpressionStatementParser(parser);
+  auto identifier_expression_parser = IdentifierExpressionParser(parser);
 
-  auto name_expression =
-      expression_statement_parser.parse_expression(Precedence::CALL);
+  auto name_expression = identifier_expression_parser.parse();
   unique_ptr<IdentifierExpression> name(
       static_cast<IdentifierExpression *>(name_expression.release()));
 
@@ -29,17 +27,46 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   parser->eat_token(); // eat (
 
-  vector<unique_ptr<IdentifierExpression>> arguments;
+  vector<
+      pair<unique_ptr<IdentifierExpression>, unique_ptr<IdentifierExpression>>>
+      parameters;
   while (parser->current_token.type != TokenType::TOKEN_RIGHT_PARENTHESES) {
     if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
-      Logger::error("Expected identifier as prototype argument");
+      Logger::error("Expected identifier as prototype parameter");
       return nullptr;
     }
 
-    auto argument_expression =
-        expression_statement_parser.parse_expression(Precedence::LOWEST);
-    arguments.push_back(unique_ptr<IdentifierExpression>(
-        static_cast<IdentifierExpression *>(argument_expression.release())));
+    auto parameter_expression = identifier_expression_parser.parse();
+
+    if (parser->current_token.type != TokenType::TOKEN_COLON) {
+      Logger::error("Expected : after parameter name");
+      return nullptr;
+    }
+
+    parser->eat_token(); // eat :
+
+    bool is_pointer = false;
+    if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
+      if (parser->current_token.type == TokenType::TOKEN_ASTERISK) {
+        parser->eat_token(); // eat *
+        is_pointer = true;
+      } else {
+        Logger::error("Expected type identifier after :");
+        return nullptr;
+      }
+    }
+
+    auto type_expression = identifier_expression_parser.parse();
+    unique_ptr<IdentifierExpression> type(
+        static_cast<IdentifierExpression *>(type_expression.release()));
+    if (is_pointer) {
+      type = make_unique<IdentifierExpression>("*" + type->get_value());
+    }
+
+    parameters.push_back(pair(
+        unique_ptr<IdentifierExpression>(static_cast<IdentifierExpression *>(
+            parameter_expression.release())),
+        std::move(type)));
 
     if (parser->current_token.type == TokenType::TOKEN_COMMA) {
       parser->eat_token(); // eat ,
@@ -52,5 +79,31 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   parser->eat_token(); // eat )
 
-  return make_unique<ProtoStatement>(std::move(name), std::move(arguments));
+  if (parser->current_token.type != TokenType::TOKEN_ARROW) {
+    Logger::error("Expected -> after )");
+    return nullptr;
+  }
+
+  parser->eat_token(); // eat ->
+
+  bool is_pointer = false;
+  if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
+    if (parser->current_token.type == TokenType::TOKEN_ASTERISK) {
+      parser->eat_token(); // eat *
+      is_pointer = true;
+    } else {
+      Logger::error("Expected type identifier after :");
+      return nullptr;
+    }
+  }
+
+  auto type_expression = identifier_expression_parser.parse();
+  unique_ptr<IdentifierExpression> type(
+      static_cast<IdentifierExpression *>(type_expression.release()));
+  if (is_pointer) {
+    type = make_unique<IdentifierExpression>("*" + type->get_value());
+  }
+
+  return make_unique<ProtoStatement>(std::move(name), std::move(parameters),
+                                     std::move(type));
 }

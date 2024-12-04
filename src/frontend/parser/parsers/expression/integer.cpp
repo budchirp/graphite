@@ -1,9 +1,9 @@
 #include <memory>
 #include <string>
 
-#include "frontend/parser/parsers/expression/integer.hpp"
 #include "frontend/ast/expression.hpp"
 #include "frontend/ast/expressions/integer.hpp"
+#include "frontend/parser/parsers/expression/integer.hpp"
 
 IntegerExpressionParser::IntegerExpressionParser(shared_ptr<Parser> parser) {
   this->parser = parser;

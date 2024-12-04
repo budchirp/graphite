@@ -1,8 +1,10 @@
-#include "frontend/ast/expressions/binary.hpp"
 #include <string>
 
-BinaryExpression::BinaryExpression(Token op, unique_ptr<Expression> left,
-                                   unique_ptr<Expression> right) {
+#include "frontend/ast/expressions/binary.hpp"
+
+BinaryExpression::BinaryExpression(Token op,
+                   unique_ptr<Expression> left, unique_ptr<Expression> right) {
+
   this->op = op;
 
   this->left = std::move(left);

@@ -1,8 +1,8 @@
 #include <memory>
 
-#include "frontend/parser/parsers/expression/identifier.hpp"
 #include "frontend/ast/expression.hpp"
 #include "frontend/ast/expressions/identifier.hpp"
+#include "frontend/parser/parsers/expression/identifier.hpp"
 
 IdentifierExpressionParser::IdentifierExpressionParser(
     shared_ptr<Parser> parser) {

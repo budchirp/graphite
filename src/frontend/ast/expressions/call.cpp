@@ -1,9 +1,10 @@
-#include "frontend/ast/expressions/call.hpp"
-#include "std/types.hpp"
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "frontend/ast/expressions/call.hpp"
+#include "std/types.hpp"
 
 using namespace std;
 

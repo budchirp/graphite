@@ -13,10 +13,12 @@ using namespace std;
 class VarStatement : public Statement {
 private:
   unique_ptr<IdentifierExpression> name;
+  unique_ptr<IdentifierExpression> type;
   unique_ptr<Expression> expression;
 
 public:
   VarStatement(unique_ptr<IdentifierExpression> name,
+               unique_ptr<IdentifierExpression> type,
                unique_ptr<Expression> expression);
 
   llvm::Value *codegen() override;

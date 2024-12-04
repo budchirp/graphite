@@ -1,25 +1,22 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
-#include <memory>
 #include <string>
 
 #include "frontend/ast/expression.hpp"
-#include "frontend/token/token.hpp"
 
 using namespace std;
 
-class PrefixExpression : public Expression {
+class BooleanExpression : public Expression {
 private:
-  Token prefix;
+  bool value;
 
-  unique_ptr<Expression> right;
-
-public:
-  PrefixExpression(Token prefix,
-                   unique_ptr<Expression> right);
+public:  
+  BooleanExpression(bool value);
 
   llvm::Value *codegen() override;
+
+  bool get_value();
 
   string to_string() const override;
   string to_string_tree() const override;

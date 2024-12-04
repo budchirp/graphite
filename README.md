@@ -14,9 +14,14 @@
 - [x] Lexer
 - [x] Parser
 - [x] Basic codegen
-- [ ] Type support (currently only supports integers)
+- [x] Type support
+- [ ] If expressions
+- [ ] For / While statements
+- [ ] Switch expressions
+- [ ] Stdlib
+- [ ] Better compile error handling
 - [ ] Structs
 - [ ] Arrays
-- [ ] CLI
+- [ ] CLI (build, run commands)
 - [ ] Optimization
-- [ ] Type checking
+- [ ] Type checking (currenly has basic type checking and probably its full of bugs)

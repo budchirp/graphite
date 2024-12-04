@@ -1,5 +1,6 @@
 #pragma once
 
+#include <llvm/IR/Function.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,10 +13,16 @@ using namespace std;
 class ProtoStatement : public Statement {
 public:
   unique_ptr<IdentifierExpression> name;
-  vector<unique_ptr<IdentifierExpression>> arguments;
+  vector<
+      pair<unique_ptr<IdentifierExpression>, unique_ptr<IdentifierExpression>>>
+      parameters;
+  unique_ptr<IdentifierExpression> return_type;
 
   ProtoStatement(unique_ptr<IdentifierExpression> name,
-                 vector<unique_ptr<IdentifierExpression>> arguments);
+                 vector<pair<unique_ptr<IdentifierExpression>,
+                             unique_ptr<IdentifierExpression>>>
+                     parameters,
+                 unique_ptr<IdentifierExpression> return_type);
 
   llvm::Value *codegen() override;
   llvm::Function *codegen_function();

@@ -16,9 +16,9 @@ private:
   unique_ptr<Expression> left;
   unique_ptr<Expression> right;
 
-public:
-  BinaryExpression(Token op, unique_ptr<Expression> left,
-                   unique_ptr<Expression> right);
+public:  
+  BinaryExpression(Token op,
+                   unique_ptr<Expression> left, unique_ptr<Expression> right);
 
   llvm::Value *codegen() override;
 

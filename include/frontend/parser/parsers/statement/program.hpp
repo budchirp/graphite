@@ -14,5 +14,5 @@ private:
 public:
   explicit ProgramParser(shared_ptr<Parser> parser);
 
-  unique_ptr<Program> parse();
+  shared_ptr<Program> parse();
 };
