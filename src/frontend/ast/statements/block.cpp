@@ -1,6 +1,7 @@
+#include <sstream>
+
 #include "frontend/ast/statements/block.hpp"
 #include "std/types.hpp"
-#include <sstream>
 
 BlockStatement::BlockStatement(vector<unique_ptr<Statement>> statements) {
   this->statements = std::move(statements);

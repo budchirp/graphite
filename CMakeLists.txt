@@ -29,6 +29,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(mcppga)
 
+FetchContent_Declare(
+  argman
+  GIT_REPOSITORY https://github.com/budchirp/argman
+  GIT_TAG        main
+)
+FetchContent_MakeAvailable(argman)
+
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
@@ -41,6 +48,7 @@ add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} PRIVATE mcppga)
+target_link_libraries(${PROJECT_NAME} PRIVATE argman)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LLVM)
 

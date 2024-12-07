@@ -1,4 +1,3 @@
-#include <iostream>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
@@ -18,6 +17,7 @@
 #include "frontend/ast/expressions/boolean.hpp"
 #include "frontend/ast/expressions/call.hpp"
 #include "frontend/ast/expressions/identifier.hpp"
+#include "frontend/ast/expressions/if.hpp"
 #include "frontend/ast/expressions/integer.hpp"
 #include "frontend/ast/expressions/prefix.hpp"
 #include "frontend/ast/expressions/string.hpp"
@@ -27,6 +27,7 @@
 #include "frontend/ast/statements/return.hpp"
 #include "frontend/ast/statements/var.hpp"
 #include "frontend/token/token_type.hpp"
+#include "std/types.hpp"
 #include "utils/logger/logger.hpp"
 
 using namespace std;
@@ -45,11 +46,14 @@ Codegen::Codegen(shared_ptr<Program> program) {
   builder = make_unique<llvm::IRBuilder<>>(*context);
 }
 
-void Codegen::generate() {
+string Codegen::generate() {
   program->codegen();
 
-  cout << endl;
-  module->print(llvm::errs(), nullptr);
+  string ir_string;
+  llvm::raw_string_ostream ir_stream(ir_string);
+  module->print(ir_stream, nullptr);
+
+  return ir_stream.str();
 }
 
 llvm::Type *Codegen::resolve_type(const string type_name) {
@@ -81,7 +85,7 @@ llvm::Type *Codegen::resolve_type(const string type_name) {
     return llvm::Type::getX86_FP80Ty(*context);
   if (type_name == "void")
     return llvm::Type::getVoidTy(*context);
-  if (type_name == "bool")
+  if (type_name == "boolean")
     return llvm::Type::getInt1Ty(*context);
   if (type_name == "string")
     return llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0);
@@ -98,6 +102,12 @@ llvm::Value *Codegen::convert_type(llvm::Value *value,
 
   if (value->getType() == expectedType) {
     return value;
+  }
+
+  if (value->getType()->isIntegerTy(1) && expectedType->isIntegerTy(1)) {
+    return value;
+  } else {
+    return nullptr;
   }
 
   if (value->getType()->isIntegerTy() && expectedType->isIntegerTy()) {
@@ -175,7 +185,7 @@ llvm::Value *BinaryExpression::codegen() {
       Logger::error("Unsupported operator for boolean type");
       return nullptr;
     }
-  } else if (type->isIntegerTy()) { // Integer operations
+  } else if (type->isIntegerTy()) {
     switch (op.type) {
     case TokenType::TOKEN_PLUS:
       return builder->CreateAdd(left_value, right_value, "addtmp");
@@ -193,7 +203,7 @@ llvm::Value *BinaryExpression::codegen() {
       Logger::error("Unsupported operator for integer type");
       return nullptr;
     }
-  } else if (type->isFloatingPointTy()) { // Floating-point operations
+  } else if (type->isFloatingPointTy()) {
     switch (op.type) {
     case TokenType::TOKEN_PLUS:
       return builder->CreateFAdd(left_value, right_value, "faddtmp");
@@ -237,7 +247,7 @@ llvm::Value *CallExpression::codegen() {
   }
 
   if (function->arg_size() != arguments.size()) {
-    Logger::error("Incorrect number of arguments passed to function: " +
+    Logger::error("Incorrect number of arguments passed to function " +
                   name->get_value());
     return nullptr;
   }
@@ -255,45 +265,91 @@ llvm::Value *CallExpression::codegen() {
 
     auto parameter_type = function->getFunctionType()->getParamType(idx);
     argument_value = Codegen::convert_type(argument_value, parameter_type);
-    if (!argument_value->getType()->isPointerTy() &&
-        parameter_type->isPointerTy()) {
-      Logger::error("Expected pointer but received value");
-      return nullptr;
-    } else if (argument_value->getType()->isPointerTy() &&
-               !parameter_type->isPointerTy()) {
-      Logger::error("Expected value but received pointer");
-      return nullptr;
-    } else if ((!argument_value->getType()->isPointerTy() &&
-                !parameter_type->isPointerTy()) &&
-               argument_value->getType() != parameter_type) {
+    if (!argument_value) {
       Logger::error("Type mismatch");
       return nullptr;
+    } else {
+      if (parameter_type->isPointerTy() &&
+          !argument_value->getType()->isPointerTy()) {
+        Logger::error("Expected pointer but received value");
+        return nullptr;
+      } else if (!parameter_type->isPointerTy() &&
+                 argument_value->getType()->isPointerTy()) {
+        Logger::error("Expected value but received pointer");
+        return nullptr;
+      } else
+
+        llvm_arguments.push_back(argument_value);
+      ++idx;
     }
-
-    llvm_arguments.push_back(argument_value);
-    ++idx;
   }
 
-  llvm::Value *value;
   if (function->getReturnType()->isVoidTy()) {
-    value = builder->CreateCall(function, llvm_arguments);
+    builder->CreateCall(function, llvm_arguments);
+    return nullptr;
   } else {
-    value = builder->CreateCall(function, llvm_arguments, "calltmp");
+    auto value = builder->CreateCall(function, llvm_arguments, "calltmp");
+    if (function->getReturnType()->isPointerTy())
+      pointer_type_map[value] = pointer_type_map[function];
+
+    return value;
   }
-
-  pointer_type_map[value] = pointer_type_map[function];
-
-  return value;
 }
 
 llvm::Value *IdentifierExpression::codegen() {
   auto it = named_values.find(value);
   if (it == named_values.end()) {
-    Logger::error("Undefined variable: " + value);
+    Logger::error("Undefined variable " + value);
     return nullptr;
   }
 
   return it->second;
+}
+
+llvm::Value *IfExpression::codegen() {
+  auto condition_value = condition->codegen();
+  if (!condition_value) {
+    Logger::error("Failed to generate condition for if expression");
+    return nullptr;
+  }
+
+  if (!condition_value->getType()->isIntegerTy(1)) {
+    Logger::error("Condition must be a boolean");
+    return nullptr;
+  }
+
+  auto parent_function = builder->GetInsertBlock()->getParent();
+
+  auto then_block = llvm::BasicBlock::Create(*context, "then", parent_function);
+  auto else_block = llvm::BasicBlock::Create(*context, "else");
+  auto merge_block = llvm::BasicBlock::Create(*context, "ifcontent");
+
+  builder->CreateCondBr(condition_value, then_block, else_block);
+
+  builder->SetInsertPoint(then_block);
+  auto then_value = consequence->codegen();
+  builder->CreateBr(merge_block);
+  then_block = builder->GetInsertBlock();
+
+  parent_function->insert(parent_function->end(), else_block);
+  builder->SetInsertPoint(else_block);
+  auto else_value = alternative ? alternative->codegen() : nullptr;
+  builder->CreateBr(merge_block);
+  else_block = builder->GetInsertBlock();
+
+  parent_function->insert(parent_function->end(), merge_block);
+  builder->SetInsertPoint(merge_block);
+
+  if (then_value && else_value &&
+      then_value->getType() == else_value->getType()) {
+    auto phi = builder->CreatePHI(then_value->getType(), 2, "iftmp");
+    phi->addIncoming(then_value, then_block);
+    phi->addIncoming(else_value, else_block);
+
+    return phi;
+  } else {
+    return then_value;
+  }
 }
 
 llvm::Value *IntegerExpression::codegen() {
@@ -336,24 +392,32 @@ llvm::Value *PrefixExpression::codegen() {
 
   default:
     Logger::error("Unsupported operator type in prefix expression");
+    return nullptr;
   }
-
-  return nullptr;
 }
 
 llvm::Value *StringExpression::codegen() {
-  return builder->CreateGlobalString(llvm::StringRef(value));
+  return builder->CreateGlobalStringPtr(llvm::StringRef(value), "str", 0,
+                                        module.get());
 }
 
-llvm::Value *BlockStatement::codegen() { return nullptr; }
+llvm::Value *BlockStatement::codegen() {
+  llvm::Value *last = nullptr;
+  for (auto &statement : statements) {
+    last = statement->codegen();
+    if (builder->GetInsertBlock()->getTerminator()) {
+      break;
+    }
+  }
+
+  return last;
+}
 llvm::BasicBlock *BlockStatement::codegen_block(llvm::Function *parent,
                                                 string name) {
   auto block = llvm::BasicBlock::Create(*context, name, parent);
   builder->SetInsertPoint(block);
 
-  for (auto &statement : statements) {
-    statement->codegen();
-  }
+  codegen();
 
   return block;
 }
@@ -367,13 +431,12 @@ llvm::Function *FunctionStatement::codegen_function() {
   auto function = module->getFunction(proto->name->get_value());
   if (function) {
     Logger::warn("Function " + proto->name->get_value() + " exists");
-    return nullptr;
-  }
-
-  function = proto->codegen_function();
-  if (!function) {
-    Logger::error("Failed to generate function " + proto->name->get_value());
-    return nullptr;
+  } else {
+    function = proto->codegen_function();
+    if (!function) {
+      Logger::error("Failed to generate function " + proto->name->get_value());
+      return nullptr;
+    }
   }
 
   named_values.clear();
@@ -388,8 +451,7 @@ llvm::Function *FunctionStatement::codegen_function() {
     return nullptr;
   }
 
-  if (!body_block->getTerminator() ||
-      !llvm::isa<llvm::ReturnInst>(body_block->getTerminator())) {
+  if (!body_block->getTerminator()) {
     if (function->getReturnType()->isVoidTy()) {
       builder->CreateRetVoid();
     } else {
@@ -427,6 +489,7 @@ llvm::Function *ProtoStatement::codegen_function() {
 
     parameter_types.push_back(resolved_type);
   }
+
   bool is_pointer = false;
   if (return_type->get_value()[0] == '*') {
     is_pointer = true;
@@ -458,24 +521,28 @@ llvm::Function *ProtoStatement::codegen_function() {
 llvm::Value *ReturnStatement::codegen() {
   auto value = expression->codegen();
   if (value) {
-    auto return_type = builder->GetInsertBlock()->getParent()->getReturnType();
+    auto function = builder->GetInsertBlock()->getParent();
+    auto return_type = function->getReturnType();
 
     value = Codegen::convert_type(value, return_type);
     if (!value) {
-      Logger::error("Failed to convert value type");
-    }
-
-    if (!value->getType()->isPointerTy() && return_type->isPointerTy()) {
-      Logger::error("Return expected pointer but received value");
+      Logger::error("Return type does not match function's return type");
       return nullptr;
-    } else if (value->getType()->isPointerTy() && !return_type->isPointerTy()) {
-      Logger::error("Return expected value but received pointer");
-      return nullptr;
-    } else if ((!value->getType()->isPointerTy() &&
-                !return_type->isPointerTy()) &&
-               value->getType() != return_type) {
-      Logger::error("Return value type does not match function return type");
-      return nullptr;
+    } else {
+      if (return_type->isPointerTy() && !value->getType()->isPointerTy()) {
+        Logger::error("Return expected pointer but received value");
+        return nullptr;
+      } else if (!return_type->isPointerTy() &&
+                 value->getType()->isPointerTy()) {
+        Logger::error("Return expected value but received pointer");
+        return nullptr;
+      } else if (return_type->isPointerTy() &&
+                 value->getType()->isPointerTy()) {
+        if (pointer_type_map[value] != pointer_type_map[function]) {
+          Logger::error("Return type does not match function's return type");
+          return nullptr;
+        }
+      }
     }
 
     builder->CreateRet(value);
@@ -506,21 +573,48 @@ llvm::Value *VarStatement::codegen() {
     return nullptr;
   }
 
-  value = Codegen::convert_type(value, llvm_type);
-  if (!value) {
-    Logger::error("Failed to convert value type");
+  if (llvm::isa<llvm::PHINode>(value)) {
+    auto phi = llvm::cast<llvm::PHINode>(value);
+    for (unsigned i = 0; i < phi->getNumIncomingValues(); ++i) {
+      auto incoming_value =
+          Codegen::convert_type(phi->getIncomingValue(i), llvm_type);
+      if (!incoming_value) {
+        Logger::error("Type mismatch");
+        return nullptr;
+      } else {
+        if (is_pointer && !incoming_value->getType()->isPointerTy()) {
+          Logger::error("Expected pointer but received incoming_value");
+          return nullptr;
+        } else if (!is_pointer && incoming_value->getType()->isPointerTy()) {
+          Logger::error("Expected value but received pointer");
+          return nullptr;
+        } else if (is_pointer && incoming_value->getType()->isPointerTy()) {
+          if (llvm_type != pointer_type_map[incoming_value]) {
+            Logger::error("Type mismatch");
+            return nullptr;
+          }
+        }
+      }
+    }
   }
 
-  if (is_pointer) {
-    auto function = builder->GetInsertBlock()->getParent();
-    llvm::IRBuilder<> temp_builder(&function->getEntryBlock(),
-                                   function->getEntryBlock().begin());
-    auto alloca =
-        temp_builder.CreateAlloca(llvm_type, nullptr, name->get_value());
-    builder->CreateStore(value, alloca);
-
-    pointer_type_map[alloca] = value->getType();
-    value = alloca;
+  value = Codegen::convert_type(value, llvm_type);
+  if (!value) {
+    Logger::error("Type mismatch");
+    return nullptr;
+  } else {
+    if (is_pointer && !value->getType()->isPointerTy()) {
+      Logger::error("Expected pointer but received value");
+      return nullptr;
+    } else if (!is_pointer && value->getType()->isPointerTy()) {
+      Logger::error("Expected value but received pointer");
+      return nullptr;
+    } else if (is_pointer && value->getType()->isPointerTy()) {
+      if (llvm_type != pointer_type_map[value]) {
+        Logger::error("Type mismatch");
+        return nullptr;
+      }
+    }
   }
 
   named_values[name->get_value()] = value;

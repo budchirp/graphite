@@ -8,6 +8,9 @@ enum TokenType {
 
   TOKEN_EXTERN,
 
+  TOKEN_IF,
+  TOKEN_ELSE,
+
   TOKEN_VAR,
 
   TOKEN_IDENTIFIER,
@@ -21,7 +24,6 @@ enum TokenType {
   TOKEN_ASSIGN,
   TOKEN_EQUAL,
   TOKEN_NOT_EQUAL,
-
 
   TOKEN_AND,
   TOKEN_OR,

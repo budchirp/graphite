@@ -15,13 +15,13 @@
 - [x] Parser
 - [x] Basic codegen
 - [x] Type support
-- [ ] If expressions
+- [x] If expressions
 - [ ] For / While statements
 - [ ] Switch expressions
 - [ ] Stdlib
 - [ ] Better compile error handling
 - [ ] Structs
 - [ ] Arrays
-- [ ] CLI (build, run commands)
+- [x] CLI (compile, run commands) (compile command is done)
 - [ ] Optimization
 - [ ] Type checking (currenly has basic type checking and probably its full of bugs)

@@ -8,6 +8,7 @@
 #include "frontend/parser/parsers/expression/call.hpp"
 #include "frontend/parser/parsers/expression/group.hpp"
 #include "frontend/parser/parsers/expression/identifier.hpp"
+#include "frontend/parser/parsers/expression/if.hpp"
 #include "frontend/parser/parsers/expression/integer.hpp"
 #include "frontend/parser/parsers/expression/parser.hpp"
 #include "frontend/parser/parsers/expression/prefix.hpp"
@@ -74,7 +75,9 @@ std::map<TokenType, std::function<std::unique_ptr<ExpressionParser>(
          [](std::shared_ptr<Parser> parser) {
            return std::make_unique<GroupExpressionParser>(parser);
          }},
-};
+        {TokenType::TOKEN_IF, [](std::shared_ptr<Parser> parser) {
+           return std::make_unique<IfExpressionParser>(parser);
+         }}};
 
 std::map<TokenType,
          std::function<std::unique_ptr<ExpressionParser>(
