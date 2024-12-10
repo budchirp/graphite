@@ -6,7 +6,7 @@ fn main() -> i32 {
   var x: i32 = (32 + 32)
   var y: i32 = (16 * 4)
 
-  var z: string = if (x == y) { true } else { false }
+  var z: boolean = if (x == y) { true } else { false }
 
   if (true) {
     printf("x and y is 64")

@@ -1,17 +1,19 @@
 #include <memory>
 
+#include "frontend/ast/expression/identifier.hpp"
 #include "frontend/parser/parsers/expression/identifier.hpp"
 #include "frontend/parser/parsers/statement/proto.hpp"
 #include "frontend/token/token_type.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/log_types.hpp"
 
-ProtoStatementParser::ProtoStatementParser(shared_ptr<Parser> parser) {
+ProtoStatementParser::ProtoStatementParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
 unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
-    Logger::error("Expected identifier as prototype name");
+    parser->logger->error("Expected identifier as prototype name",
+                          LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
@@ -19,10 +21,11 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   auto name_expression = identifier_expression_parser.parse();
   unique_ptr<IdentifierExpression> name(
-      static_cast<IdentifierExpression *>(name_expression.release()));
+      dynamic_cast<IdentifierExpression *>(name_expression.release()));
 
   if (parser->current_token.type != TokenType::TOKEN_LEFT_PARENTHESES) {
-    Logger::error("Expected left parantheses after prototype name");
+    parser->logger->error("Expected left parentheses after prototype name",
+                          LogTypes::Error::SYNTAX);
   }
 
   parser->eat_token(); // eat (
@@ -32,14 +35,18 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
       parameters;
   while (parser->current_token.type != TokenType::TOKEN_RIGHT_PARENTHESES) {
     if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
-      Logger::error("Expected identifier as prototype parameter");
+      parser->logger->error("Expected identifier as prototype parameter",
+                            LogTypes::Error::SYNTAX);
       return nullptr;
     }
 
     auto parameter_expression = identifier_expression_parser.parse();
+    unique_ptr<IdentifierExpression> parameter(
+        dynamic_cast<IdentifierExpression *>(parameter_expression.release()));
 
     if (parser->current_token.type != TokenType::TOKEN_COLON) {
-      Logger::error("Expected : after parameter name");
+      parser->logger->error("Expected : after parameter name",
+                            LogTypes::Error::SYNTAX);
       return nullptr;
     }
 
@@ -51,28 +58,26 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
         parser->eat_token(); // eat *
         is_pointer = true;
       } else {
-        Logger::error("Expected type identifier after :");
+        parser->logger->error("Expected type after :", LogTypes::Error::SYNTAX);
         return nullptr;
       }
     }
 
     auto type_expression = identifier_expression_parser.parse();
     unique_ptr<IdentifierExpression> type(
-        static_cast<IdentifierExpression *>(type_expression.release()));
+        dynamic_cast<IdentifierExpression *>(type_expression.release()));
     if (is_pointer) {
       type = make_unique<IdentifierExpression>("*" + type->get_value());
     }
 
-    parameters.push_back(pair(
-        unique_ptr<IdentifierExpression>(static_cast<IdentifierExpression *>(
-            parameter_expression.release())),
-        std::move(type)));
+    parameters.push_back(pair(std::move(parameter), std::move(type)));
 
     if (parser->current_token.type == TokenType::TOKEN_COMMA) {
       parser->eat_token(); // eat ,
     } else if (parser->current_token.type !=
                TokenType::TOKEN_RIGHT_PARENTHESES) {
-      Logger::error("Expected right parantheses or comma");
+      parser->logger->error("Expected right parentheses or comma",
+                            LogTypes::Error::SYNTAX);
       return nullptr;
     }
   }
@@ -80,7 +85,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
   parser->eat_token(); // eat )
 
   if (parser->current_token.type != TokenType::TOKEN_ARROW) {
-    Logger::error("Expected -> after )");
+    parser->logger->error("Expected -> after )", LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
@@ -92,14 +97,15 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
       parser->eat_token(); // eat *
       is_pointer = true;
     } else {
-      Logger::error("Expected type identifier after :");
+      parser->logger->error("Expected type identifier after :",
+                            LogTypes::Error::SYNTAX);
       return nullptr;
     }
   }
 
   auto type_expression = identifier_expression_parser.parse();
   unique_ptr<IdentifierExpression> type(
-      static_cast<IdentifierExpression *>(type_expression.release()));
+      dynamic_cast<IdentifierExpression *>(type_expression.release()));
   if (is_pointer) {
     type = make_unique<IdentifierExpression>("*" + type->get_value());
   }

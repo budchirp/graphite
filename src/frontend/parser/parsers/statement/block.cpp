@@ -3,7 +3,7 @@
 #include "frontend/parser/parsers/statement/block.hpp"
 #include "frontend/parser/parsers/statement/statement.hpp"
 
-BlockStatementParser::BlockStatementParser(shared_ptr<Parser> parser) {
+BlockStatementParser::BlockStatementParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
@@ -14,8 +14,7 @@ unique_ptr<BlockStatement> BlockStatementParser::parse() {
 
   auto statements = std::vector<std::unique_ptr<Statement>>();
   while (parser->current_token.type != TokenType::TOKEN_RIGHT_BRACE) {
-    auto statement = statement_parser.parse();
-    if (statement) {
+    if (auto statement = statement_parser.parse()) {
       statements.push_back(std::move(statement));
     }
   }

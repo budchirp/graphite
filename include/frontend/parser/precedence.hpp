@@ -27,8 +27,7 @@ public:
         {TokenType::TOKEN_ASTERISK, Precedence::PRODUCT},
         {TokenType::TOKEN_LEFT_PARENTHESES, Precedence::CALL}};
 
-    auto it = precedenceMap.find(tokenType);
-    if (it != precedenceMap.end()) {
+    if (const auto it = precedenceMap.find(tokenType); it != precedenceMap.end()) {
       return it->second;
     }
 

@@ -6,15 +6,16 @@
 #include "frontend/lexer/position.hpp"
 #include "frontend/token/grammar.hpp"
 #include "frontend/token/token_type.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/logger.hpp"
 
 using namespace std;
 
-Lexer::Lexer(const string &source) : source(source), position(0, 0) {
+Lexer::Lexer(const string &source)
+    : source(source), read_position(0), position(make_shared<Position>(0, 0)) {
   eat_char();
 }
 
-i8 Lexer::get_current_char() {
+i8 Lexer::get_current_char() const {
   return (read_position < source.size()) ? source[read_position] : '\0';
 }
 
@@ -22,13 +23,19 @@ void Lexer::eat_char() {
   current_char = get_current_char();
 
   read_position++;
-  position.column++;
+  position->column++;
 
   next_char = get_current_char();
 }
 
 void Lexer::eat_whitespace() {
-  while (current_char == ' ' || current_char == '\t' || current_char == '\n') {
+  while (current_char == '\n') {
+    position->column = 0;
+    position->line++;
+    eat_char();
+  }
+
+  while (current_char == ' ' || current_char == '\t') {
     eat_char();
   }
 }

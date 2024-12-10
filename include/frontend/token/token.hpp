@@ -12,7 +12,7 @@ public:
   string literal;
 
   Token();
-  Token(TokenType token_type, string literal);
+  Token(const TokenType &token_type, const string &literal);
 
   string to_string() const;
   string to_string_tree() const;

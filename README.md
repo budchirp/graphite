@@ -19,7 +19,7 @@
 - [ ] For / While statements
 - [ ] Switch expressions
 - [ ] Stdlib
-- [ ] Better compile error handling
+- [ ] Better compile error handling (only parsing errors has position info)
 - [ ] Structs
 - [ ] Arrays
 - [x] CLI (compile, run commands) (compile command is done)

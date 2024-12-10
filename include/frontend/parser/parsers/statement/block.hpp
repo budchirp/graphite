@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "frontend/ast/statements/block.hpp"
+#include "frontend/ast/statement/block.hpp"
 #include "frontend/parser/parser.hpp"
 
 using namespace std;
@@ -12,7 +12,7 @@ private:
   shared_ptr<Parser> parser;
 
 public:
-  explicit BlockStatementParser(shared_ptr<Parser> parser);
+  explicit BlockStatementParser(const shared_ptr<Parser> &parser);
 
   unique_ptr<BlockStatement> parse();
 };

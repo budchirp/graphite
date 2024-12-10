@@ -13,22 +13,21 @@
 #include <memory>
 
 #include "backend/codegen/codegen.hpp"
-#include "frontend/ast/expressions/binary.hpp"
-#include "frontend/ast/expressions/boolean.hpp"
-#include "frontend/ast/expressions/call.hpp"
-#include "frontend/ast/expressions/identifier.hpp"
-#include "frontend/ast/expressions/if.hpp"
-#include "frontend/ast/expressions/integer.hpp"
-#include "frontend/ast/expressions/prefix.hpp"
-#include "frontend/ast/expressions/string.hpp"
-#include "frontend/ast/statements/expression.hpp"
-#include "frontend/ast/statements/extern.hpp"
-#include "frontend/ast/statements/function.hpp"
-#include "frontend/ast/statements/return.hpp"
-#include "frontend/ast/statements/var.hpp"
+#include "frontend/ast/expression/binary.hpp"
+#include "frontend/ast/expression/boolean.hpp"
+#include "frontend/ast/expression/call.hpp"
+#include "frontend/ast/expression/identifier.hpp"
+#include "frontend/ast/expression/if.hpp"
+#include "frontend/ast/expression/integer.hpp"
+#include "frontend/ast/expression/prefix.hpp"
+#include "frontend/ast/expression/string.hpp"
+#include "frontend/ast/statement/expression.hpp"
+#include "frontend/ast/statement/extern.hpp"
+#include "frontend/ast/statement/function.hpp"
+#include "frontend/ast/statement/return.hpp"
+#include "frontend/ast/statement/var.hpp"
 #include "frontend/token/token_type.hpp"
-#include "std/types.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/logger.hpp"
 
 using namespace std;
 
@@ -38,7 +37,7 @@ unique_ptr<llvm::IRBuilder<>> builder;
 unordered_map<string, llvm::Value *> named_values;
 unordered_map<const llvm::Value *, llvm::Type *> pointer_type_map;
 
-Codegen::Codegen(shared_ptr<Program> program) {
+Codegen::Codegen(const shared_ptr<Program> &program) {
   this->program = program;
 
   context = make_unique<llvm::LLVMContext>();
@@ -46,7 +45,7 @@ Codegen::Codegen(shared_ptr<Program> program) {
   builder = make_unique<llvm::IRBuilder<>>(*context);
 }
 
-string Codegen::generate() {
+string Codegen::generate_ir() const {
   program->codegen();
 
   string ir_string;
@@ -56,7 +55,7 @@ string Codegen::generate() {
   return ir_stream.str();
 }
 
-llvm::Type *Codegen::resolve_type(const string type_name) {
+llvm::Type *Codegen::resolve_type(const string &type_name) {
   if (type_name[0] == '*') {
     return Codegen::resolve_type(type_name.substr(1));
   }
@@ -106,8 +105,6 @@ llvm::Value *Codegen::convert_type(llvm::Value *value,
 
   if (value->getType()->isIntegerTy(1) && expectedType->isIntegerTy(1)) {
     return value;
-  } else {
-    return nullptr;
   }
 
   if (value->getType()->isIntegerTy() && expectedType->isIntegerTy()) {
@@ -141,7 +138,7 @@ llvm::Value *Codegen::convert_type(llvm::Value *value,
 }
 
 llvm::Value *Program::codegen() {
-  for (auto &statement : statements) {
+  for (const auto &statement : statements) {
     statement->codegen();
   }
 
@@ -240,7 +237,7 @@ llvm::Value *BinaryExpression::codegen() {
 llvm::Value *BooleanExpression::codegen() { return builder->getInt1(value); }
 
 llvm::Value *CallExpression::codegen() {
-  llvm::Function *function = module->getFunction(name->get_value());
+  auto function = module->getFunction(name->get_value());
   if (!function) {
     Logger::error("Unknown function " + name->get_value() + " called");
     return nullptr;
@@ -252,11 +249,11 @@ llvm::Value *CallExpression::codegen() {
     return nullptr;
   }
 
-  std::vector<llvm::Value *> llvm_arguments;
-  size_t idx = 0;
+  vector<llvm::Value *> llvm_arguments;
+  auto idx = 0;
 
-  for (auto &argument : arguments) {
-    llvm::Value *argument_value = argument->codegen();
+  for (const auto &argument : arguments) {
+    auto argument_value = argument->codegen();
     if (!argument_value) {
       Logger::error("Failed to generate argument for function " +
                     name->get_value());
@@ -403,7 +400,7 @@ llvm::Value *StringExpression::codegen() {
 
 llvm::Value *BlockStatement::codegen() {
   llvm::Value *last = nullptr;
-  for (auto &statement : statements) {
+  for (const auto &statement : statements) {
     last = statement->codegen();
     if (builder->GetInsertBlock()->getTerminator()) {
       break;
@@ -413,7 +410,7 @@ llvm::Value *BlockStatement::codegen() {
   return last;
 }
 llvm::BasicBlock *BlockStatement::codegen_block(llvm::Function *parent,
-                                                string name) {
+                                                const string &name) {
   auto block = llvm::BasicBlock::Create(*context, name, parent);
   builder->SetInsertPoint(block);
 
@@ -468,15 +465,14 @@ llvm::Function *FunctionStatement::codegen_function() {
 
 llvm::Value *ProtoStatement::codegen() { return codegen_function(); }
 llvm::Function *ProtoStatement::codegen_function() {
-  std::vector<llvm::Type *> parameter_types;
+  vector<llvm::Type *> parameter_types;
   for (const auto &parameter : parameters) {
-    bool is_pointer = false;
+    auto is_pointer = false;
     if (parameter.second->get_value()[0] == '*') {
       is_pointer = true;
     }
 
-    llvm::Type *resolved_type =
-        Codegen::resolve_type(parameter.second->get_value());
+    auto resolved_type = Codegen::resolve_type(parameter.second->get_value());
     if (!resolved_type) {
       Logger::error("Failed to resolve type for argument " +
                     parameter.first->get_value());
@@ -494,8 +490,8 @@ llvm::Function *ProtoStatement::codegen_function() {
   if (return_type->get_value()[0] == '*') {
     is_pointer = true;
   }
-  llvm::Type *return_type =
-      Codegen::resolve_type(this->return_type->get_value());
+
+  auto return_type = Codegen::resolve_type(this->return_type->get_value());
   if (!return_type) {
     Logger::error("Failed to resolve return type for function " +
                   name->get_value());
@@ -509,7 +505,7 @@ llvm::Function *ProtoStatement::codegen_function() {
       llvm::Function::Create(function_type, llvm::Function::ExternalLinkage,
                              name->get_value(), module.get());
 
-  u32 idx = 0;
+  auto idx = 0;
   for (auto &argument : function->args())
     argument.setName(parameters[idx++].first->get_value());
 
@@ -519,10 +515,9 @@ llvm::Function *ProtoStatement::codegen_function() {
 }
 
 llvm::Value *ReturnStatement::codegen() {
-  auto value = expression->codegen();
-  if (value) {
-    auto function = builder->GetInsertBlock()->getParent();
-    auto return_type = function->getReturnType();
+  if (auto value = expression->codegen()) {
+    const auto function = builder->GetInsertBlock()->getParent();
+    const auto return_type = function->getReturnType();
 
     value = Codegen::convert_type(value, return_type);
     if (!value) {
@@ -546,12 +541,12 @@ llvm::Value *ReturnStatement::codegen() {
     }
 
     builder->CreateRet(value);
+
+    return value;
   } else {
     Logger::error("Failed to generate return value");
     return nullptr;
   }
-
-  return value;
 }
 
 llvm::Value *VarStatement::codegen() {
@@ -575,7 +570,7 @@ llvm::Value *VarStatement::codegen() {
 
   if (llvm::isa<llvm::PHINode>(value)) {
     auto phi = llvm::cast<llvm::PHINode>(value);
-    for (unsigned i = 0; i < phi->getNumIncomingValues(); ++i) {
+    for (auto i = 0; i < phi->getNumIncomingValues(); ++i) {
       auto incoming_value =
           Codegen::convert_type(phi->getIncomingValue(i), llvm_type);
       if (!incoming_value) {

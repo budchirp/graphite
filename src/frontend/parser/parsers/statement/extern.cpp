@@ -2,9 +2,9 @@
 
 #include "frontend/parser/parsers/statement/extern.hpp"
 #include "frontend/parser/parsers/statement/proto.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/log_types.hpp"
 
-ExternStatementParser::ExternStatementParser(shared_ptr<Parser> parser) {
+ExternStatementParser::ExternStatementParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
@@ -12,12 +12,11 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
   parser->eat_token(); // eat extern
 
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
-    Logger::error("Expected identifier after extern");
+    parser->logger->error("Expected identifier after extern",
+                          LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
-  auto proto_statement_parser = ProtoStatementParser(parser);
-  auto proto = proto_statement_parser.parse();
-
+  auto proto = ProtoStatementParser(parser).parse();
   return make_unique<ExternStatement>(std::move(proto));
 }

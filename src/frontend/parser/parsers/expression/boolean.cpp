@@ -1,10 +1,11 @@
 #include <memory>
 
 #include "frontend/ast/expression.hpp"
-#include "frontend/ast/expressions/boolean.hpp"
+#include "frontend/ast/expression/boolean.hpp"
 #include "frontend/parser/parsers/expression/boolean.hpp"
 
-BooleanExpressionParser::BooleanExpressionParser(shared_ptr<Parser> parser) {
+BooleanExpressionParser::BooleanExpressionParser(
+    const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 

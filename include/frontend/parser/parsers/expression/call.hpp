@@ -14,7 +14,7 @@ private:
   unique_ptr<Expression> left;
 
 public:
-  explicit CallExpressionParser(shared_ptr<Parser> parser, unique_ptr<Expression> left);
+  explicit CallExpressionParser(const shared_ptr<Parser> &parser, unique_ptr<Expression> left);
 
-  unique_ptr<Expression> parse();
+  unique_ptr<Expression> parse() override;
 };

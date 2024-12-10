@@ -4,6 +4,7 @@
 
 #include "frontend/lexer/lexer.hpp"
 #include "frontend/token/token.hpp"
+#include "logger/logger.hpp"
 
 using namespace std;
 
@@ -12,6 +13,8 @@ private:
   shared_ptr<Lexer> lexer;
 
 public:
+  shared_ptr<Logger> logger;
+
   Token current_token;
   Token next_token;
 

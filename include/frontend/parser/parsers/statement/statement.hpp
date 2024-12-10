@@ -12,7 +12,7 @@ private:
   shared_ptr<Parser> parser;
 
 public:
-  explicit StatementParser(shared_ptr<Parser> parser);
+  explicit StatementParser(const shared_ptr<Parser> &parser);
 
   unique_ptr<Statement> parse();
 };

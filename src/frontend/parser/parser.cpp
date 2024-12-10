@@ -4,9 +4,8 @@
 
 Parser::Parser(shared_ptr<Lexer> lexer) {
   this->lexer = lexer;
-  if (!this->lexer) {
-    throw runtime_error("Lexer is null!");
-  }
+
+  logger = make_shared<Logger>(lexer->position);
 
   current_token = lexer->next_token();
   next_token = lexer->next_token();

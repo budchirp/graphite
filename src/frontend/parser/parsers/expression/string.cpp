@@ -1,10 +1,10 @@
 #include <memory>
 
 #include "frontend/ast/expression.hpp"
-#include "frontend/ast/expressions/string.hpp"
+#include "frontend/ast/expression/string.hpp"
 #include "frontend/parser/parsers/expression/string.hpp"
 
-StringExpressionParser::StringExpressionParser(shared_ptr<Parser> parser) {
+StringExpressionParser::StringExpressionParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 

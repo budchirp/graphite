@@ -12,7 +12,7 @@ private:
   shared_ptr<Parser> parser;
 
 public:
-  explicit IntegerExpressionParser(shared_ptr<Parser> parser);
+  explicit IntegerExpressionParser(const shared_ptr<Parser> &parser);
 
-  unique_ptr<Expression> parse();
+  unique_ptr<Expression> parse() override;
 };

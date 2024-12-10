@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "frontend/ast/statements/proto.hpp"
+#include "frontend/ast/statement/proto.hpp"
 #include "frontend/parser/parser.hpp"
 
 using namespace std;
@@ -12,7 +12,7 @@ private:
   shared_ptr<Parser> parser;
 
 public:
-  explicit ProtoStatementParser(shared_ptr<Parser> parser);
+  explicit ProtoStatementParser(const shared_ptr<Parser> &parser);
 
   unique_ptr<ProtoStatement> parse();
 };

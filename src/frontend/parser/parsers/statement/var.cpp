@@ -1,14 +1,14 @@
 #include <memory>
 
-#include "frontend/ast/expressions/identifier.hpp"
+#include "frontend/ast/expression/identifier.hpp"
 #include "frontend/parser/parsers/expression/identifier.hpp"
 #include "frontend/parser/parsers/statement/expression.hpp"
 #include "frontend/parser/parsers/statement/var.hpp"
 #include "frontend/parser/precedence.hpp"
 #include "frontend/token/token_type.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/log_types.hpp"
 
-VarStatementParser::VarStatementParser(shared_ptr<Parser> parser) {
+VarStatementParser::VarStatementParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
@@ -16,16 +16,19 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
   parser->eat_token(); // eat var
 
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
-    Logger::error("Expected identifier after var");
+    parser->logger->error("Expected identifier after var",
+                          LogTypes::Error::SYNTAX);
   }
 
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
+
   auto name_expression = identifier_expression_parser.parse();
   unique_ptr<IdentifierExpression> name(
-      static_cast<IdentifierExpression *>(name_expression.release()));
+      dynamic_cast<IdentifierExpression *>(name_expression.release()));
 
   if (parser->current_token.type != TokenType::TOKEN_COLON) {
-    Logger::error("Expected : after identifier");
+    parser->logger->error("Expected : after identifier",
+                          LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
@@ -37,29 +40,28 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
       parser->eat_token(); // eat *
       is_pointer = true;
     } else {
-      Logger::error("Expected type identifier after :");
+      parser->logger->error("Expected type identifier after :",
+                            LogTypes::Error::SYNTAX);
       return nullptr;
     }
   }
 
   auto type_expression = identifier_expression_parser.parse();
   unique_ptr<IdentifierExpression> type(
-      static_cast<IdentifierExpression *>(type_expression.release()));
+      dynamic_cast<IdentifierExpression *>(type_expression.release()));
   if (is_pointer) {
     type = make_unique<IdentifierExpression>("*" + type->get_value());
   }
 
   if (parser->current_token.type != TokenType::TOKEN_ASSIGN) {
-    Logger::error("Expected = after type");
+    parser->logger->error("Expected = after type", LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
   parser->eat_token(); // eat =
 
-  auto expression_statement_parser = ExpressionStatementParser(parser);
   auto expression =
-      expression_statement_parser.parse_expression(Precedence::LOWEST);
-
+      ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
   return make_unique<VarStatement>(std::move(name), std::move(type),
                                    std::move(expression));
 }

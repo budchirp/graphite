@@ -15,10 +15,11 @@ private:
   map<string, llvm::Value *> named_values;
 
 public:
-  Codegen(shared_ptr<Program> program);
+  explicit Codegen(const shared_ptr<Program> &program);
 
-  string generate();
-  static llvm::Type *resolve_type(const string type_name);
+  string generate_ir() const;
+
+  static llvm::Type *resolve_type(const string &type_name);
   static llvm::Value *convert_type(llvm::Value *value,
                                    llvm::Type *expectedType);
 };

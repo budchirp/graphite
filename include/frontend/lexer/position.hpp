@@ -9,5 +9,5 @@ public:
   i32 line;
   i32 column;
 
-  Position(i32 line, i32 column);
+  explicit Position(const i32 line, const i32 column);
 };

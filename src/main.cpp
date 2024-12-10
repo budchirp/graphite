@@ -1,7 +1,7 @@
 #include <exception>
+#include <iostream>
 
 #include "cli/cli.hpp"
-#include "utils/logger/logger.hpp"
 
 using namespace std;
 
@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
   try {
     cli.parser->parse(argc, argv);
   } catch (const exception &error) {
-    Logger::error(cli.parser->app_name + ": error: " + error.what());
+    cerr << error.what() << endl;
     return 1;
   }
 

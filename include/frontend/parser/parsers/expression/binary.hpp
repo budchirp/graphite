@@ -15,7 +15,7 @@ private:
   unique_ptr<Expression> left;
 
 public:
-  explicit BinaryExpressionParser(shared_ptr<Parser> parser, unique_ptr<Expression> left);
+  explicit BinaryExpressionParser(const shared_ptr<Parser> &parser, unique_ptr<Expression> left);
 
   unique_ptr<Expression> parse() override;
 };

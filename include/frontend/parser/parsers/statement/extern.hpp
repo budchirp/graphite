@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "frontend/ast/statements/extern.hpp"
+#include "frontend/ast/statement/extern.hpp"
 #include "frontend/parser/parser.hpp"
 
 using namespace std;
@@ -12,7 +12,7 @@ private:
   shared_ptr<Parser> parser;
 
 public:
-  explicit ExternStatementParser(shared_ptr<Parser> parser);
+  explicit ExternStatementParser(const shared_ptr<Parser> &parser);
 
   unique_ptr<ExternStatement> parse();
 };

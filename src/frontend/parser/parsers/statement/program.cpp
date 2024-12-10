@@ -4,7 +4,7 @@
 #include "frontend/parser/parsers/statement/program.hpp"
 #include "frontend/parser/parsers/statement/statement.hpp"
 
-ProgramParser::ProgramParser(shared_ptr<Parser> parser) {
+ProgramParser::ProgramParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
@@ -13,8 +13,7 @@ shared_ptr<Program> ProgramParser::parse() {
 
   auto statements = std::vector<std::unique_ptr<Statement>>();
   while (parser->current_token.type != TokenType::TOKEN_EOF) {
-    auto statement = statement_parser.parse();
-    if (statement) {
+    if (auto statement = statement_parser.parse()) {
       statements.push_back(std::move(statement));
     }
   }

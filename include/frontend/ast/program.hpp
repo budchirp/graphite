@@ -14,7 +14,7 @@ private:
 
 public:
   explicit Program(vector<unique_ptr<Statement>> statements);
-  virtual ~Program() = default;
+  ~Program() override = default;
 
   llvm::Value *codegen() override;
 

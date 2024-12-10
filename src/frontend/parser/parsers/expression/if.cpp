@@ -2,13 +2,14 @@
 #include <string>
 
 #include "frontend/ast/expression.hpp"
-#include "frontend/ast/expressions/if.hpp"
+#include "frontend/ast/expression/if.hpp"
 #include "frontend/parser/parsers/expression/group.hpp"
 #include "frontend/parser/parsers/expression/if.hpp"
 #include "frontend/parser/parsers/statement/block.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/log_types.hpp"
+#include "logger/logger.hpp"
 
-IfExpressionParser::IfExpressionParser(shared_ptr<Parser> parser) {
+IfExpressionParser::IfExpressionParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
@@ -16,15 +17,16 @@ unique_ptr<Expression> IfExpressionParser::parse() {
   parser->eat_token(); // eat if
 
   if (parser->current_token.type != TokenType::TOKEN_LEFT_PARENTHESES) {
-    Logger::error("Expected left parantheses after if");
+    parser->logger->error("Expected left parentheses after if",
+                          LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
-  auto group_expression_parser = GroupExpressionParser(parser);
-  auto condition = group_expression_parser.parse();
+  auto condition = GroupExpressionParser(parser).parse();
 
   if (parser->current_token.type != TokenType::TOKEN_LEFT_BRACE) {
-    Logger::error("Expected left brace after if condition");
+    parser->logger->error("Expected left brace after condition",
+                          LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
@@ -36,7 +38,9 @@ unique_ptr<Expression> IfExpressionParser::parse() {
     parser->eat_token(); // eat else
 
     if (parser->current_token.type != TokenType::TOKEN_LEFT_BRACE) {
-      Logger::error("Expected left brace after else");
+      parser->logger->error("Expected left brace after else",
+                            LogTypes::Error::SYNTAX);
+      return nullptr;
     }
 
     alternative = block_statement_parser.parse();

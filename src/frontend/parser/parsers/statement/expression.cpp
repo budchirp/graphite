@@ -15,10 +15,10 @@
 #include "frontend/parser/parsers/expression/string.hpp"
 #include "frontend/parser/parsers/statement/expression.hpp"
 #include "frontend/parser/precedence.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/logger.hpp"
 
 ExpressionStatementParser::ExpressionStatementParser(
-    shared_ptr<Parser> parser) {
+    const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
@@ -32,50 +32,50 @@ std::map<TokenType, std::function<std::unique_ptr<ExpressionParser>(
                         std::shared_ptr<Parser>)>>
     prefix_parse_fns = {
         {TokenType::TOKEN_IDENTIFIER,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<IdentifierExpressionParser>(parser);
          }},
         {TokenType::TOKEN_INT,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<IntegerExpressionParser>(parser);
          }},
         {TokenType::TOKEN_STRING,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<StringExpressionParser>(parser);
          }},
         {TokenType::TOKEN_TRUE,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<BooleanExpressionParser>(parser);
          }},
         {TokenType::TOKEN_FALSE,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<BooleanExpressionParser>(parser);
          }},
         {TokenType::TOKEN_BANG,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<PrefixExpressionParser>(parser);
          }},
         {TokenType::TOKEN_ASTERISK,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<PrefixExpressionParser>(parser);
          }},
         {TokenType::TOKEN_AMPERSAND,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<PrefixExpressionParser>(parser);
          }},
         {TokenType::TOKEN_PLUS,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<PrefixExpressionParser>(parser);
          }},
         {TokenType::TOKEN_MINUS,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<PrefixExpressionParser>(parser);
          }},
         {TokenType::TOKEN_LEFT_PARENTHESES,
-         [](std::shared_ptr<Parser> parser) {
+         [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<GroupExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_IF, [](std::shared_ptr<Parser> parser) {
+        {TokenType::TOKEN_IF, [](const std::shared_ptr<Parser>& parser) {
            return std::make_unique<IfExpressionParser>(parser);
          }}};
 
@@ -84,47 +84,47 @@ std::map<TokenType,
              std::shared_ptr<Parser>, std::unique_ptr<Expression> &)>>
     binary_parse_fns = {
         {TokenType::TOKEN_PLUS,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_MINUS,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_SLASH,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_ASTERISK,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_EQUAL,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_NOT_EQUAL,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_LESS_THAN,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_GREATER_THAN,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<BinaryExpressionParser>(parser,
                                                            std::move(left));
          }},
         {TokenType::TOKEN_LEFT_PARENTHESES,
-         [](std::shared_ptr<Parser> parser, std::unique_ptr<Expression> &left) {
+         [](const std::shared_ptr<Parser>& parser, std::unique_ptr<Expression> &left) {
            return std::make_unique<CallExpressionParser>(parser,
                                                          std::move(left));
          }}};

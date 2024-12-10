@@ -1,31 +1,32 @@
-#include <iostream>
 #include <memory>
 #include <vector>
 
 #include "frontend/ast/expression.hpp"
-#include "frontend/ast/expressions/call.hpp"
+#include "frontend/ast/expression/call.hpp"
 #include "frontend/parser/parsers/expression/call.hpp"
 #include "frontend/parser/parsers/statement/expression.hpp"
-#include "utils/logger/logger.hpp"
+#include "logger/log_types.hpp"
+#include "logger/logger.hpp"
 
-CallExpressionParser::CallExpressionParser(shared_ptr<Parser> parser,
+CallExpressionParser::CallExpressionParser(const shared_ptr<Parser> &parser,
                                            unique_ptr<Expression> left) {
   this->parser = parser;
   this->left = std::move(left);
 }
 
 unique_ptr<Expression> CallExpressionParser::parse() {
-  auto *identifier_expression =
-      dynamic_cast<IdentifierExpression *>(left.get());
-  if (!identifier_expression) {
-    Logger::error("Expected an identifier for call function");
+  if (!dynamic_cast<IdentifierExpression *>(left.get())) {
+    parser->logger->error("Expected an identifier for call function",
+                          LogTypes::Error::SYNTAX);
+    return nullptr;
   }
 
   unique_ptr<IdentifierExpression> name(
-      static_cast<IdentifierExpression *>(left.release()));
+      dynamic_cast<IdentifierExpression *>(left.release()));
 
   if (parser->current_token.type != TokenType::TOKEN_LEFT_PARENTHESES) {
-    Logger::error("Expected left parentheses after identifier");
+    parser->logger->error("Expected left parentheses after identifier",
+                          LogTypes::Error::SYNTAX);
     return nullptr;
   }
 
@@ -42,7 +43,8 @@ unique_ptr<Expression> CallExpressionParser::parse() {
       parser->eat_token(); // eat ','
     } else if (parser->current_token.type !=
                TokenType::TOKEN_RIGHT_PARENTHESES) {
-      Logger::error("Expected right parantheses or comma");
+      parser->logger->error("Expected right parentheses or comma",
+                            LogTypes::Error::SYNTAX);
       return nullptr;
     }
   }
