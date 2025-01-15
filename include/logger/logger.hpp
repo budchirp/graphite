@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "frontend/lexer/position.hpp"
+#include "lexer/position.hpp"
 #include "logger/log_types.hpp"
 
 using namespace std;

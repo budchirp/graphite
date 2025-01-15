@@ -1,3 +1,5 @@
+#include "cli/commands/compile.hpp"
+
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -7,11 +9,12 @@
 #include <stdexcept>
 #include <string>
 
-#include "backend/codegen/codegen.hpp"
-#include "cli/commands/compile.hpp"
-#include "frontend/lexer/lexer.hpp"
-#include "frontend/parser/parser.hpp"
-#include "frontend/parser/parsers/statement/program.hpp"
+#include "codegen/codegen.hpp"
+#include "lexer/lexer.hpp"
+#include "parser/parser.hpp"
+#include "parser/parsers/statement/program.hpp"
+
+shared_ptr<Env> env;
 
 void CompileCommand::execute() {
   auto file_option = get_option<string>("file");
@@ -25,10 +28,16 @@ void CompileCommand::execute() {
     auto content = buffer.str();
 
     auto lexer = make_shared<Lexer>(content);
-    auto parser = make_shared<Parser>(lexer);
+
+    env = make_shared<Env>(nullptr);
+    env->init();
+
+    auto parser = make_shared<Parser>(lexer, env);
 
     auto program_parser = ProgramParser(parser);
     auto program = program_parser.parse();
+
+    cout << program->to_string_tree() << endl;
 
     auto codegen = Codegen(program);
     auto ir = codegen.generate_ir();

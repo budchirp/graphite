@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "frontend/lexer/position.hpp"
+#include "lexer/position.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
@@ -50,6 +50,18 @@ void Logger::warn(const string &message, LogTypes::Warn type, Position *position
 void Logger::error(const string &message, LogTypes::Error type, Position *position) {
   string error_type;
   switch (type) {
+  case LogTypes::Error::UNDEFINED:
+    error_type = "undefined symbol";
+    break;
+
+  case LogTypes::Error::UNKNOWN:
+    error_type = "unknown error";
+    break;
+
+  case LogTypes::Error::INTERNAL:
+    error_type = "internal error";
+    break;
+
   case LogTypes::Error::SYNTAX:
     error_type = "syntax error";
     break;

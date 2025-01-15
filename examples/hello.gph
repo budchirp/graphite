@@ -1,12 +1,7 @@
 extern printf(str: string) -> void
 
 fn main() -> i32 {
-  printf("start")
-
-  var str: string = "hi"
-  var pointer: *string = &str
-
-  printf(*pointer)
+  printf("start\"ta\n")
 
   var x: i32 = (32 + 32)
   var y: i32 = (x * 1)
@@ -14,12 +9,12 @@ fn main() -> i32 {
   var z: boolean = if (x == y) { true } else { false }
 
   if (z) {
-    printf("x and y is 64")
+    printf("x and y is 64\n")
   } else {
-    printf("x and y is not 64")
+    printf("x and y is not 64\n")
   }
 
-  printf("end")
+  printf("end\n")
 
   return (10 - 10) * 10
 }

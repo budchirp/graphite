@@ -19,9 +19,9 @@
 - [ ] For / While statements
 - [ ] Switch expressions
 - [ ] Stdlib
-- [ ] Better compile error handling (only parsing errors has position info)
+- [ ] Better errors
 - [ ] Structs
 - [ ] Arrays
 - [x] CLI (compile, run commands) (compile command is done)
 - [ ] Optimization
-- [ ] Type checking (currenly has basic type checking and probably its full of bugs)
+- [ ] Type checking
