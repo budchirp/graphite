@@ -8,8 +8,11 @@ using namespace std;
 using namespace ArgMan;
 
 class CLI {
-public:
+private:
   shared_ptr<CommandLineParser> parser;
 
+public:
   CLI();
+
+  void parse(int argc, char *argv[]) const;
 };

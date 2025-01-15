@@ -6,17 +6,23 @@
 
 #include "frontend/ast/expression.hpp"
 #include "frontend/ast/statement.hpp"
+#include "frontend/lexer/position.hpp"
 
 using namespace std;
 
 class ReturnStatement : public Statement {
 private:
+  Position position;
+
   unique_ptr<Expression> expression;
 
 public:
-  explicit ReturnStatement(unique_ptr<Expression> expression);
+  explicit ReturnStatement(const Position &position,
+                           unique_ptr<Expression> expression);
 
   llvm::Value *codegen() override;
+
+  Position *get_position() override { return &position; };
 
   string to_string() const override;
   string to_string_tree() const override;

@@ -11,11 +11,11 @@
 using namespace std;
 
 Lexer::Lexer(const string &source)
-    : source(source), read_position(0), position(make_shared<Position>(0, 0)) {
+    : source(source), read_position(0), position(make_shared<Position>(1, 0)) {
   eat_char();
 }
 
-i8 Lexer::get_current_char() const {
+char Lexer::get_current_char() const {
   return (read_position < source.size()) ? source[read_position] : '\0';
 }
 
@@ -40,10 +40,12 @@ void Lexer::eat_whitespace() {
   }
 }
 
-Token Lexer::tokenize(i8 character) {
+Token Lexer::next_token() {
   Token token;
 
-  switch (character) {
+  eat_whitespace();
+
+  switch (current_char) {
   case '!':
     if (next_char == '=') {
       eat_char();
@@ -156,7 +158,7 @@ Token Lexer::tokenize(i8 character) {
     break;
 
   default:
-    if (isalpha(character)) {
+    if (isalpha(current_char)) {
       string identifier;
       do {
         identifier += current_char;
@@ -171,7 +173,7 @@ Token Lexer::tokenize(i8 character) {
       } else {
         token = Token(TokenType::TOKEN_IDENTIFIER, identifier);
       }
-    } else if (isdigit(character)) {
+    } else if (isdigit(current_char)) {
       string number;
       do {
         number += current_char;
@@ -188,11 +190,7 @@ Token Lexer::tokenize(i8 character) {
   }
 
   eat_char();
+  eat_whitespace();
 
   return token;
-}
-
-Token Lexer::next_token() {
-  eat_whitespace();
-  return tokenize(current_char);
 }

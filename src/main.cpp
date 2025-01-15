@@ -6,9 +6,9 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  auto cli = CLI();
+  const auto cli = CLI();
   try {
-    cli.parser->parse(argc, argv);
+    cli.parse(argc, argv);
   } catch (const exception &error) {
     cerr << error.what() << endl;
     return 1;

@@ -1,11 +1,14 @@
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "frontend/ast/expression/binary.hpp"
+#include "frontend/lexer/position.hpp"
 
-BinaryExpression::BinaryExpression(const Token &op, unique_ptr<Expression> left,
-                                   unique_ptr<Expression> right) {
-
+BinaryExpression::BinaryExpression(const Position &position, const Token &op,
+                                   unique_ptr<Expression> left,
+                                   unique_ptr<Expression> right)
+    : position(position) {
   this->op = op;
 
   this->left = std::move(left);

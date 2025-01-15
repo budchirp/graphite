@@ -23,13 +23,6 @@ add_compile_options(
 include(FetchContent)
 
 FetchContent_Declare(
-  mcppga
-  GIT_REPOSITORY https://github.com/budchirp/mcppga
-  GIT_TAG        main
-)
-FetchContent_MakeAvailable(mcppga)
-
-FetchContent_Declare(
   argman
   GIT_REPOSITORY https://github.com/budchirp/argman
   GIT_TAG        main
@@ -47,7 +40,6 @@ message(STATUS "Found sources: ${SOURCES}")
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
-target_link_libraries(${PROJECT_NAME} PRIVATE mcppga)
 target_link_libraries(${PROJECT_NAME} PRIVATE argman)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LLVM)

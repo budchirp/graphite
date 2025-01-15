@@ -1,6 +1,6 @@
 #include "frontend/lexer/position.hpp"
 
-Position::Position(const i32 line, const i32 column) {
+Position::Position(const int &line, const int &column) {
   this->line = line;
   this->column = column;
 }

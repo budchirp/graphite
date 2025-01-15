@@ -3,7 +3,6 @@
 
 #include "frontend/ast/program.hpp"
 #include "frontend/ast/statement.hpp"
-#include "std/types.hpp"
 
 Program::Program(vector<unique_ptr<Statement>> statements) {
   this->statements = std::move(statements);

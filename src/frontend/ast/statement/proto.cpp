@@ -3,11 +3,12 @@
 
 #include "frontend/ast/statement/proto.hpp"
 
-ProtoStatement::ProtoStatement(unique_ptr<IdentifierExpression> name,
+ProtoStatement::ProtoStatement(const Position &position, unique_ptr<IdentifierExpression> name,
                                vector<pair<unique_ptr<IdentifierExpression>,
                                            unique_ptr<IdentifierExpression>>>
                                    parameters,
-                               unique_ptr<IdentifierExpression> return_type) {
+                               unique_ptr<IdentifierExpression> return_type) 
+    : position(position) {
   this->name = std::move(name);
   this->parameters = std::move(parameters);
   this->return_type = std::move(return_type);

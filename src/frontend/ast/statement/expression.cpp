@@ -2,7 +2,8 @@
 
 #include "frontend/ast/statement/expression.hpp"
 
-ExpressionStatement::ExpressionStatement(unique_ptr<Expression> expression) {
+ExpressionStatement::ExpressionStatement(const Position &position, unique_ptr<Expression> expression) 
+    : position(position) {
   this->expression = std::move(expression);
 }
 

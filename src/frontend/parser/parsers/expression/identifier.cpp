@@ -10,8 +10,9 @@ IdentifierExpressionParser::IdentifierExpressionParser(
 }
 
 unique_ptr<Expression> IdentifierExpressionParser::parse() {
-  auto identifier_token = parser->current_token;
+  const auto identifier_token = parser->current_token;
   parser->eat_token(); // eat identifier
 
-  return make_unique<IdentifierExpression>(identifier_token.literal);
+  return make_unique<IdentifierExpression>(*parser->get_lexer()->position,
+                                           identifier_token.literal);
 }

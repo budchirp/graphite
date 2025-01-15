@@ -2,10 +2,13 @@
 #include <sstream>
 
 #include "frontend/ast/statement/var.hpp"
+#include "frontend/lexer/position.hpp"
 
-VarStatement::VarStatement(unique_ptr<IdentifierExpression> name,
+VarStatement::VarStatement(const Position &position,
+                           unique_ptr<IdentifierExpression> name,
                            unique_ptr<IdentifierExpression> type,
-                           unique_ptr<Expression> expression) {
+                           unique_ptr<Expression> expression)
+    : position(position) {
   this->name = std::move(name);
   this->type = std::move(type);
   this->expression = std::move(expression);

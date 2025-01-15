@@ -2,7 +2,7 @@
 
 #include "frontend/ast/expression/prefix.hpp"
 
-PrefixExpression::PrefixExpression(const Token &prefix, unique_ptr<Expression> right) {
+PrefixExpression::PrefixExpression(const Position &position, const Token &prefix, unique_ptr<Expression> right) : position(position) {
   this->prefix = prefix;
 
   this->right = std::move(right);

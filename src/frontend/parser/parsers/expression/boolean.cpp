@@ -10,9 +10,10 @@ BooleanExpressionParser::BooleanExpressionParser(
 }
 
 unique_ptr<Expression> BooleanExpressionParser::parse() {
-  auto boolean_token = parser->current_token;
+  const auto boolean_token = parser->current_token;
   parser->eat_token(); // eat boolean
 
   return make_unique<BooleanExpression>(
+      *parser->get_lexer()->position,
       boolean_token.literal == "true" ? true : false);
 }

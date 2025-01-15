@@ -8,6 +8,8 @@ BlockStatementParser::BlockStatementParser(const shared_ptr<Parser> &parser) {
 }
 
 unique_ptr<BlockStatement> BlockStatementParser::parse() {
+  const auto position = *parser->get_lexer()->position;
+
   parser->eat_token(); // eat {
 
   auto statement_parser = StatementParser(parser);
@@ -21,5 +23,5 @@ unique_ptr<BlockStatement> BlockStatementParser::parse() {
 
   parser->eat_token(); // eat }
 
-  return make_unique<BlockStatement>(std::move(statements));
+  return make_unique<BlockStatement>(position, std::move(statements));
 }

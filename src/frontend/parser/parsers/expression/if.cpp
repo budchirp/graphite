@@ -7,13 +7,14 @@
 #include "frontend/parser/parsers/expression/if.hpp"
 #include "frontend/parser/parsers/statement/block.hpp"
 #include "logger/log_types.hpp"
-#include "logger/logger.hpp"
 
 IfExpressionParser::IfExpressionParser(const shared_ptr<Parser> &parser) {
   this->parser = parser;
 }
 
 unique_ptr<Expression> IfExpressionParser::parse() {
+  const auto position = *parser->get_lexer()->position;
+
   parser->eat_token(); // eat if
 
   if (parser->current_token.type != TokenType::TOKEN_LEFT_PARENTHESES) {
@@ -46,6 +47,7 @@ unique_ptr<Expression> IfExpressionParser::parse() {
     alternative = block_statement_parser.parse();
   }
 
-  return make_unique<IfExpression>(std::move(condition), std::move(consequence),
+  return make_unique<IfExpression>(position, std::move(condition),
+                                   std::move(consequence),
                                    std::move(alternative));
 }

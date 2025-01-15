@@ -6,7 +6,6 @@
 #include "frontend/parser/parsers/expression/call.hpp"
 #include "frontend/parser/parsers/statement/expression.hpp"
 #include "logger/log_types.hpp"
-#include "logger/logger.hpp"
 
 CallExpressionParser::CallExpressionParser(const shared_ptr<Parser> &parser,
                                            unique_ptr<Expression> left) {
@@ -20,6 +19,8 @@ unique_ptr<Expression> CallExpressionParser::parse() {
                           LogTypes::Error::SYNTAX);
     return nullptr;
   }
+
+  const auto position = *parser->get_lexer()->position;
 
   unique_ptr<IdentifierExpression> name(
       dynamic_cast<IdentifierExpression *>(left.release()));
@@ -51,5 +52,6 @@ unique_ptr<Expression> CallExpressionParser::parse() {
 
   parser->eat_token(); // eat ')'
 
-  return make_unique<CallExpression>(std::move(name), std::move(arguments));
+  return make_unique<CallExpression>(position, std::move(name),
+                                     std::move(arguments));
 }

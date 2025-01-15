@@ -9,6 +9,8 @@ ExternStatementParser::ExternStatementParser(const shared_ptr<Parser> &parser) {
 }
 
 unique_ptr<ExternStatement> ExternStatementParser::parse() {
+  const auto position = *parser->get_lexer()->position;
+
   parser->eat_token(); // eat extern
 
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
@@ -18,5 +20,5 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
   }
 
   auto proto = ProtoStatementParser(parser).parse();
-  return make_unique<ExternStatement>(std::move(proto));
+  return make_unique<ExternStatement>(position, std::move(proto));
 }

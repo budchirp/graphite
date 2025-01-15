@@ -11,6 +11,8 @@ FunctionStatementParser::FunctionStatementParser(
 }
 
 unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
+  const auto position = *parser->get_lexer()->position;
+
   parser->eat_token(); // eat fn
 
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
@@ -28,5 +30,5 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   }
 
   auto body = BlockStatementParser(parser).parse();
-  return make_unique<FunctionStatement>(std::move(proto), std::move(body));
+  return make_unique<FunctionStatement>(position, std::move(proto), std::move(body));
 }

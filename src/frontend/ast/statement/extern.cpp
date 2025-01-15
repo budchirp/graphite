@@ -3,7 +3,8 @@
 #include "frontend/ast/statement/extern.hpp"
 #include "frontend/ast/statement/proto.hpp"
 
-ExternStatement::ExternStatement(unique_ptr<ProtoStatement> proto) {
+ExternStatement::ExternStatement(const Position &position, unique_ptr<ProtoStatement> proto) 
+    : position(position) {
   this->proto = std::move(proto);
 }
 

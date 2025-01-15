@@ -7,6 +7,12 @@
 #include "llvm/IR/DerivedTypes.h"
 
 using namespace std;
+using namespace llvm;
+
+extern unique_ptr<LLVMContext> context;
+extern unique_ptr<Module> module;
+extern unique_ptr<IRBuilder<>> builder;
+extern unordered_map<string, Value *> named_values;
 
 class Codegen {
 private:
@@ -19,7 +25,8 @@ public:
 
   string generate_ir() const;
 
-  static llvm::Type *resolve_type(const string &type_name);
-  static llvm::Value *convert_type(llvm::Value *value,
-                                   llvm::Type *expectedType);
+  static Type *resolve_type_identifier(const string &type_name);
+  static Value *convert_type(Value *value,
+                                   Type *expectedType);
+  static bool type_check(Value *value, Type *expectedType);
 };

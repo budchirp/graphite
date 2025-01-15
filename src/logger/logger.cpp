@@ -11,7 +11,7 @@
 Logger::Logger(shared_ptr<Position> position)
     : position(position) {}
 
-void Logger::log(const string &message, LogTypes::Log type) {
+void Logger::log(const string &message, LogTypes::Log type, Position *position) {
   string log_type;
   switch (type) {
   case LogTypes::Log::INFO:
@@ -24,12 +24,12 @@ void Logger::log(const string &message, LogTypes::Log type) {
     return;
   }
 
-  cout << format("[error][{}] {}:{} {}", log_type, position->column,
-                 position->line, message)
+  cout << format("[error][{}] {}:{} {}", log_type, position->line,
+                 position->column, message)
        << endl;
 };
 
-void Logger::warn(const string &message, LogTypes::Warn type) {
+void Logger::warn(const string &message, LogTypes::Warn type, Position *position) {
   string warn_type;
   switch (type) {
   case LogTypes::Warn::SUGGESTION:
@@ -42,12 +42,12 @@ void Logger::warn(const string &message, LogTypes::Warn type) {
     return;
   }
 
-  cout << format("[error][{}] {}:{} {}", warn_type, position->column,
-                 position->line, message)
+  cout << format("[error][{}] {}:{} {}", warn_type, position->line,
+                 position->column, message)
        << endl;
 };
 
-void Logger::error(const string &message, LogTypes::Error type) {
+void Logger::error(const string &message, LogTypes::Error type, Position *position) {
   string error_type;
   switch (type) {
   case LogTypes::Error::SYNTAX:
@@ -65,12 +65,22 @@ void Logger::error(const string &message, LogTypes::Error type) {
   }
 
   auto msg = format("[error][{}] {}:{} {}", error_type, 
-                 position->column, position->line, message);
+                 position->line, position->column, message);
 
   throw runtime_error(msg);
 }
 
-void Logger::log(const string &message) {
+void Logger::log(const string &message, LogTypes::Log type) {
+  Logger::log(message, type, position.get());
+}
+void Logger::warn(const string &message, LogTypes::Warn type) {
+  Logger::warn(message, type, position.get());
+}
+void Logger::error(const string &message, LogTypes::Error type) {
+  Logger::error(message, type, position.get());
+}
+
+  void Logger::log(const string &message) {
   cout << "[log]: " << message << endl;
 }
 void Logger::warn(const string &message) {

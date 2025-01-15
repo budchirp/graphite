@@ -2,7 +2,8 @@
 
 #include "frontend/ast/statement/block.hpp"
 
-BlockStatement::BlockStatement(vector<unique_ptr<Statement>> statements) {
+BlockStatement::BlockStatement(const Position &position, vector<unique_ptr<Statement>> statements) 
+    : position(position) {
   this->statements = std::move(statements);
 }
 

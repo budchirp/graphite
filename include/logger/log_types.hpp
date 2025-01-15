@@ -3,6 +3,9 @@
 namespace LogTypes {
 
 enum class Error {
+  UNDEFINED,
+  UNKNOWN,
+  INTERNAL,
   SYNTAX,
   TYPE_MISMATCH,
 };

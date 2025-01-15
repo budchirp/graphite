@@ -21,4 +21,6 @@ public:
   explicit Parser(shared_ptr<Lexer> lexer);
 
   void eat_token();
+
+  shared_ptr<Lexer> get_lexer();
 };

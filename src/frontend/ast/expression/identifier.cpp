@@ -1,6 +1,8 @@
 #include "frontend/ast/expression/identifier.hpp"
 
-IdentifierExpression::IdentifierExpression(const string &value) {
+IdentifierExpression::IdentifierExpression(const Position &position,
+                                           const string &value)
+    : position(position) {
   this->value = value;
 }
 

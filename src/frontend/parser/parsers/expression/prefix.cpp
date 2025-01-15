@@ -10,11 +10,12 @@ PrefixExpressionParser::PrefixExpressionParser(
 }
 
 unique_ptr<Expression> PrefixExpressionParser::parse() {
-  auto prefix_token = parser->current_token;
+  const auto prefix_token = parser->current_token;
   parser->eat_token(); // eat prefix
 
   auto right = ExpressionStatementParser(parser).parse_expression(
       PrecedenceHelper::precedence_for(prefix_token.type));
 
-  return make_unique<PrefixExpression>(prefix_token, std::move(right));
+  return make_unique<PrefixExpression>(*right->get_position(), prefix_token,
+                                       std::move(right));
 }

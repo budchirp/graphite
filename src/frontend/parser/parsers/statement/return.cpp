@@ -9,9 +9,11 @@ ReturnStatementParser::ReturnStatementParser(const shared_ptr<Parser> &parser) {
 }
 
 unique_ptr<ReturnStatement> ReturnStatementParser::parse() {
+  const auto position = *parser->get_lexer()->position;
+
   parser->eat_token(); // eat return
 
   auto expression =
       ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
-  return make_unique<ReturnStatement>(std::move(expression));
+  return make_unique<ReturnStatement>(position, std::move(expression));
 }

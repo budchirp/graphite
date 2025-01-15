@@ -17,6 +17,8 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
+  const auto position = *parser->get_lexer()->position;
+
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
 
   auto name_expression = identifier_expression_parser.parse();
@@ -67,7 +69,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     unique_ptr<IdentifierExpression> type(
         dynamic_cast<IdentifierExpression *>(type_expression.release()));
     if (is_pointer) {
-      type = make_unique<IdentifierExpression>("*" + type->get_value());
+      type = make_unique<IdentifierExpression>(*type->get_position(), "*" + type->get_value());
     }
 
     parameters.push_back(pair(std::move(parameter), std::move(type)));
@@ -107,9 +109,9 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
   unique_ptr<IdentifierExpression> type(
       dynamic_cast<IdentifierExpression *>(type_expression.release()));
   if (is_pointer) {
-    type = make_unique<IdentifierExpression>("*" + type->get_value());
+    type = make_unique<IdentifierExpression>(*type->get_position(), "*" + type->get_value());
   }
 
-  return make_unique<ProtoStatement>(std::move(name), std::move(parameters),
+  return make_unique<ProtoStatement>(position, std::move(name), std::move(parameters),
                                      std::move(type));
 }

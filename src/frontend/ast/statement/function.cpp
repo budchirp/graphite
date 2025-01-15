@@ -3,8 +3,9 @@
 
 #include "frontend/ast/statement/function.hpp"
 
-FunctionStatement::FunctionStatement(unique_ptr<ProtoStatement> proto,
-                                     unique_ptr<BlockStatement> body) {
+FunctionStatement::FunctionStatement(const Position &position, unique_ptr<ProtoStatement> proto,
+                                     unique_ptr<BlockStatement> body) 
+    : position(position) {
   this->proto = std::move(proto);
   this->body = std::move(body);
 }

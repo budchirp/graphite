@@ -12,7 +12,6 @@
 #include "frontend/lexer/lexer.hpp"
 #include "frontend/parser/parser.hpp"
 #include "frontend/parser/parsers/statement/program.hpp"
-#include "std/types.hpp"
 
 void CompileCommand::execute() {
   auto file_option = get_option<string>("file");
@@ -45,7 +44,7 @@ void CompileCommand::execute() {
       ll_file << ir;
       ll_file.close();
 
-      i32 result =
+      auto result =
           system(("clang " + ldflags_option->value + " build/" +
                   path.stem().string() + ".ll -o build/" + path.stem().string())
                      .c_str());

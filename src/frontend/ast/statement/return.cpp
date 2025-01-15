@@ -2,7 +2,8 @@
 
 #include "frontend/ast/statement/return.hpp"
 
-ReturnStatement::ReturnStatement(unique_ptr<Expression> expression) {
+ReturnStatement::ReturnStatement(const Position &position, unique_ptr<Expression> expression) 
+    : position(position) {
   this->expression = std::move(expression);
 }
 

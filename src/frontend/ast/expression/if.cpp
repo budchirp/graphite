@@ -6,9 +6,11 @@
 
 using namespace std;
 
-IfExpression::IfExpression(unique_ptr<Expression> condition,
+IfExpression::IfExpression(const Position &position,
+                           unique_ptr<Expression> condition,
                            unique_ptr<BlockStatement> consequence,
-                           unique_ptr<BlockStatement> alternative) {
+                           unique_ptr<BlockStatement> alternative)
+    : position(position) {
   this->condition = std::move(condition);
   this->consequence = std::move(consequence);
   this->alternative = std::move(alternative);

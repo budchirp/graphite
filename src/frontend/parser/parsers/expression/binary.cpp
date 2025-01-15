@@ -12,12 +12,12 @@ BinaryExpressionParser::BinaryExpressionParser(const shared_ptr<Parser> &parser,
 }
 
 unique_ptr<Expression> BinaryExpressionParser::parse() {
-  auto operator_token = parser->current_token;
+  const auto operator_token = parser->current_token;
   parser->eat_token(); // eat operator
 
   auto right = ExpressionStatementParser(parser).parse_expression(
       PrecedenceHelper::precedence_for(operator_token.type));
 
-  return make_unique<BinaryExpression>(operator_token, std::move(left),
-                                       std::move(right));
+  return make_unique<BinaryExpression>(*right->get_position(), operator_token,
+                                       std::move(left), std::move(right));
 }

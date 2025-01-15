@@ -15,3 +15,7 @@ void Parser::eat_token() {
   current_token = next_token;
   next_token = lexer->next_token();
 }
+
+shared_ptr<Lexer> Parser::get_lexer() {
+  return lexer;
+}

@@ -2,7 +2,10 @@
 
 #include "frontend/ast/expression/boolean.hpp"
 
-BooleanExpression::BooleanExpression(const bool value) { this->value = value; }
+BooleanExpression::BooleanExpression(const Position &position, const bool value)
+    : position(position) {
+  this->value = value;
+}
 
 bool BooleanExpression::get_value() { return value; }
 

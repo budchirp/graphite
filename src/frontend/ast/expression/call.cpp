@@ -7,8 +7,10 @@
 
 using namespace std;
 
-CallExpression::CallExpression(unique_ptr<IdentifierExpression> name,
-                               vector<unique_ptr<Expression>> arguments) {
+CallExpression::CallExpression(const Position &position,
+                               unique_ptr<IdentifierExpression> name,
+                               vector<unique_ptr<Expression>> arguments)
+    : position(position) {
   this->name = std::move(name);
   this->arguments = std::move(arguments);
 }

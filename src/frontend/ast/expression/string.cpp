@@ -2,7 +2,10 @@
 
 #include "frontend/ast/expression/string.hpp"
 
-StringExpression::StringExpression(const string &value) { this->value = value; }
+StringExpression::StringExpression(const Position &position,
+                                   const string &value): position(position) {
+  this->value = value;
+}
 
 string StringExpression::get_value() { return value; }
 

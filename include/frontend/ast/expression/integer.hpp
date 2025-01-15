@@ -4,20 +4,24 @@
 #include <string>
 
 #include "frontend/ast/expression.hpp"
-#include "std/types.hpp"
+#include "frontend/lexer/position.hpp"
 
 using namespace std;
 
 class IntegerExpression : public Expression {
 private:
-  i32 value;
+  Position position;
+
+  int value;
 
 public:
-  explicit IntegerExpression(const i32 &value);
+  explicit IntegerExpression(const Position &position, const int &value);
 
   llvm::Value *codegen() override;
 
-  i32 get_value();
+  int get_value();
+
+  Position *get_position() override { return &position; };
 
   string to_string() const override;
   string to_string_tree() const override;

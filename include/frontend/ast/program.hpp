@@ -14,9 +14,12 @@ private:
 
 public:
   explicit Program(vector<unique_ptr<Statement>> statements);
-  ~Program() override = default;
 
   llvm::Value *codegen() override;
+  
+  Position *get_position() override {
+    return nullptr;
+  };
 
   string to_string() const override;
   string to_string_tree() const override;

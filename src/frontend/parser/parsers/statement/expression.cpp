@@ -25,7 +25,7 @@ ExpressionStatementParser::ExpressionStatementParser(
 unique_ptr<ExpressionStatement> ExpressionStatementParser::parse() {
   auto expression = parse_expression(Precedence::LOWEST);
 
-  return make_unique<ExpressionStatement>(std::move(expression));
+  return make_unique<ExpressionStatement>(*expression->get_position(), std::move(expression));
 }
 
 std::map<TokenType, std::function<std::unique_ptr<ExpressionParser>(

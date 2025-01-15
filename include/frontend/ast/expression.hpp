@@ -3,15 +3,17 @@
 #include <llvm/IR/Value.h>
 #include <string>
 
-#include "frontend/ast/node.hpp"
+#include "frontend/lexer/position.hpp"
 
 using namespace std;
 
-class Expression : public Node {
+class Expression {
 public:
   virtual ~Expression() = default;
 
   virtual llvm::Value *codegen() = 0;
+
+  virtual Position *get_position() = 0;
 
   virtual string to_string() const = 0;
   virtual string to_string_tree() const = 0;

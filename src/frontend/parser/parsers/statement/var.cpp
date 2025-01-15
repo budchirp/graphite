@@ -13,6 +13,8 @@ VarStatementParser::VarStatementParser(const shared_ptr<Parser> &parser) {
 }
 
 unique_ptr<VarStatement> VarStatementParser::parse() {
+  const auto position = *parser->get_lexer()->position;
+
   parser->eat_token(); // eat var
 
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
@@ -50,7 +52,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
   unique_ptr<IdentifierExpression> type(
       dynamic_cast<IdentifierExpression *>(type_expression.release()));
   if (is_pointer) {
-    type = make_unique<IdentifierExpression>("*" + type->get_value());
+    type = make_unique<IdentifierExpression>(*type->get_position(), "*" + type->get_value());
   }
 
   if (parser->current_token.type != TokenType::TOKEN_ASSIGN) {
@@ -62,6 +64,6 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
 
   auto expression =
       ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
-  return make_unique<VarStatement>(std::move(name), std::move(type),
+  return make_unique<VarStatement>(position, std::move(name), std::move(type),
                                    std::move(expression));
 }

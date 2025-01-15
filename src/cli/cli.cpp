@@ -11,11 +11,15 @@ CLI::CLI() {
   auto build_command =
       make_unique<CompileCommand>("compile", "Compile specified file");
   build_command->add_option(
-      make_unique<Option<string>>("file", "File path", OptionType::STRING, ""));
+      make_unique<Option<string>>("file", "File path", ""));
   build_command->add_option(make_unique<Option<string>>(
-      "ldflags", "Linker flags", OptionType::STRING, ""));
+      "ldflags", "Linker flags", ""));
 
   command_line_parser->add_command(std::move(build_command));
 
   this->parser = std::move(command_line_parser);
+}
+
+void CLI::parse(int argc, char *argv[]) const {
+  parser->parse(argc, argv);
 }
