@@ -1,15 +1,12 @@
-#include "parser/parsers/statement/proto.hpp"
-
 #include <memory>
 
+#include "parser/parsers/statement/proto.hpp"
 #include "ast/expression/identifier.hpp"
 #include "ast/expression/type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/identifier.hpp"
 #include "parser/parsers/expression/type.hpp"
 #include "token/token_type.hpp"
-#include "types/function.hpp"
-#include "types/type.hpp"
 
 unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
@@ -22,7 +19,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
 
-  auto name_expression = identifier_expression_parser.parse();
+  auto name_expression = identifier_expression_parser.parse(false);
   unique_ptr<IdentifierExpression> name(
       dynamic_cast<IdentifierExpression *>(name_expression.release()));
   if (!name) {
@@ -50,7 +47,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
       return nullptr;
     }
 
-    auto parameter_expression = identifier_expression_parser.parse();
+    auto parameter_expression = identifier_expression_parser.parse(false);
     unique_ptr<IdentifierExpression> parameter(
         dynamic_cast<IdentifierExpression *>(parameter_expression.release()));
     if (!parameter) {
@@ -97,27 +94,15 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   parser->eat_token();  // eat ->
 
-  auto type_expression = type_expression_parser.parse();
-  unique_ptr<TypeExpression> type(
-      dynamic_cast<TypeExpression *>(type_expression.release()));
-  if (!type) {
+  auto return_type_expression = type_expression_parser.parse();
+  unique_ptr<TypeExpression> return_type(
+      dynamic_cast<TypeExpression *>(return_type_expression.release()));
+  if (!return_type) {
     parser->get_logger()->error("Failed to parse the return type of the proto",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
-  auto parent = parser->get_env()->get_parent();
-  auto env = parent ? parent : parser->get_env();
-
-  vector<shared_ptr<Type>> parameter_types;
-  for (const auto &[_, type] : parameters) {
-    parameter_types.push_back(type->get_type());
-  }
-
-  env->set_type(name->get_value(),
-                make_shared<FunctionType>(parameter_types, type->get_type()));
-  env->set_symbol(name->get_value(), type->get_type());
-
   return make_unique<ProtoStatement>(position, std::move(name),
-                                     std::move(parameters), std::move(type));
+                                     std::move(parameters), std::move(return_type));
 }

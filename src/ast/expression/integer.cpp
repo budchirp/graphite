@@ -6,7 +6,7 @@
 
 using namespace llvm;
 
-Value *IntegerExpression::codegen() {
+Value *IntegerExpression::codegen() const {
   return ConstantInt::get(llvm::Type::getInt32Ty(*context), value, true);
 }
 

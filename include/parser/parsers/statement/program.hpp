@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "ast/program.hpp"
 #include "parser/parser.hpp"
 
 using namespace std;
@@ -14,5 +13,5 @@ private:
 public:
   explicit ProgramParser(const shared_ptr<Parser> &parser) : parser(parser) {};
 
-  shared_ptr<Program> parse();
+  void parse();
 };

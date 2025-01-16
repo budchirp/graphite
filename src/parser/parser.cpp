@@ -1,9 +1,10 @@
-#include <memory>
-
 #include "parser/parser.hpp"
 
-Parser::Parser(shared_ptr<Lexer> lexer, shared_ptr<Env> env)
-    : lexer(lexer), env(env) {
+#include <memory>
+
+Parser::Parser(const shared_ptr<Lexer> &lexer,
+               const shared_ptr<Program> &program)
+    : lexer(lexer), program(program) {
   logger = make_shared<Logger>(lexer->position);
 
   current_token = lexer->next_token();

@@ -4,22 +4,25 @@
 #include <memory>
 #include <sstream>
 
-#include "codegen/codegen.hpp"
 #include "ast/statement/function.hpp"
+#include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 
-Value *FunctionStatement::codegen() { return codegen_function(); }
-Function *FunctionStatement::codegen_function() {
+Value *FunctionStatement::codegen() const { return codegen_function(); }
+Function *FunctionStatement::codegen_function() const {
   Function *function = module->getFunction(proto->name->get_value());
   if (function) {
-    Logger::warn("Function `" + proto->name->get_value() + "` exists", LogTypes::Warn::SUGGESTION, &position);
+    Logger::warn("Function `" + proto->name->get_value() + "` exists",
+                 LogTypes::Warn::SUGGESTION, proto->name->get_position());
   } else {
     function = proto->codegen_function();
     if (!function) {
-      Logger::error("Failed to generate function " + proto->name->get_value(), LogTypes::Error::INTERNAL, proto->get_position());
+      Logger::error("Failed to generate low level code for function `" +
+                        proto->name->get_value() + "`",
+                    LogTypes::Error::INTERNAL, proto->get_position());
       return nullptr;
     }
   }
@@ -31,7 +34,8 @@ Function *FunctionStatement::codegen_function() {
 
   BasicBlock *body_block = body->codegen_block(function, "entry");
   if (!body_block) {
-    Logger::error("Failed to generate function body", LogTypes::Error::INTERNAL, body->get_position());
+    Logger::error("Failed to generate low level code for function body",
+                  LogTypes::Error::INTERNAL, body->get_position());
     function->eraseFromParent();
     return nullptr;
   }
@@ -40,7 +44,9 @@ Function *FunctionStatement::codegen_function() {
     if (function->getReturnType()->isVoidTy()) {
       builder->CreateRetVoid();
     } else {
-      Logger::error("Non-void function missing return statement", LogTypes::Error::UNKNOWN, &position);
+      Logger::error("Non-void function missing return statement",
+                    LogTypes::Error::UNKNOWN,
+                    proto->return_type->get_position());
       function->eraseFromParent();
       return nullptr;
     }

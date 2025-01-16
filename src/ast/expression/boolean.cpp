@@ -6,7 +6,7 @@
 
 using namespace llvm;
 
-Value *BooleanExpression::codegen() { return builder->getInt1(value); }
+Value *BooleanExpression::codegen() const { return builder->getInt1(value); }
 
 string BooleanExpression::to_string() const { return ::to_string(value); }
 

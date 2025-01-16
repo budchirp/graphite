@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <string>
 
@@ -12,17 +13,17 @@
 using namespace std;
 
 class ExternStatement : public Statement {
-private:
+ private:
   Position position;
 
   unique_ptr<ProtoStatement> proto;
 
-public:
+ public:
   explicit ExternStatement(const Position &position,
                            unique_ptr<ProtoStatement> proto)
       : position(position), proto(std::move(proto)) {};
 
-  llvm::Value *codegen() override;
+  llvm::Value *codegen() const override;
 
   Position *get_position() override { return &position; };
 

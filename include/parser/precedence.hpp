@@ -1,7 +1,8 @@
 #pragma once
 
-#include "token/token_type.hpp"
 #include <unordered_map>
+
+#include "token/token_type.hpp"
 
 enum class Precedence {
   LOWEST,
@@ -14,7 +15,7 @@ enum class Precedence {
 };
 
 class PrecedenceHelper {
-public:
+ public:
   static Precedence precedence_for(const TokenType &tokenType) {
     static const std::unordered_map<TokenType, Precedence> precedenceMap = {
         {TokenType::TOKEN_EQUAL, Precedence::EQUALS},
@@ -27,7 +28,8 @@ public:
         {TokenType::TOKEN_ASTERISK, Precedence::PRODUCT},
         {TokenType::TOKEN_LEFT_PARENTHESES, Precedence::CALL}};
 
-    if (const auto it = precedenceMap.find(tokenType); it != precedenceMap.end()) {
+    if (const auto it = precedenceMap.find(tokenType);
+        it != precedenceMap.end()) {
       return it->second;
     }
 

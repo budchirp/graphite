@@ -7,13 +7,13 @@
 
 class IntType : public Type {
  public:
-  int size;
+  short size;
   bool is_unsigned;
 
-  IntType(char size, bool is_unsigned)
+  explicit IntType(short size, bool is_unsigned)
       : size(size), is_unsigned(is_unsigned) {};
 
-  llvm::IntegerType *to_llvm(shared_ptr<llvm::LLVMContext> context) override {
+  llvm::IntegerType *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
     switch (size) {
       case 8:
         return llvm::Type::getInt8Ty(*context);
@@ -26,6 +26,7 @@ class IntType : public Type {
 
       default:
         Logger::error("Unsupported int size: " + std::to_string(size));
+        return nullptr;
     }
   };
 

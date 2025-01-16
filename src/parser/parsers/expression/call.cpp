@@ -46,6 +46,12 @@ unique_ptr<Expression> CallExpressionParser::parse() {
 
   parser->eat_token(); // eat ')'
 
-  return make_unique<CallExpression>(position, parser->get_env()->get_symbol(name->get_value()), std::move(name),
+  auto type = parser->get_program()->get_env()->get_symbol(name->get_value());
+  if (!type) {
+    parser->get_logger()->error("Undefined function `" + name->get_value() + "`", LogTypes::Error::UNDEFINED);
+    return nullptr;
+  }
+
+  return make_unique<CallExpression>(position, type, std::move(name),
                                      std::move(arguments));
 }

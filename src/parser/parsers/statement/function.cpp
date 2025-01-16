@@ -4,6 +4,7 @@
 #include "parser/parsers/statement/block.hpp"
 #include "parser/parsers/statement/function.hpp"
 #include "parser/parsers/statement/proto.hpp"
+#include "types/function.hpp"
 
 unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -16,8 +17,8 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
     return nullptr;
   }
 
-  auto env = make_shared<Env>(parser->get_env());
-  parser->set_env(env);
+  auto env = make_shared<Env>(parser->get_program()->get_env());
+  parser->get_program()->set_env(env);
 
   auto proto = ProtoStatementParser(parser).parse();
   if (!proto) {
@@ -37,7 +38,17 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
     return nullptr;
   }
 
-  parser->set_env(env->get_parent());
+  vector<shared_ptr<Type>> parameter_types;
+  for (const auto &[_, type] : proto->parameters) {
+    parameter_types.push_back(type->get_type());
+  }
+
+  auto parent_env = env->get_parent();
+  parent_env->set_type(proto->name->get_value(),
+                make_shared<FunctionType>(parameter_types, proto->return_type->get_type()));
+  parent_env->set_symbol(proto->name->get_value(), proto->return_type->get_type());
+
+  parser->get_program()->set_env(parent_env);
 
   return make_unique<FunctionStatement>(position, env, std::move(proto),
                                         std::move(body));

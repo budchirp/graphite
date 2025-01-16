@@ -22,6 +22,6 @@
 - [ ] Better errors
 - [ ] Structs
 - [ ] Arrays
-- [x] CLI (compile, run commands) (compile command is done)
-- [ ] Optimization
+- [ ] Maps
+- [x] CLI (graphitec for single files and graphite for project compilation)
 - [ ] Type checking

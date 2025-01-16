@@ -9,7 +9,6 @@
 #include "ast/expression/identifier.hpp"
 #include "ast/expression/type.hpp"
 #include "ast/statement.hpp"
-#include "env/env.hpp"
 #include "lexer/position.hpp"
 
 using namespace std;
@@ -29,8 +28,8 @@ class ProtoStatement : public Statement {
         parameters(std::move(parameters)),
         return_type(std::move(return_type)) {};
 
-  llvm::Value *codegen() override;
-  llvm::Function *codegen_function();
+  llvm::Value *codegen() const override;
+  llvm::Function *codegen_function() const;
 
   unique_ptr<IdentifierExpression> name;
   vector<pair<unique_ptr<IdentifierExpression>, unique_ptr<TypeExpression>>>

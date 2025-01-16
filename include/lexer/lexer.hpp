@@ -3,13 +3,13 @@
 #include <memory>
 #include <string>
 
-#include "token/token.hpp"
 #include "position.hpp"
+#include "token/token.hpp"
 
 using namespace std;
 
 class Lexer {
-private:
+ private:
   const string &source;
 
   int read_position;
@@ -22,7 +22,7 @@ private:
   void eat_char();
   void eat_whitespace();
 
-public:
+ public:
   shared_ptr<Position> position;
 
   explicit Lexer(const string &source);

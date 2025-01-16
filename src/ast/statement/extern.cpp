@@ -1,5 +1,4 @@
 #include <memory>
-
 #include <llvm/IR/Value.h>
 
 #include "ast/statement/extern.hpp"
@@ -8,7 +7,7 @@
 
 using namespace llvm;
 
-Value *ExternStatement::codegen() { return proto->codegen_function(); }
+Value *ExternStatement::codegen() const { return proto->codegen_function(); }
 
 string ExternStatement::to_string() const {
   return "extern " + proto->to_string();

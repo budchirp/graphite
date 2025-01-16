@@ -12,9 +12,9 @@ class PointerType : public Type {
  public:
   shared_ptr<Type> type;
 
-  PointerType(shared_ptr<Type> type) : type(type) {};
+  explicit PointerType(shared_ptr<Type> type) : type(type) {};
 
-  llvm::PointerType *to_llvm(shared_ptr<llvm::LLVMContext> context) override {
+  llvm::PointerType *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
     return llvm::PointerType::get(type->to_llvm(context), 0);
   };
 

@@ -7,11 +7,11 @@
 
 class FloatType : public Type {
  public:
-  char size;
+  short size;
 
-  FloatType(int size) : size(size) {};
+  explicit FloatType(short size) : size(size) {};
 
-  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) override {
+  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
     switch (size) {
       case 16:
         return llvm::Type::getHalfTy(*context);
@@ -25,6 +25,7 @@ class FloatType : public Type {
       default:
         Logger::error("Unsupported floating-point size: " +
                       std::to_string(size));
+        return nullptr;
     }
   };
 

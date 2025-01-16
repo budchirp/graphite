@@ -6,7 +6,7 @@
 
 using namespace llvm;
 
-Value *StringExpression::codegen() {
+Value *StringExpression::codegen() const {
   return builder->CreateGlobalStringPtr(StringRef(value), "str", 0,
                                         module.get());
 }

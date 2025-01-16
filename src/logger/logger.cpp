@@ -4,19 +4,19 @@
 #include <stdexcept>
 #include <string>
 
+#include "logger/logger.hpp"
 #include "lexer/position.hpp"
 #include "logger/log_types.hpp"
-#include "logger/logger.hpp"
 
-Logger::Logger(shared_ptr<Position> position)
-    : position(position) {}
+Logger::Logger(shared_ptr<Position> position) : position(position) {}
 
-void Logger::log(const string &message, LogTypes::Log type, Position *position) {
+void Logger::log(const string &message, LogTypes::Log type,
+                 const Position *position) {
   string log_type;
   switch (type) {
-  case LogTypes::Log::INFO:
-    log_type = "info";
-    break;
+    case LogTypes::Log::INFO:
+      log_type = "info";
+      break;
   }
 
   if (!position) {
@@ -29,12 +29,13 @@ void Logger::log(const string &message, LogTypes::Log type, Position *position) 
        << endl;
 };
 
-void Logger::warn(const string &message, LogTypes::Warn type, Position *position) {
+void Logger::warn(const string &message, LogTypes::Warn type,
+                  const Position *position) {
   string warn_type;
   switch (type) {
-  case LogTypes::Warn::SUGGESTION:
-    warn_type = "suggestion";
-    break;
+    case LogTypes::Warn::SUGGESTION:
+      warn_type = "suggestion";
+      break;
   }
 
   if (!position) {
@@ -47,28 +48,29 @@ void Logger::warn(const string &message, LogTypes::Warn type, Position *position
        << endl;
 };
 
-void Logger::error(const string &message, LogTypes::Error type, Position *position) {
+void Logger::error(const string &message, LogTypes::Error type,
+                   const Position *position) {
   string error_type;
   switch (type) {
-  case LogTypes::Error::UNDEFINED:
-    error_type = "undefined symbol";
-    break;
+    case LogTypes::Error::UNDEFINED:
+      error_type = "undefined symbol";
+      break;
 
-  case LogTypes::Error::UNKNOWN:
-    error_type = "unknown error";
-    break;
+    case LogTypes::Error::UNKNOWN:
+      error_type = "unknown error";
+      break;
 
-  case LogTypes::Error::INTERNAL:
-    error_type = "internal error";
-    break;
+    case LogTypes::Error::INTERNAL:
+      error_type = "internal error";
+      break;
 
-  case LogTypes::Error::SYNTAX:
-    error_type = "syntax error";
-    break;
+    case LogTypes::Error::SYNTAX:
+      error_type = "syntax error";
+      break;
 
-  case LogTypes::Error::TYPE_MISMATCH:
-    error_type = "type mismatch";
-    break;
+    case LogTypes::Error::TYPE_MISMATCH:
+      error_type = "type mismatch";
+      break;
   }
 
   if (!position) {
@@ -76,8 +78,8 @@ void Logger::error(const string &message, LogTypes::Error type, Position *positi
     return;
   }
 
-  auto msg = format("[error][{}] {}:{} {}", error_type, 
-                 position->line, position->column, message);
+  auto msg = format("[error][{}] {}:{} {}", error_type, position->line,
+                    position->column, message);
 
   throw runtime_error(msg);
 }
@@ -92,7 +94,7 @@ void Logger::error(const string &message, LogTypes::Error type) {
   Logger::error(message, type, position.get());
 }
 
-  void Logger::log(const string &message) {
+void Logger::log(const string &message) {
   cout << "[log]: " << message << endl;
 }
 void Logger::warn(const string &message) {

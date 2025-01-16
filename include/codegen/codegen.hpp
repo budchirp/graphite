@@ -15,14 +15,14 @@ extern shared_ptr<llvm::Module> module;
 extern shared_ptr<llvm::IRBuilder<>> builder;
 extern unordered_map<string, llvm::Value *> named_values;
 
+extern shared_ptr<Program> program;
+
 class Codegen {
  private:
-  shared_ptr<Program> program;
-
   map<string, llvm::Value *> named_values;
 
  public:
-  explicit Codegen(const shared_ptr<Program> &program);
+  explicit Codegen(const shared_ptr<Program> &_program);
 
   string generate_ir() const;
 

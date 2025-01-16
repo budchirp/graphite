@@ -1,7 +1,7 @@
 extern printf(str: string) -> void
 
 fn main() -> i32 {
-  printf("start\"ta\n")
+  printf("start\n")
 
   var x: i32 = (32 + 32)
   var y: i32 = (x * 1)

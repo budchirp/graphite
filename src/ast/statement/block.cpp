@@ -6,7 +6,7 @@
 
 using namespace llvm;
 
-Value *BlockStatement::codegen() {
+Value *BlockStatement::codegen() const {
   Value *last = nullptr;
   for (const auto &statement : statements) {
     last = statement->codegen();
@@ -19,7 +19,7 @@ Value *BlockStatement::codegen() {
 }
 
 BasicBlock *BlockStatement::codegen_block(Function *parent,
-                                          const string &name) {
+                                          const string &name) const {
   auto block = BasicBlock::Create(*context, name, parent);
   builder->SetInsertPoint(block);
 

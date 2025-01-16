@@ -1,17 +1,19 @@
-#include "ast/expression/prefix.hpp"
-
 #include <llvm/IR/Value.h>
-
 #include <string>
 
-#include "cli/commands/compile.hpp"
 #include "codegen/codegen.hpp"
+#include "ast/expression/prefix.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 
-Value *PrefixExpression::codegen() {
-  Value *value = right->codegen();
+Value *PrefixExpression::codegen() const {
+  auto value = right->codegen();
+  if (!value) {
+    Logger::error("Failed to generate low level code for expression",
+                  LogTypes::Error::INTERNAL, right->get_position());
+    return nullptr;
+  }
 
   switch (prefix.type) {
     case TokenType::TOKEN_ASTERISK: {

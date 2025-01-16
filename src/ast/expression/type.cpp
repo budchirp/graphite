@@ -2,7 +2,7 @@
 
 #include "ast/expression/type.hpp"
 
-llvm::Value *TypeExpression::codegen() { return nullptr; }
+llvm::Value *TypeExpression::codegen() const { return nullptr; }
 
 string TypeExpression::to_string() const { return type->to_string(); }
 

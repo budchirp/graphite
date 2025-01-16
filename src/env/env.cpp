@@ -1,3 +1,6 @@
+#include <iostream>
+
+#include "logger/logger.hpp"
 #include "env/env.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
@@ -25,35 +28,41 @@ void Env::init() {
 }
 
 void Env::set_type(string name, shared_ptr<Type> type) {
-    type_map.insert_or_assign(name, type);
+  cout << "set: " << name << endl;
+
+  type_map.insert_or_assign(name, type);
 }
 
-shared_ptr<Type> Env::get_type(const string &name) {
-    auto it = type_map.find(name);
-    if (it != type_map.end()) {
-        return it->second;
-    }
+shared_ptr<Type> Env::get_type(const string &name) const {
+  auto it = type_map.find(name);
+  if (it != type_map.end()) {
+    return it->second;
+  }
 
-    if (parent) {
-        return parent->get_type(name);
-    }
+  if (parent) {
+    return parent->get_type(name);
+  }
 
-    return nullptr;
+  Logger::warn("Accessed to an undefined type `" + name + "`");
+  return nullptr;
 }
 
 void Env::set_symbol(string name, shared_ptr<Type> symbol) {
-    symbol_map.insert_or_assign(name, symbol);
+  cout << "set: " << name << endl;
+
+  symbol_map.insert_or_assign(name, symbol);
 }
 
-shared_ptr<Type> Env::get_symbol(const string &name) {
-    auto it = symbol_map.find(name);
-    if (it != symbol_map.end()) {
-        return it->second;
-    }
+shared_ptr<Type> Env::get_symbol(const string &name) const {
+  auto it = symbol_map.find(name);
+  if (it != symbol_map.end()) {
+    return it->second;
+  }
 
-    if (parent) {
-        return parent->get_symbol(name);
-    }
+  if (parent) {
+    return parent->get_symbol(name);
+  }
 
-    return nullptr;
+  Logger::warn("Accessed to an undefined symbol `" + name + "`");
+  return nullptr;
 }

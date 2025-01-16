@@ -2,6 +2,7 @@
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Function.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,18 +13,19 @@
 using namespace std;
 
 class BlockStatement : public Statement {
-private:
+ private:
   Position position;
 
   vector<unique_ptr<Statement>> statements;
 
-public:
+ public:
   explicit BlockStatement(const Position &position,
                           vector<unique_ptr<Statement>> statements)
       : position(position), statements(std::move(statements)) {};
 
-  llvm::Value *codegen() override;
-  llvm::BasicBlock *codegen_block(llvm::Function *parent, const string &name);
+  llvm::Value *codegen() const override;
+  llvm::BasicBlock *codegen_block(llvm::Function *parent,
+                                  const string &name) const;
 
   Position *get_position() override { return &position; };
 

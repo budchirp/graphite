@@ -1,20 +1,22 @@
+
 #include <llvm/IR/Value.h>
 #include <memory>
 #include <sstream>
 #include <string>
 
-#include "ast/expression/if.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
+#include "ast/expression/if.hpp"
 
 using namespace llvm;
 using namespace std;
 
-Value *IfExpression::codegen() {
-  Value *condition_value = condition->codegen();
+Value *IfExpression::codegen() const {
+  auto condition_value = condition->codegen();
   if (!condition_value) {
-    Logger::error("Failed to generate condition for if expression",
-                  LogTypes::Error::INTERNAL, &position);
+    Logger::error(
+        "Failed to generate low level code for condition in if expression",
+        LogTypes::Error::INTERNAL, &position);
     return nullptr;
   }
 
@@ -24,7 +26,7 @@ Value *IfExpression::codegen() {
     return nullptr;
   }
 
-  Function *parent_function = builder->GetInsertBlock()->getParent();
+  auto parent_function = builder->GetInsertBlock()->getParent();
 
   auto then_block = BasicBlock::Create(*context, "then", parent_function);
   auto else_block = BasicBlock::Create(*context, "else");
@@ -33,14 +35,14 @@ Value *IfExpression::codegen() {
   builder->CreateCondBr(condition_value, then_block, else_block);
 
   builder->SetInsertPoint(then_block);
-  Value *then_value = consequence->codegen();
+  auto then_value = consequence->codegen();
   builder->CreateBr(merge_block);
   then_block = builder->GetInsertBlock();
 
   parent_function->insert(parent_function->end(), else_block);
 
   builder->SetInsertPoint(else_block);
-  Value *else_value = alternative ? alternative->codegen() : nullptr;
+  auto else_value = alternative ? alternative->codegen() : nullptr;
   builder->CreateBr(merge_block);
   else_block = builder->GetInsertBlock();
 

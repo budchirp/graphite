@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <string>
 
@@ -13,7 +14,7 @@
 using namespace std;
 
 class FunctionStatement : public Statement {
-private:
+ private:
   Position position;
 
   shared_ptr<Env> env;
@@ -21,18 +22,20 @@ private:
   unique_ptr<ProtoStatement> proto;
   unique_ptr<BlockStatement> body;
 
-public:
-  explicit FunctionStatement(const Position &position,
-                             shared_ptr<Env> env,
+ public:
+  explicit FunctionStatement(const Position &position, shared_ptr<Env> env,
                              unique_ptr<ProtoStatement> proto,
                              unique_ptr<BlockStatement> body)
-      : position(position), env(env), proto(std::move(proto)), body(std::move(body)) {};
+      : position(position),
+        env(env),
+        proto(std::move(proto)),
+        body(std::move(body)) {};
 
-  llvm::Value *codegen() override;
-  llvm::Function *codegen_function();
+  llvm::Value *codegen() const override;
+  llvm::Function *codegen_function() const;
 
   Position *get_position() override { return &position; };
-  shared_ptr<Env> get_env() {return env;}
+  shared_ptr<Env> get_env() { return env; }
 
   string to_string() const override;
   string to_string_tree() const override;

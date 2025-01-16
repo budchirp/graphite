@@ -1,13 +1,11 @@
-#include "codegen/codegen.hpp"
-
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Support/raw_ostream.h>
-
 #include <cstdio>
 #include <memory>
 
-#include "logger/logger.hpp"
+#include "ast/program.hpp"
+#include "codegen/codegen.hpp"
 
 using namespace std;
 using namespace llvm;
@@ -15,13 +13,16 @@ using namespace llvm;
 shared_ptr<llvm::LLVMContext> context;
 shared_ptr<llvm::Module> module;
 shared_ptr<llvm::IRBuilder<>> builder;
+
 unordered_map<string, Value *> named_values;
 
-Codegen::Codegen(const shared_ptr<Program> &program) {
-  this->program = program;
+shared_ptr<Program> program;
+
+Codegen::Codegen(const shared_ptr<Program> &_program) {
+  program = _program;
 
   context = make_shared<LLVMContext>();
-  module = make_shared<Module>("graphite", *context);
+  module = make_shared<Module>(program->get_name(), *context);
   builder = make_shared<IRBuilder<>>(*context);
 }
 
@@ -30,6 +31,7 @@ string Codegen::generate_ir() const {
 
   string ir_string;
   raw_string_ostream ir_stream(ir_string);
+
   module->print(ir_stream, nullptr);
   module->print(errs(), nullptr);
 

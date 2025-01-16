@@ -20,6 +20,6 @@ CLI::CLI() {
   this->parser = std::move(command_line_parser);
 }
 
-void CLI::parse(int argc, char *argv[]) const {
+void CLI::parse(int argc, char *argv[]) {
   parser->parse(argc, argv);
 }

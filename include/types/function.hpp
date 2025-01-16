@@ -15,11 +15,12 @@ class FunctionType : public Type {
   vector<shared_ptr<Type>> parameters;
   shared_ptr<Type> return_type;
 
-  FunctionType(vector<shared_ptr<Type>> parameters,
-               shared_ptr<Type> return_type)
+  explicit FunctionType(vector<shared_ptr<Type>> parameters,
+                        shared_ptr<Type> return_type)
       : parameters(parameters), return_type(return_type) {};
 
-  llvm::FunctionType* to_llvm(shared_ptr<llvm::LLVMContext> context) override {
+  llvm::FunctionType* to_llvm(
+      shared_ptr<llvm::LLVMContext> context) const override {
     vector<llvm::Type*> llvm_parameters;
     for (const auto& parameter : parameters) {
       llvm_parameters.push_back(parameter->to_llvm(context));

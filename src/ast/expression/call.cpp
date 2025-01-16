@@ -1,31 +1,29 @@
-#include "ast/expression/call.hpp"
-
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
-
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "codegen/codegen.hpp"
+#include "ast/expression/call.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 using namespace std;
 
-Value *CallExpression::codegen() {
+Value *CallExpression::codegen() const {
   Function *function = module->getFunction(name->get_value());
   if (!function) {
-    Logger::error("Unknown function " + name->get_value() + " called",
+    Logger::error("Undefined function `" + name->get_value() + "` called",
                   LogTypes::Error::UNDEFINED, &position);
     return nullptr;
   }
 
   if (function->arg_size() != arguments.size()) {
-    Logger::error(
-        "Incorrect number of arguments passed to function " + name->get_value(),
-        LogTypes::Error::SYNTAX, &position);
+    Logger::error("Incorrect number of arguments passed to function `" +
+                      name->get_value() + "`",
+                  LogTypes::Error::SYNTAX, &position);
     return nullptr;
   }
 
@@ -36,13 +34,18 @@ Value *CallExpression::codegen() {
     Value *argument_value = argument->codegen();
     if (!argument_value) {
       Logger::error(
-          "Failed to generate argument for function " + name->get_value(),
-          LogTypes::Error::INTERNAL, &position);
+          "Failed to generate low level code for argument in function `" +
+              name->get_value() + "`",
+          LogTypes::Error::INTERNAL, argument->get_position());
       return nullptr;
     }
 
     llvm::Type *parameter_type = function->getFunctionType()->getParamType(idx);
     argument_value = Codegen::cast_type(argument_value, parameter_type);
+    if (!argument_value) {
+      Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
+      return nullptr;
+    }
 
     llvm_arguments.push_back(argument_value);
     ++idx;
@@ -75,7 +78,7 @@ string CallExpression::to_string() const {
 string CallExpression::to_string_tree() const {
   ostringstream result;
   result << "CallExpression(name: " << name->to_string_tree()
-         << ", parameters: [";
+         << ", arguments: [";
 
   for (auto i = 0; i < arguments.size(); ++i) {
     result << arguments[i]->to_string_tree();

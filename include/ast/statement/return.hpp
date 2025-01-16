@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <string>
 
@@ -11,17 +12,17 @@
 using namespace std;
 
 class ReturnStatement : public Statement {
-private:
+ private:
   Position position;
 
   unique_ptr<Expression> expression;
 
-public:
+ public:
   explicit ReturnStatement(const Position &position,
                            unique_ptr<Expression> expression)
       : position(position), expression(std::move(expression)) {};
 
-  llvm::Value *codegen() override;
+  llvm::Value *codegen() const override;
 
   Position *get_position() override { return &position; };
 

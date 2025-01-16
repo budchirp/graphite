@@ -4,9 +4,9 @@
 
 class VoidType : public Type {
  public:
-  VoidType() {};
+  explicit VoidType() {};
 
-  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) override {
+  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
     return llvm::Type::getVoidTy(*context);
   };
 

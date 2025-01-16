@@ -1,34 +1,35 @@
 #pragma once
 
 #include <llvm/IR/Value.h>
+
 #include <string>
 
-#include "types/type.hpp"
 #include "ast/expression.hpp"
 #include "lexer/position.hpp"
+#include "types/type.hpp"
 
 using namespace std;
 
 class StringExpression : public Expression {
-private:
+ private:
   Position position;
 
   shared_ptr<Type> type;
 
   string value;
 
-public:
+ public:
   explicit StringExpression(const Position &position, shared_ptr<Type> type,
                             const string &value)
       : position(position), type(type), value(value) {};
 
-  llvm::Value *codegen() override;
+  llvm::Value *codegen() const override;
 
   string get_value() { return value; };
 
   Position *get_position() override { return &position; };
 
-  shared_ptr<Type> get_type() override { return type; }
+  shared_ptr<Type> get_type() const override { return type; }
 
   string to_string() const override;
   string to_string_tree() const override;

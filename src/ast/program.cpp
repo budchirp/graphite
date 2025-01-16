@@ -2,16 +2,12 @@
 #include <sstream>
 #include <vector>
 
-#include "ast/program.hpp"
 #include "ast/statement.hpp"
+#include "ast/program.hpp"
 
 using namespace llvm;
 
-Program::Program(vector<unique_ptr<Statement>> statements) {
-  this->statements = std::move(statements);
-}
-
-Value *Program::codegen() {
+Value *Program::codegen() const {
   for (const auto &statement : statements) {
     statement->codegen();
   }

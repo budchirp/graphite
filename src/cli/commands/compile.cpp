@@ -1,5 +1,3 @@
-#include "cli/commands/compile.hpp"
-
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -9,12 +7,12 @@
 #include <stdexcept>
 #include <string>
 
+#include "cli/commands/compile.hpp"
+#include "ast/program.hpp"
 #include "codegen/codegen.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "parser/parsers/statement/program.hpp"
-
-shared_ptr<Env> env;
 
 void CompileCommand::execute() {
   auto file_option = get_option<string>("file");
@@ -29,13 +27,13 @@ void CompileCommand::execute() {
 
     auto lexer = make_shared<Lexer>(content);
 
-    env = make_shared<Env>(nullptr);
+    auto env = make_shared<Env>(nullptr);
     env->init();
 
-    auto parser = make_shared<Parser>(lexer, env);
+    auto program = make_shared<Program>("graphite", env);
+    auto parser = make_shared<Parser>(lexer, program);
 
-    auto program_parser = ProgramParser(parser);
-    auto program = program_parser.parse();
+    ProgramParser(parser).parse();
 
     cout << program->to_string_tree() << endl;
 

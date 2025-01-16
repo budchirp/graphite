@@ -9,18 +9,18 @@
 using namespace std;
 
 class Logger {
-private:
+ private:
   shared_ptr<Position> position;
 
-public:
-  Logger(shared_ptr<Position> position);
+ public:
+  explicit Logger(shared_ptr<Position> position);
 
   static void log(const string &message, LogTypes::Log type,
-                  Position *position);
+                  const Position *position);
   static void warn(const string &message, LogTypes::Warn type,
-                   Position *position);
+                   const Position *position);
   static void error(const string &message, LogTypes::Error type,
-                    Position *position);
+                    const Position *position);
 
   void log(const string &message, LogTypes::Log type);
   void warn(const string &message, LogTypes::Warn type);
