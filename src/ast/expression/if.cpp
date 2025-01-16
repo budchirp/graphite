@@ -1,12 +1,14 @@
 
+#include "ast/expression/if.hpp"
+
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <sstream>
 #include <string>
 
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
-#include "ast/expression/if.hpp"
 
 using namespace llvm;
 using namespace std;
@@ -26,39 +28,39 @@ Value *IfExpression::codegen() const {
     return nullptr;
   }
 
-  auto parent_function = builder->GetInsertBlock()->getParent();
+  auto parent_function = context->builder->GetInsertBlock()->getParent();
 
-  auto then_block = BasicBlock::Create(*context, "then", parent_function);
-  auto else_block = BasicBlock::Create(*context, "else");
-  auto merge_block = BasicBlock::Create(*context, "if");
+  auto then_block = BasicBlock::Create(*context->llvm_context, "then", parent_function);
+  auto else_block = BasicBlock::Create(*context->llvm_context, "else");
+  auto merge_block = BasicBlock::Create(*context->llvm_context, "if");
 
-  builder->CreateCondBr(condition_value, then_block, else_block);
+  context->builder->CreateCondBr(condition_value, then_block, else_block);
 
-  builder->SetInsertPoint(then_block);
+  context->builder->SetInsertPoint(then_block);
   auto then_value = consequence->codegen();
-  builder->CreateBr(merge_block);
-  then_block = builder->GetInsertBlock();
+  context->builder->CreateBr(merge_block);
+  then_block = context->builder->GetInsertBlock();
 
   parent_function->insert(parent_function->end(), else_block);
 
-  builder->SetInsertPoint(else_block);
+  context->builder->SetInsertPoint(else_block);
   auto else_value = alternative ? alternative->codegen() : nullptr;
-  builder->CreateBr(merge_block);
-  else_block = builder->GetInsertBlock();
+  context->builder->CreateBr(merge_block);
+  else_block = context->builder->GetInsertBlock();
 
   parent_function->insert(parent_function->end(), merge_block);
-  builder->SetInsertPoint(merge_block);
+  context->builder->SetInsertPoint(merge_block);
 
-  if (then_value && else_value &&
-      then_value->getType() == else_value->getType()) {
-    PHINode *phi = builder->CreatePHI(then_value->getType(), 2, "iftmp");
+  if (else_value && (then_value->getType() == else_value->getType())) {
+    PHINode *phi =
+        context->builder->CreatePHI(then_value->getType(), 2, "iftmp");
     phi->addIncoming(then_value, then_block);
     phi->addIncoming(else_value, else_block);
 
     return phi;
-  } else {
-    return then_value;
   }
+
+  return then_value;
 }
 
 string IfExpression::to_string() const {

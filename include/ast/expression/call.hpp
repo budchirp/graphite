@@ -23,7 +23,7 @@ class CallExpression : public Expression {
   vector<unique_ptr<Expression>> arguments;
 
  public:
-  explicit CallExpression(const Position &position, shared_ptr<Type> type,
+  explicit CallExpression(const Position &position, const shared_ptr<Type> &type,
                           unique_ptr<IdentifierExpression> name,
                           vector<unique_ptr<Expression>> arguments)
       : position(position),

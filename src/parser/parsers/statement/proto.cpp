@@ -51,7 +51,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     unique_ptr<IdentifierExpression> parameter(
         dynamic_cast<IdentifierExpression *>(parameter_expression.release()));
     if (!parameter) {
-      parser->get_logger()->error("Failed to parse the parameter of the proto");
+      parser->get_logger()->error("Failed to parse one of the parameter in proto", LogTypes::Error::INTERNAL);
       return nullptr;
     }
 
@@ -73,7 +73,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
       return nullptr;
     }
 
-    parameters.push_back(pair(std::move(parameter), std::move(type)));
+    parameters.emplace_back(std::move(parameter), std::move(type));
 
     if (parser->current_token.type == TokenType::TOKEN_COMMA) {
       parser->eat_token();  // eat ,

@@ -1,10 +1,12 @@
 extern printf(str: string) -> void
 extern print_number(number: i32) -> void
 
+extern add(a: i32, b: i32) -> i32
+
 fn main() -> i32 {
   printf("start\n")
 
-  var x: i32 = (32 + 32)
+  var x: i32 = add(32, 32)
   var y: i32 = (x * 1)
 
   print_number(y)

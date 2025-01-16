@@ -9,7 +9,7 @@ class StringType : public Type {
  public:
   explicit StringType() {};
 
-  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::Type *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
     return llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0);
   };
 

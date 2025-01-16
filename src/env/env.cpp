@@ -1,7 +1,8 @@
+#include "env/env.hpp"
+
 #include <iostream>
 
 #include "logger/logger.hpp"
-#include "env/env.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
 #include "types/int.hpp"
@@ -28,8 +29,6 @@ void Env::init() {
 }
 
 void Env::set_type(string name, shared_ptr<Type> type) {
-  cout << "set: " << name << endl;
-
   type_map.insert_or_assign(name, type);
 }
 
@@ -48,8 +47,6 @@ shared_ptr<Type> Env::get_type(const string &name) const {
 }
 
 void Env::set_symbol(string name, shared_ptr<Type> symbol) {
-  cout << "set: " << name << endl;
-
   symbol_map.insert_or_assign(name, symbol);
 }
 

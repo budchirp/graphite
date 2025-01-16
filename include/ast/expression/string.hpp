@@ -19,7 +19,7 @@ class StringExpression : public Expression {
   string value;
 
  public:
-  explicit StringExpression(const Position &position, shared_ptr<Type> type,
+  explicit StringExpression(const Position &position, const shared_ptr<Type> &type,
                             const string &value)
       : position(position), type(type), value(value) {};
 

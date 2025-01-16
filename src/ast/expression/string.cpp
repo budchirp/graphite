@@ -1,14 +1,16 @@
-#include <string>
+#include "ast/expression/string.hpp"
+
 #include <llvm/IR/Value.h>
 
+#include <string>
+
 #include "codegen/codegen.hpp"
-#include "ast/expression/string.hpp"
 
 using namespace llvm;
 
 Value *StringExpression::codegen() const {
-  return builder->CreateGlobalStringPtr(StringRef(value), "str", 0,
-                                        module.get());
+  return context->builder->CreateGlobalStringPtr(StringRef(value), "str", 0,
+                                                 context->module.get());
 }
 
 string StringExpression::to_string() const { return value; }

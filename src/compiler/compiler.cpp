@@ -2,12 +2,15 @@
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <numeric>
+#include <string>
 
 #include "ast/program.hpp"
 #include "codegen/codegen.hpp"
 #include "env/env.hpp"
 #include "lexer/lexer.hpp"
+#include "logger/logger.hpp"
 #include "parser/parser.hpp"
 #include "parser/parsers/statement/program.hpp"
 
@@ -19,7 +22,29 @@ string join_strings(const vector<string>& strings, const string& delimiter) {
         });
 }
 
-void Compiler::compile(const filesystem::path& source_file_path) {
+void Compiler::compile(const filesystem::path &source_file_path,
+               const vector<string> &libs, const vector<string> &objs) {
+  auto filename = source_file_path.filename().stem().string();
+
+  vector<string> _objs = {source_file_path.stem().string() + ".o"};
+  for (const auto &lib_file : libs) {
+    filesystem::path lib_file_path(lib_file);
+
+    compile_gph(lib_file_path);
+
+    _objs.push_back(lib_file_path.filename().stem().string() + ".o");
+  }
+
+  compile_gph(source_file_path);
+
+  _objs.insert(_objs.end(), objs.begin(), objs.end());
+  compile_objects(_objs, filename);
+};
+
+void Compiler::compile_gph(const filesystem::path &source_file_path) {
+  auto filename = source_file_path.filename().stem().string();
+  Logger::log("Compiling `" + filename + ".gph`");
+
   ifstream source_file(source_file_path);
   if (!source_file.is_open()) {
     Logger::error("Failed to open file `" + source_file_path.string() + "`");
@@ -35,15 +60,16 @@ void Compiler::compile(const filesystem::path& source_file_path) {
   auto env = make_shared<Env>(nullptr);
   env->init();
 
-  auto filename = source_file_path.filename().stem().string();
 
   auto program = make_shared<Program>(filename, env);
   auto parser = make_shared<Parser>(lexer, program);
 
   ProgramParser(parser).parse();
 
-  auto codegen = Codegen(program);
-  auto ir = codegen.generate_ir();
+  auto codegen_context = make_shared<CodegenContext>(program);
+
+  auto codegen = make_shared<Codegen>(codegen_context);
+  auto ir = codegen->generate_ir();
 
   auto ir_file_path = filesystem::path(source_file_path.stem().string() + ".ll");
   ofstream ir_file(ir_file_path);
@@ -56,19 +82,19 @@ void Compiler::compile(const filesystem::path& source_file_path) {
   ir_file.close();
 
   compile_ir(ir_file_path.stem());
-  compile_objects({
-    filename + ".o",
-    "print.o"
-  }, filename);
 };
 
 void Compiler::compile_ir(const filesystem::path& ir_file_path) {
   auto filename = ir_file_path.filename().stem().string();
+  Logger::log("Compiling `" + filename + ".ll`");
 
   vector<string> command{"clang", "-c", "-o", filename + ".o",
                                filename + ".ll"};
+  auto command_str = join_strings(command, " ") + " > /dev/null 2>&1";
 
-  auto result = system(join_strings(command, " ").c_str());
+  Logger::log("Executing `" + command_str + "`\n");
+
+  auto result = system(command_str.c_str());
   if (result > 0) {
     Logger::error("Failed to generate object code for llvm ir");
     return;
@@ -77,10 +103,14 @@ void Compiler::compile_ir(const filesystem::path& ir_file_path) {
 
 void Compiler::compile_objects(const vector<string> &objs, const filesystem::path &output_file_path) {
   auto filename = output_file_path.filename().stem().string();
+  Logger::log("Creating executable `" + filename + "`");
 
-  vector<string> command {"clang", "-fPIE", "-o", filename, join_strings(objs, " ")};
+  vector<string> command {"clang", ld_flags, "-o", filename, join_strings(objs, " ")};
+  auto command_str = join_strings(command, " ") + " > /dev/null 2>&1";
 
-  auto result = system(join_strings(command, " ").c_str());
+  Logger::log("Executing `" + command_str + "`");
+
+  auto result = system(command_str.c_str() );
   if (result > 0) {
     Logger::error("Failed to generate executable");
     return;

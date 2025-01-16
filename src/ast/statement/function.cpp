@@ -1,10 +1,12 @@
+#include "ast/statement/function.hpp"
+
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
+
 #include <memory>
 #include <sstream>
 
-#include "ast/statement/function.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
@@ -13,7 +15,7 @@ using namespace llvm;
 
 Value *FunctionStatement::codegen() const { return codegen_function(); }
 Function *FunctionStatement::codegen_function() const {
-  Function *function = module->getFunction(proto->name->get_value());
+  auto function = context->module->getFunction(proto->name->get_value());
   if (function) {
     Logger::warn("Function `" + proto->name->get_value() + "` exists",
                  LogTypes::Warn::SUGGESTION, proto->name->get_position());
@@ -27,9 +29,9 @@ Function *FunctionStatement::codegen_function() const {
     }
   }
 
-  named_values.clear();
+  context->named_values.clear();
   for (auto &arg : function->args()) {
-    named_values[string(arg.getName())] = &arg;
+    context->named_values[string(arg.getName())] = &arg;
   }
 
   BasicBlock *body_block = body->codegen_block(function, "entry");
@@ -42,7 +44,7 @@ Function *FunctionStatement::codegen_function() const {
 
   if (!body_block->getTerminator()) {
     if (function->getReturnType()->isVoidTy()) {
-      builder->CreateRetVoid();
+      context->builder->CreateRetVoid();
     } else {
       Logger::error("Non-void function missing return statement",
                     LogTypes::Error::UNKNOWN,

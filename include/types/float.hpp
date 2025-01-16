@@ -9,9 +9,9 @@ class FloatType : public Type {
  public:
   short size;
 
-  explicit FloatType(short size) : size(size) {};
+  explicit FloatType(const short size) : size(size) {};
 
-  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::Type *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
     switch (size) {
       case 16:
         return llvm::Type::getHalfTy(*context);

@@ -4,37 +4,25 @@
 #include <cstdio>
 #include <memory>
 
-#include "ast/program.hpp"
+#include "codegen/context.hpp"
 #include "codegen/codegen.hpp"
 
 using namespace std;
 using namespace llvm;
 
-shared_ptr<llvm::LLVMContext> context;
-shared_ptr<llvm::Module> module;
-shared_ptr<llvm::IRBuilder<>> builder;
+shared_ptr<CodegenContext> context;
 
-unordered_map<string, Value *> named_values;
-
-shared_ptr<Program> program;
-
-Codegen::Codegen(const shared_ptr<Program> &_program) {
-  program = _program;
-
-  context = make_shared<LLVMContext>();
-  module = make_shared<Module>(program->get_name(), *context);
-  builder = make_shared<IRBuilder<>>(*context);
+Codegen::Codegen(const shared_ptr<CodegenContext> &_context) {
+  context = _context;
 }
 
 string Codegen::generate_ir() const {
-  program->codegen();
+  context->program->codegen();
 
   string ir_string;
   raw_string_ostream ir_stream(ir_string);
 
-  module->print(ir_stream, nullptr);
-  module->print(errs(), nullptr);
-
+  context->module->print(ir_stream, nullptr);
   return ir_stream.str();
 }
 
@@ -49,9 +37,9 @@ Value *Codegen::cast_type(Value *value, llvm::Type *expectedType) {
   if (value->getType()->isIntegerTy() && expectedType->isIntegerTy()) {
     if (value->getType()->getIntegerBitWidth() >
         expectedType->getIntegerBitWidth()) {
-      return builder->CreateTrunc(value, expectedType);
+      return context->builder->CreateTrunc(value, expectedType);
     } else {
-      return builder->CreateSExt(value, expectedType);
+      return context->builder->CreateSExt(value, expectedType);
     }
   }
 
@@ -59,18 +47,18 @@ Value *Codegen::cast_type(Value *value, llvm::Type *expectedType) {
       expectedType->isFloatingPointTy()) {
     if (value->getType()->getPrimitiveSizeInBits() >
         expectedType->getPrimitiveSizeInBits()) {
-      return builder->CreateFPTrunc(value, expectedType);
+      return context->builder->CreateFPTrunc(value, expectedType);
     } else {
-      return builder->CreateFPExt(value, expectedType);
+      return context->builder->CreateFPExt(value, expectedType);
     }
   }
 
   if (value->getType()->isIntegerTy() && expectedType->isFloatingPointTy()) {
-    return builder->CreateSIToFP(value, expectedType);
+    return context->builder->CreateSIToFP(value, expectedType);
   }
 
   if (value->getType()->isFloatingPointTy() && expectedType->isIntegerTy()) {
-    return builder->CreateFPToSI(value, expectedType);
+    return context->builder->CreateFPToSI(value, expectedType);
   }
 
   return nullptr;

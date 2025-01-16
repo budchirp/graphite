@@ -1,0 +1,6 @@
+fn add(a: i32, b: i32) -> i32 {
+  var x: i32 = a * 1
+  var y: i32 = b * 1
+
+  return x + y
+}

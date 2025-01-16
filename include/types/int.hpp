@@ -10,10 +10,10 @@ class IntType : public Type {
   short size;
   bool is_unsigned;
 
-  explicit IntType(short size, bool is_unsigned)
+  explicit IntType(const short size, const bool is_unsigned)
       : size(size), is_unsigned(is_unsigned) {};
 
-  llvm::IntegerType *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::IntegerType *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
     switch (size) {
       case 8:
         return llvm::Type::getInt8Ty(*context);

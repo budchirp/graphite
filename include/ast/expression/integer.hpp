@@ -19,7 +19,7 @@ class IntegerExpression : public Expression {
   long long value;
 
  public:
-  explicit IntegerExpression(const Position &position, shared_ptr<Type> type,
+  explicit IntegerExpression(const Position &position, const shared_ptr<Type> &type,
                              const long long &value)
       : position(position), type(type), value(value) {};
 

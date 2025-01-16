@@ -1,19 +1,21 @@
+#include "ast/expression/call.hpp"
+
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "codegen/codegen.hpp"
-#include "ast/expression/call.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 using namespace std;
 
 Value *CallExpression::codegen() const {
-  Function *function = module->getFunction(name->get_value());
+  auto function = context->module->getFunction(name->get_value());
   if (!function) {
     Logger::error("Undefined function `" + name->get_value() + "` called",
                   LogTypes::Error::UNDEFINED, &position);
@@ -40,7 +42,7 @@ Value *CallExpression::codegen() const {
       return nullptr;
     }
 
-    llvm::Type *parameter_type = function->getFunctionType()->getParamType(idx);
+    auto parameter_type = function->getFunctionType()->getParamType(idx);
     argument_value = Codegen::cast_type(argument_value, parameter_type);
     if (!argument_value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
@@ -52,10 +54,10 @@ Value *CallExpression::codegen() const {
   }
 
   if (function->getReturnType()->isVoidTy()) {
-    builder->CreateCall(function, llvm_arguments);
+    context->builder->CreateCall(function, llvm_arguments);
     return nullptr;
   } else {
-    return builder->CreateCall(function, llvm_arguments, "call");
+    return context->builder->CreateCall(function, llvm_arguments, "call");
   }
 }
 

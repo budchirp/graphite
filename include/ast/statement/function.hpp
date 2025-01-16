@@ -23,7 +23,7 @@ class FunctionStatement : public Statement {
   unique_ptr<BlockStatement> body;
 
  public:
-  explicit FunctionStatement(const Position &position, shared_ptr<Env> env,
+  explicit FunctionStatement(const Position &position, const shared_ptr<Env> &env,
                              unique_ptr<ProtoStatement> proto,
                              unique_ptr<BlockStatement> body)
       : position(position),

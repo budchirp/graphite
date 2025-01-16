@@ -11,7 +11,11 @@ CLI::CLI() {
   auto compile_command =
       make_unique<CompileCommand>("compile", "Compile specified file");
   compile_command->add_option(
-      make_unique<Option<string>>("file", "File path", ""));
+      make_unique<Option<string>>("main", "Main file path", "src/main.gph"));
+  compile_command->add_option(
+      make_unique<Option<string>>("libs", "Optional graphite libs", ""));
+  compile_command->add_option(
+      make_unique<Option<string>>("objs", "Optional C and other libs", ""));
   compile_command->add_option(make_unique<Option<string>>(
       "ldflags", "Linker flags", ""));
 

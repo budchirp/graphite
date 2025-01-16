@@ -29,7 +29,7 @@ class Program {
     statements.push_back(std::move(statement));
   }
 
-  void set_env(shared_ptr<Env> env) { this->env = env; }
+  void set_env(const shared_ptr<Env> &env) { this->env = env; }
   shared_ptr<Env> get_env() const {
     return env;
   }

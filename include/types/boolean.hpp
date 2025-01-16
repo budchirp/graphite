@@ -7,7 +7,7 @@ class BooleanType : public Type {
  public:
   explicit BooleanType() {};
 
-  llvm::IntegerType* to_llvm(std::shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::IntegerType* to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
     return llvm::Type::getInt1Ty(*context);
   }
 

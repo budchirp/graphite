@@ -1,17 +1,19 @@
+#include "ast/expression/binary.hpp"
+
 #include <llvm/IR/Value.h>
+
 #include <memory>
 #include <string>
 
 #include "codegen/codegen.hpp"
-#include "ast/expression/binary.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 
 Value *BinaryExpression::codegen() const {
-  Value *left_value = left->codegen();
-  Value *right_value = right->codegen();
+  auto left_value = left->codegen();
+  auto right_value = right->codegen();
 
   if (!left_value || !right_value) {
     Logger::error("Failed to generate low level code for left or right operand",
@@ -34,17 +36,16 @@ Value *BinaryExpression::codegen() const {
     return nullptr;
   }
 
-  llvm::Type *type = left_value->getType();
-  if (type->isIntegerTy(1)) {
+  if (auto type = left_value->getType(); type->isIntegerTy(1)) {
     switch (op.type) {
       case TokenType::TOKEN_AND:
-        return builder->CreateAnd(left_value, right_value, "and");
+        return context->builder->CreateAnd(left_value, right_value, "and");
       case TokenType::TOKEN_OR:
-        return builder->CreateOr(left_value, right_value, "or");
+        return context->builder->CreateOr(left_value, right_value, "or");
       case TokenType::TOKEN_EQUAL:
-        return builder->CreateICmpEQ(left_value, right_value, "eq");
+        return context->builder->CreateICmpEQ(left_value, right_value, "eq");
       case TokenType::TOKEN_NOT_EQUAL:
-        return builder->CreateICmpNE(left_value, right_value, "ne");
+        return context->builder->CreateICmpNE(left_value, right_value, "ne");
       default:
         Logger::error("Unsupported operator for boolean type",
                       LogTypes::Error::SYNTAX, &position);
@@ -53,17 +54,17 @@ Value *BinaryExpression::codegen() const {
   } else if (type->isIntegerTy()) {
     switch (op.type) {
       case TokenType::TOKEN_PLUS:
-        return builder->CreateAdd(left_value, right_value, "add");
+        return context->builder->CreateAdd(left_value, right_value, "add");
       case TokenType::TOKEN_MINUS:
-        return builder->CreateSub(left_value, right_value, "sub");
+        return context->builder->CreateSub(left_value, right_value, "sub");
       case TokenType::TOKEN_ASTERISK:
-        return builder->CreateMul(left_value, right_value, "mul");
+        return context->builder->CreateMul(left_value, right_value, "mul");
       case TokenType::TOKEN_SLASH:
-        return builder->CreateSDiv(left_value, right_value, "div");
+        return context->builder->CreateSDiv(left_value, right_value, "div");
       case TokenType::TOKEN_EQUAL:
-        return builder->CreateICmpEQ(left_value, right_value, "eq");
+        return context->builder->CreateICmpEQ(left_value, right_value, "eq");
       case TokenType::TOKEN_NOT_EQUAL:
-        return builder->CreateICmpNE(left_value, right_value, "ne");
+        return context->builder->CreateICmpNE(left_value, right_value, "ne");
       default:
         Logger::error("Unsupported operator for integer type",
                       LogTypes::Error::SYNTAX, &position);
@@ -72,17 +73,17 @@ Value *BinaryExpression::codegen() const {
   } else if (type->isFloatingPointTy()) {
     switch (op.type) {
       case TokenType::TOKEN_PLUS:
-        return builder->CreateFAdd(left_value, right_value, "fadd");
+        return context->builder->CreateFAdd(left_value, right_value, "fadd");
       case TokenType::TOKEN_MINUS:
-        return builder->CreateFSub(left_value, right_value, "fsub");
+        return context->builder->CreateFSub(left_value, right_value, "fsub");
       case TokenType::TOKEN_ASTERISK:
-        return builder->CreateFMul(left_value, right_value, "fmul");
+        return context->builder->CreateFMul(left_value, right_value, "fmul");
       case TokenType::TOKEN_SLASH:
-        return builder->CreateFDiv(left_value, right_value, "fdiv");
+        return context->builder->CreateFDiv(left_value, right_value, "fdiv");
       case TokenType::TOKEN_EQUAL:
-        return builder->CreateFCmpUEQ(left_value, right_value, "eq");
+        return context->builder->CreateFCmpUEQ(left_value, right_value, "eq");
       case TokenType::TOKEN_NOT_EQUAL:
-        return builder->CreateFCmpUNE(left_value, right_value, "ne");
+        return context->builder->CreateFCmpUNE(left_value, right_value, "ne");
       default:
         Logger::error("Unsupported operator for floating-point type",
                       LogTypes::Error::SYNTAX, &position);
@@ -91,9 +92,9 @@ Value *BinaryExpression::codegen() const {
   } else if (type->isPointerTy() && type->getContainedType(0)->isIntegerTy(8)) {
     switch (op.type) {
       case TokenType::TOKEN_EQUAL:
-        return builder->CreateICmpEQ(left_value, right_value, "streq");
+        return context->builder->CreateICmpEQ(left_value, right_value, "streq");
       case TokenType::TOKEN_NOT_EQUAL:
-        return builder->CreateICmpNE(left_value, right_value, "strne");
+        return context->builder->CreateICmpNE(left_value, right_value, "strne");
       default:
         Logger::error("Unsupported operator for string type",
                       LogTypes::Error::SYNTAX, &position);

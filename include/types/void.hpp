@@ -6,7 +6,7 @@ class VoidType : public Type {
  public:
   explicit VoidType() {};
 
-  llvm::Type *to_llvm(shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::Type *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
     return llvm::Type::getVoidTy(*context);
   };
 

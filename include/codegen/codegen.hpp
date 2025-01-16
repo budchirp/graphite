@@ -5,24 +5,19 @@
 #include <memory>
 #include <string>
 
-#include "ast/program.hpp"
+#include "codegen/context.hpp"
 #include "llvm/IR/DerivedTypes.h"
 
 using namespace std;
 
-extern shared_ptr<llvm::LLVMContext> context;
-extern shared_ptr<llvm::Module> module;
-extern shared_ptr<llvm::IRBuilder<>> builder;
-extern unordered_map<string, llvm::Value *> named_values;
-
-extern shared_ptr<Program> program;
+extern shared_ptr<CodegenContext> context;
 
 class Codegen {
  private:
   map<string, llvm::Value *> named_values;
 
  public:
-  explicit Codegen(const shared_ptr<Program> &_program);
+  explicit Codegen(const shared_ptr<CodegenContext> &context);
 
   string generate_ir() const;
 

@@ -18,7 +18,7 @@ private:
   string value;
 
 public:
-  explicit IdentifierExpression(const Position &position, shared_ptr<Type> type,
+  explicit IdentifierExpression(const Position &position, const shared_ptr<Type> &type,
                                 const string &value)
       : position(position), type(type), value(value) {};
 

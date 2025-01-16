@@ -1,8 +1,10 @@
+#include "ast/statement/return.hpp"
+
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
+
 #include <memory>
 
-#include "ast/statement/return.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
 
@@ -10,7 +12,7 @@ using namespace llvm;
 
 Value *ReturnStatement::codegen() const {
   if (Value *value = expression->codegen()) {
-    auto function = builder->GetInsertBlock()->getParent();
+    auto function = context->builder->GetInsertBlock()->getParent();
     auto return_type = function->getReturnType();
 
     value = Codegen::cast_type(value, return_type);
@@ -19,13 +21,13 @@ Value *ReturnStatement::codegen() const {
       return nullptr;
     }
 
-    builder->CreateRet(value);
+    context->builder->CreateRet(value);
     return value;
-  } else {
-    Logger::error("Failed to generate low level code for return value",
-                  LogTypes::Error::UNKNOWN, expression->get_position());
-    return nullptr;
   }
+
+  Logger::error("Failed to generate low level code for return value",
+                LogTypes::Error::UNKNOWN, expression->get_position());
+  return nullptr;
 }
 
 string ReturnStatement::to_string() const {

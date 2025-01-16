@@ -17,7 +17,7 @@ class TypeExpression : public Expression {
   shared_ptr<Type> type;
 
  public:
-  explicit TypeExpression(const Position &position, shared_ptr<Type> type)
+  explicit TypeExpression(const Position &position, const shared_ptr<Type> &type)
       : position(position), type(type) {};
 
   llvm::Value *codegen() const override;

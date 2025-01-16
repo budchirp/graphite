@@ -23,7 +23,7 @@ class IfExpression : public Expression {
   unique_ptr<BlockStatement> alternative;
 
  public:
-  explicit IfExpression(const Position &position, shared_ptr<Type> type,
+  explicit IfExpression(const Position &position, const shared_ptr<Type> &type,
                         unique_ptr<Expression> condition,
                         unique_ptr<BlockStatement> consequence,
                         unique_ptr<BlockStatement> alternative)

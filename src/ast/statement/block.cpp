@@ -1,7 +1,9 @@
+#include "ast/statement/block.hpp"
+
 #include <llvm/IR/Value.h>
+
 #include <sstream>
 
-#include "ast/statement/block.hpp"
 #include "codegen/codegen.hpp"
 
 using namespace llvm;
@@ -10,7 +12,7 @@ Value *BlockStatement::codegen() const {
   Value *last = nullptr;
   for (const auto &statement : statements) {
     last = statement->codegen();
-    if (builder->GetInsertBlock()->getTerminator()) {
+    if (context->builder->GetInsertBlock()->getTerminator()) {
       break;
     }
   }
@@ -20,8 +22,8 @@ Value *BlockStatement::codegen() const {
 
 BasicBlock *BlockStatement::codegen_block(Function *parent,
                                           const string &name) const {
-  auto block = BasicBlock::Create(*context, name, parent);
-  builder->SetInsertPoint(block);
+  auto block = BasicBlock::Create(*context->llvm_context, name, parent);
+  context->builder->SetInsertPoint(block);
 
   codegen();
 

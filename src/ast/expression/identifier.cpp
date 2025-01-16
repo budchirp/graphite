@@ -1,14 +1,15 @@
+#include "ast/expression/identifier.hpp"
+
 #include <llvm/IR/Value.h>
 
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
-#include "ast/expression/identifier.hpp"
 
 using namespace llvm;
 
 Value *IdentifierExpression::codegen() const {
-  auto it = named_values.find(value);
-  if (it == named_values.end()) {
+  auto it = context->named_values.find(value);
+  if (it == context->named_values.end()) {
     Logger::error("Undefined variable `" + value + "`",
                   LogTypes::Error::UNDEFINED, &position);
     return nullptr;

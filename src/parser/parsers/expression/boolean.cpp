@@ -13,5 +13,5 @@ unique_ptr<Expression> BooleanExpressionParser::parse() {
 
   return make_unique<BooleanExpression>(
       position, make_shared<BooleanType>(),
-      boolean_token.literal == "true" ? true : false);
+      boolean_token.literal == "true");
 }

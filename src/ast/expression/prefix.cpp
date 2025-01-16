@@ -1,8 +1,10 @@
+#include "ast/expression/prefix.hpp"
+
 #include <llvm/IR/Value.h>
+
 #include <string>
 
 #include "codegen/codegen.hpp"
-#include "ast/expression/prefix.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
@@ -23,13 +25,13 @@ Value *PrefixExpression::codegen() const {
         return nullptr;
       }
 
-      return builder->CreateLoad(value->getType(), value, "deref");
+      return context->builder->CreateLoad(value->getType(), value, "deref");
     }
 
     case TokenType::TOKEN_AMPERSAND: {
-      AllocaInst *alloca = builder->CreateAlloca(
-          right->get_type()->to_llvm(context), nullptr, "addr");
-      builder->CreateStore(value, alloca);
+      AllocaInst *alloca = context->builder->CreateAlloca(
+          right->get_type()->to_llvm(context->llvm_context), nullptr, "addr");
+      context->builder->CreateStore(value, alloca);
 
       return alloca;
     }

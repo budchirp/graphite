@@ -1,18 +1,20 @@
+#include "ast/statement/var.hpp"
+
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
+
 #include <memory>
 #include <sstream>
 
 #include "codegen/codegen.hpp"
-#include "ast/statement/var.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 
 Value *VarStatement::codegen() const {
-  Value *value = expression->codegen();
+  auto value = expression->codegen();
   if (!value) {
     Logger::error(
         "Failed to generate initializer for variable " + name->get_value(),
@@ -20,13 +22,14 @@ Value *VarStatement::codegen() const {
     return nullptr;
   }
 
-  value = Codegen::cast_type(value, type->get_type()->to_llvm(context));
+  value = Codegen::cast_type(value,
+                             type->get_type()->to_llvm(context->llvm_context));
   if (!value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
     return nullptr;
   }
 
-  named_values.insert({name->get_value(), value});
+  context->named_values.insert({name->get_value(), value});
   return value;
 }
 

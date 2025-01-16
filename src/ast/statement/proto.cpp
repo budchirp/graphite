@@ -1,22 +1,22 @@
+#include "ast/statement/proto.hpp"
+
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
+
 #include <iostream>
 #include <memory>
 #include <sstream>
 
 #include "codegen/codegen.hpp"
-#include "ast/statement/proto.hpp"
 
 using namespace llvm;
 
 Value *ProtoStatement::codegen() const { return codegen_function(); }
 Function *ProtoStatement::codegen_function() const {
-  cout << "env in proto: " << program << endl;
-
   auto function = Function::Create(
       static_cast<FunctionType *>(
-          program->get_env()->get_type(name->get_value())->to_llvm(context)),
-      Function::ExternalLinkage, name->get_value(), module.get());
+          context->program->get_env()->get_type(name->get_value())->to_llvm(context->llvm_context)),
+      Function::ExternalLinkage, name->get_value(), context->module.get());
 
   int idx = 0;
   for (auto &argument : function->args())

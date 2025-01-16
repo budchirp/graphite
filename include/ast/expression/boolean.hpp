@@ -19,7 +19,7 @@ class BooleanExpression : public Expression {
   bool value;
 
  public:
-  explicit BooleanExpression(const Position &position, shared_ptr<Type> type,
+  explicit BooleanExpression(const Position &position, const shared_ptr<Type> &type,
                              const bool value)
       : position(position), type(type), value(value) {};
 

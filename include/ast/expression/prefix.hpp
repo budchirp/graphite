@@ -23,7 +23,7 @@ class PrefixExpression : public Expression {
   unique_ptr<Expression> right;
 
  public:
-  explicit PrefixExpression(const Position &position, shared_ptr<Type> type,
+  explicit PrefixExpression(const Position &position, const shared_ptr<Type> &type,
                             const Token &prefix, unique_ptr<Expression> right)
       : position(position),
         type(type),
