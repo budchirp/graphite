@@ -30,6 +30,10 @@ class IntType : public Type {
     }
   };
 
+  const type_info& get_type_info() const override {
+    return typeid(IntType);
+  }
+
   string to_string() const override { return "i" + ::to_string(size); };
   string to_string_tree() const override {
     return "IntType(size: '" + ::to_string(size) + "', is_unsigned: '" +

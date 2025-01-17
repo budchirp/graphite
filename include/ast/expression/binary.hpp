@@ -6,6 +6,7 @@
 #include <string>
 
 #include "ast/expression.hpp"
+#include "codegen/context.hpp"
 #include "lexer/position.hpp"
 #include "token/token.hpp"
 #include "types/type.hpp"
@@ -33,7 +34,8 @@ class BinaryExpression : public Expression {
         left(std::move(left)),
         right(std::move(right)) {};
 
-  llvm::Value *codegen() const override;
+  llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const override;
+  void analyze(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 

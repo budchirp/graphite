@@ -23,5 +23,5 @@
 - [ ] Structs
 - [ ] Arrays
 - [ ] Maps
-- [x] CLI (graphitec for single files and graphite for project compilation)
-- [ ] Type checking
+- [ ] CLI (graphitec for single files and graphite for project compilation)
+- [x] Type checking

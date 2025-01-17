@@ -7,6 +7,7 @@
 #include "parser/parsers/expression/identifier.hpp"
 #include "parser/parsers/expression/type.hpp"
 #include "token/token_type.hpp"
+#include "types/void.hpp"
 
 unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
   if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
@@ -103,6 +104,6 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
-  return make_unique<ProtoStatement>(position, std::move(name),
+  return make_unique<ProtoStatement>(position, make_shared<VoidType>(), std::move(name),
                                      std::move(parameters), std::move(return_type));
 }

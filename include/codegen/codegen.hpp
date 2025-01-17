@@ -1,25 +1,24 @@
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Support/ManagedStatic.h>
 
-#include <map>
 #include <memory>
 #include <string>
 
+#include "ast/program.hpp"
 #include "codegen/context.hpp"
-#include "llvm/IR/DerivedTypes.h"
 
 using namespace std;
 
-extern shared_ptr<CodegenContext> context;
-
 class Codegen {
- private:
-  map<string, llvm::Value *> named_values;
+public:
+  explicit Codegen() = default;
+  ~Codegen() { llvm::llvm_shutdown(); }
 
- public:
-  explicit Codegen(const shared_ptr<CodegenContext> &context);
+  string generate_ir(const shared_ptr<CodegenContext> &context,
+                     const shared_ptr<Program> &program) const;
 
-  string generate_ir() const;
-
-  static llvm::Value *cast_type(llvm::Value *value, llvm::Type *expectedType);
+  static llvm::Value *cast_type(const shared_ptr<CodegenContext> &context,
+                                llvm::Value *value, llvm::Type *expectedType);
 };

@@ -8,13 +8,15 @@
 #include <memory>
 #include <sstream>
 
+#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
+#include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
 
-Value *VarStatement::codegen() const {
-  auto value = expression->codegen();
+Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
+  auto value = expression->codegen(context);
   if (!value) {
     Logger::error(
         "Failed to generate initializer for variable " + name->get_value(),
@@ -22,15 +24,29 @@ Value *VarStatement::codegen() const {
     return nullptr;
   }
 
-  value = Codegen::cast_type(value,
-                             type->get_type()->to_llvm(context->llvm_context));
+  value = Codegen::cast_type(
+      context, value,
+      variable_type->get_type()->to_llvm(context->llvm_context));
   if (!value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
     return nullptr;
   }
 
-  context->named_values.insert({name->get_value(), value});
+  context->value_map.insert({name->get_value(), value});
   return value;
+}
+
+void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
+  variable_type->analyze(context);
+  expression->analyze(context);
+
+  if (!Analyzer::compare(expression->get_type(), variable_type->get_type())) {
+    Logger::error(
+        "Type mismatch\nExpected `" + variable_type->get_type()->to_string() +
+            "` Received `" + expression->get_type()->to_string() + "`",
+        LogTypes::Error::TYPE_MISMATCH, variable_type->get_position());
+    return;
+  }
 }
 
 string VarStatement::to_string() const {

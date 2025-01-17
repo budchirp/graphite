@@ -1,18 +1,26 @@
+#include "ast/program.hpp"
+
 #include <llvm/IR/Value.h>
+
 #include <sstream>
 #include <vector>
 
 #include "ast/statement.hpp"
-#include "ast/program.hpp"
 
 using namespace llvm;
 
-Value *Program::codegen() const {
+Value *Program::codegen(const shared_ptr<CodegenContext> &context) const {
   for (const auto &statement : statements) {
-    statement->codegen();
+    statement->codegen(context);
   }
 
   return nullptr;
+}
+
+void Program::analyze() {
+  for (const auto &statement : statements) {
+    statement->analyze(context);
+  }
 }
 
 string Program::to_string() const {

@@ -1,19 +1,28 @@
 #include "ast/expression/binary.hpp"
 
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
 
+#include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
+#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "token/token_type.hpp"
+#include "types/boolean.hpp"
+#include "types/float.hpp"
+#include "types/int.hpp"
+#include "types/string.hpp"
 
-using namespace llvm;
-
-Value *BinaryExpression::codegen() const {
-  auto left_value = left->codegen();
-  auto right_value = right->codegen();
+llvm::Value *BinaryExpression::codegen(
+    const shared_ptr<CodegenContext> &context) const {
+  auto left_value = left->codegen(context);
+  auto right_value = right->codegen(context);
 
   if (!left_value || !right_value) {
     Logger::error("Failed to generate low level code for left or right operand",
@@ -30,7 +39,7 @@ Value *BinaryExpression::codegen() const {
     return nullptr;
   }
 
-  right_value = Codegen::cast_type(right_value, left_value->getType());
+  right_value = Codegen::cast_type(context, right_value, left_value->getType());
   if (!right_value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
     return nullptr;
@@ -107,13 +116,64 @@ Value *BinaryExpression::codegen() const {
   return nullptr;
 }
 
+void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
+  left->analyze(context);
+  right->analyze(context);
+
+  auto left_type = left->get_type();
+  auto right_type = right->get_type();
+
+  if (!Analyzer::is_string(left_type).first &&
+      !Analyzer::is_string(right_type).first) {
+    if (Analyzer::is_pointer(left_type).first &&
+        Analyzer::is_pointer(right_type).first) {
+      Logger::error("Can't do binary arithmetics on pointers",
+                    LogTypes::Error::TYPE_MISMATCH, &position);
+      return;
+    }
+  }
+
+  if (!Analyzer::compare(left_type, right_type)) {
+    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
+    return;
+  }
+
+  static const unordered_map<string, vector<TokenType>> operations = {
+      {typeid(IntType).name(),
+       {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH, TOKEN_EQUAL,
+        TOKEN_NOT_EQUAL}},
+      {typeid(FloatType).name(),
+       {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH, TOKEN_EQUAL,
+        TOKEN_NOT_EQUAL}},
+      {typeid(BooleanType).name(),
+       {TOKEN_AND, TOKEN_OR, TOKEN_EQUAL, TOKEN_NOT_EQUAL}},
+      {typeid(StringType).name(), {TOKEN_EQUAL, TOKEN_NOT_EQUAL}}};
+
+  auto it = operations.find(left_type->get_type_info().name());
+  if (it == operations.end()) {
+    cout << left_type->to_string() << endl;
+    cout << right_type->to_string() << endl;
+
+    Logger::error("Unsupported type for binary expression",
+                  LogTypes::Error::TYPE_MISMATCH, &position);
+    return;
+  }
+
+  auto type_operations = operations.at(left_type->get_type_info().name());
+  auto _it = find(type_operations.begin(), type_operations.end(), op.type);
+  if (_it == type_operations.end()) {
+    Logger::error("Unsupported operation for type `" + left_type->to_string() + "`",
+                  LogTypes::Error::SYNTAX, &position);
+  }
+}
+
 string BinaryExpression::to_string() const {
   return "(" + left->to_string() + " " + op.to_string() + " " +
          right->to_string() + ")";
 }
 
 string BinaryExpression::to_string_tree() const {
-  return "BinaryExpression(op: '" + op.to_string() +
+  return "BinaryExpression(type: " + type->to_string_tree() + ", op: '" + op.to_string() +
          "', left: " + left->to_string_tree() +
          ", right: " + right->to_string_tree() + ")";
 }

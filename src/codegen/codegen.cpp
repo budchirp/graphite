@@ -1,32 +1,27 @@
+#include "codegen/codegen.hpp"
+
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Support/raw_ostream.h>
+
 #include <cstdio>
 #include <memory>
-
-#include "codegen/context.hpp"
-#include "codegen/codegen.hpp"
 
 using namespace std;
 using namespace llvm;
 
-shared_ptr<CodegenContext> context;
-
-Codegen::Codegen(const shared_ptr<CodegenContext> &_context) {
-  context = _context;
-}
-
-string Codegen::generate_ir() const {
-  context->program->codegen();
+string Codegen::generate_ir(const shared_ptr<CodegenContext> &context, const shared_ptr<Program> &program) const {
+  program->codegen(context);
 
   string ir_string;
   raw_string_ostream ir_stream(ir_string);
 
   context->module->print(ir_stream, nullptr);
+
   return ir_stream.str();
 }
 
-Value *Codegen::cast_type(Value *value, llvm::Type *expectedType) {
+Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context, Value *value, llvm::Type *expectedType) {
   if (value->getType()->isPointerTy() || expectedType->isPointerTy())
     return value;
 

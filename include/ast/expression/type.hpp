@@ -17,10 +17,13 @@ class TypeExpression : public Expression {
   shared_ptr<Type> type;
 
  public:
-  explicit TypeExpression(const Position &position, const shared_ptr<Type> &type)
+  explicit TypeExpression(const Position &position,
+                          const shared_ptr<Type> &type)
       : position(position), type(type) {};
 
-  llvm::Value *codegen() const override;
+  llvm::Value *codegen(
+      const shared_ptr<CodegenContext> &context) const override;
+  void analyze(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 

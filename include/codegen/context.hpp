@@ -6,19 +6,25 @@
 
 #include <memory>
 
-#include "ast/program.hpp"
+#include "ast/program_context.hpp"
 
 using namespace std;
 
 class CodegenContext {
+ private:
+  shared_ptr<ProgramContext> program_context;
+
  public:
   shared_ptr<llvm::LLVMContext> llvm_context;
   shared_ptr<llvm::Module> module;
   shared_ptr<llvm::IRBuilder<>> builder;
 
-  shared_ptr<Program> program;
+  unordered_map<string, llvm::Value *> value_map;
 
-  unordered_map<string, llvm::Value *> named_values;
+  explicit CodegenContext(const shared_ptr<ProgramContext> &program_context);
+  ~CodegenContext() { value_map.clear(); }
 
-  explicit CodegenContext(const shared_ptr<Program> &program);
+  shared_ptr<ProgramContext> get_program_context() const {
+    return program_context;
+  }
 };

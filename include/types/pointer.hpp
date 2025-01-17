@@ -18,6 +18,10 @@ class PointerType : public Type {
     return llvm::PointerType::get(type->to_llvm(context), 0);
   };
 
+  const type_info& get_type_info() const override {
+    return typeid(PointerType);
+  }
+
   string to_string() const override { return "*" + type->to_string(); };
   string to_string_tree() const override {
     return "PointerType(type: " + type->to_string_tree() + ")";

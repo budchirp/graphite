@@ -1,7 +1,8 @@
+#include "parser/parsers/statement/var.hpp"
+
 #include <memory>
 
 #include "ast/expression/identifier.hpp"
-#include "parser/parsers/statement/var.hpp"
 #include "ast/expression/type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/identifier.hpp"
@@ -9,6 +10,7 @@
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
 #include "token/token_type.hpp"
+#include "types/void.hpp"
 
 unique_ptr<VarStatement> VarStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -70,6 +72,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
   parser->get_program()->get_env()->set_symbol(name->get_value(),
                                                type->get_type());
 
-  return make_unique<VarStatement>(position, std::move(name), std::move(type),
+  return make_unique<VarStatement>(position, make_shared<VoidType>(),
+                                   std::move(name), std::move(type),
                                    std::move(expression));
 }

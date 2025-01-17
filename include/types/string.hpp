@@ -7,11 +7,14 @@
 
 class StringType : public Type {
  public:
-  explicit StringType() {};
+  explicit StringType() = default;
 
-  llvm::Type *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::Type* to_llvm(
+      const shared_ptr<llvm::LLVMContext> context) const override {
     return llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0);
   };
+
+  const type_info& get_type_info() const override { return typeid(StringType); }
 
   string to_string() const override { return "string"; };
   string to_string_tree() const override { return "StringType()"; };

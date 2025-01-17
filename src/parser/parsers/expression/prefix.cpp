@@ -3,6 +3,9 @@
 #include "ast/expression/prefix.hpp"
 #include "parser/parsers/expression/prefix.hpp"
 #include "parser/parsers/statement/expression.hpp"
+#include "token/token_type.hpp"
+#include "types/pointer.hpp"
+#include "types/type.hpp"
 
 unique_ptr<Expression> PrefixExpressionParser::parse() {
   const auto prefix_token = parser->current_token;
@@ -16,6 +19,21 @@ unique_ptr<Expression> PrefixExpressionParser::parse() {
     return nullptr;
   }
 
-  return make_unique<PrefixExpression>(*right->get_position(), right->get_type(), prefix_token,
+  shared_ptr<Type> type;
+  switch (prefix_token.type) {
+    case TOKEN_ASTERISK:
+      type = dynamic_pointer_cast<PointerType>(type)->type;
+      break;
+
+    case TOKEN_AMPERSAND:
+      type = make_shared<PointerType>(type);
+      break;
+
+    default:
+      type = right->get_type();
+      break;
+  }
+
+  return make_unique<PrefixExpression>(*right->get_position(), type, prefix_token,
                                        std::move(right));
 }

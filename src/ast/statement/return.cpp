@@ -10,12 +10,12 @@
 
 using namespace llvm;
 
-Value *ReturnStatement::codegen() const {
-  if (Value *value = expression->codegen()) {
+Value *ReturnStatement::codegen(const shared_ptr<CodegenContext> &context) const {
+  if (Value *value = expression->codegen(context)) {
     auto function = context->builder->GetInsertBlock()->getParent();
     auto return_type = function->getReturnType();
 
-    value = Codegen::cast_type(value, return_type);
+    value = Codegen::cast_type(context, value, return_type);
     if (!value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
       return nullptr;
@@ -28,6 +28,11 @@ Value *ReturnStatement::codegen() const {
   Logger::error("Failed to generate low level code for return value",
                 LogTypes::Error::UNKNOWN, expression->get_position());
   return nullptr;
+}
+
+void ReturnStatement::analyze(
+    const shared_ptr<ProgramContext> &context) {
+  expression->analyze(context);
 }
 
 string ReturnStatement::to_string() const {

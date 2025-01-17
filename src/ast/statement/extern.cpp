@@ -7,7 +7,12 @@
 
 using namespace llvm;
 
-Value *ExternStatement::codegen() const { return proto->codegen_function(); }
+Value *ExternStatement::codegen(const shared_ptr<CodegenContext> &context) const { return proto->codegen_function(context); }
+
+void ExternStatement::analyze(
+    const shared_ptr<ProgramContext> &context) {
+  proto->analyze(context);
+}
 
 string ExternStatement::to_string() const {
   return "extern " + proto->to_string();

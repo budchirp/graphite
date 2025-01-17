@@ -2,11 +2,14 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <numeric>
 #include <string>
 
+#include "analyzer/analyzer.hpp"
 #include "ast/program.hpp"
+#include "ast/program_context.hpp"
 #include "codegen/codegen.hpp"
 #include "env/env.hpp"
 #include "lexer/lexer.hpp"
@@ -60,16 +63,21 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto env = make_shared<Env>(nullptr);
   env->init();
 
-
-  auto program = make_shared<Program>(filename, env);
+  auto program_context = make_shared<ProgramContext>(filename, env);
+  auto program = make_shared<Program>(program_context);
   auto parser = make_shared<Parser>(lexer, program);
 
-  ProgramParser(parser).parse();
+  auto program_parser = make_shared<ProgramParser>(parser);
+  program_parser->parse();
 
-  auto codegen_context = make_shared<CodegenContext>(program);
+  cout << program->to_string_tree() << endl;
 
-  auto codegen = make_shared<Codegen>(codegen_context);
-  auto ir = codegen->generate_ir();
+  auto analyzer = make_shared<Analyzer>(program);
+  analyzer->analyze();
+
+  auto codegen_context = make_shared<CodegenContext>(program_context);
+  auto codegen = make_shared<Codegen>();
+  auto ir = codegen->generate_ir(codegen_context, program);
 
   auto ir_file_path = filesystem::path(source_file_path.stem().string() + ".ll");
   ofstream ir_file(ir_file_path);

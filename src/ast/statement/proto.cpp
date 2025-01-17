@@ -3,19 +3,26 @@
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
-#include <iostream>
 #include <memory>
 #include <sstream>
 
 #include "codegen/codegen.hpp"
+#include "logger/log_types.hpp"
+#include "logger/logger.hpp"
 
 using namespace llvm;
 
-Value *ProtoStatement::codegen() const { return codegen_function(); }
-Function *ProtoStatement::codegen_function() const {
+Value *ProtoStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
+  return codegen_function(context);
+}
+Function *ProtoStatement::codegen_function(
+    const shared_ptr<CodegenContext> &context) const {
   auto function = Function::Create(
-      static_cast<FunctionType *>(
-          context->program->get_env()->get_type(name->get_value())->to_llvm(context->llvm_context)),
+      static_cast<FunctionType *>(context->get_program_context()
+                                      ->get_env()
+                                      ->get_type(name->get_value())
+                                      ->to_llvm(context->llvm_context)),
       Function::ExternalLinkage, name->get_value(), context->module.get());
 
   int idx = 0;
@@ -23,6 +30,12 @@ Function *ProtoStatement::codegen_function() const {
     argument.setName(parameters[idx++].first->get_value());
 
   return function;
+}
+
+void ProtoStatement::analyze(const shared_ptr<ProgramContext> &context) {
+  for (const auto &parameter : parameters) {
+    parameter.second->analyze(context);
+  }
 }
 
 string ProtoStatement::to_string() const {

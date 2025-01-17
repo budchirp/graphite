@@ -23,7 +23,8 @@ class BooleanExpression : public Expression {
                              const bool value)
       : position(position), type(type), value(value) {};
 
-  llvm::Value *codegen() const override;
+  llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const override;
+  void analyze(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 

@@ -13,14 +13,18 @@
 
 using namespace llvm;
 
-Value *FunctionStatement::codegen() const { return codegen_function(); }
-Function *FunctionStatement::codegen_function() const {
+Value *FunctionStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
+  return codegen_function(context);
+}
+Function *FunctionStatement::codegen_function(
+    const shared_ptr<CodegenContext> &context) const {
   auto function = context->module->getFunction(proto->name->get_value());
   if (function) {
     Logger::warn("Function `" + proto->name->get_value() + "` exists",
                  LogTypes::Warn::SUGGESTION, proto->name->get_position());
   } else {
-    function = proto->codegen_function();
+    function = proto->codegen_function(context);
     if (!function) {
       Logger::error("Failed to generate low level code for function `" +
                         proto->name->get_value() + "`",
@@ -29,12 +33,12 @@ Function *FunctionStatement::codegen_function() const {
     }
   }
 
-  context->named_values.clear();
+  context->value_map.clear();
   for (auto &arg : function->args()) {
-    context->named_values[string(arg.getName())] = &arg;
+    context->value_map[string(arg.getName())] = &arg;
   }
 
-  BasicBlock *body_block = body->codegen_block(function, "entry");
+  BasicBlock *body_block = body->codegen_block(context, function, "entry");
   if (!body_block) {
     Logger::error("Failed to generate low level code for function body",
                   LogTypes::Error::INTERNAL, body->get_position());
@@ -57,6 +61,16 @@ Function *FunctionStatement::codegen_function() const {
   verifyFunction(*function);
 
   return function;
+}
+
+void FunctionStatement::analyze(
+    const shared_ptr<ProgramContext> &context) {
+  context->set_env(env);
+
+  proto->analyze(context);
+  body->analyze(context);
+
+  context->set_env(env->get_parent());
 }
 
 string FunctionStatement::to_string() const {

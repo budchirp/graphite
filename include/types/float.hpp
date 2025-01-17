@@ -3,6 +3,7 @@
 #include <string>
 
 #include "logger/logger.hpp"
+#include "types/int.hpp"
 #include "types/type.hpp"
 
 class FloatType : public Type {
@@ -11,7 +12,8 @@ class FloatType : public Type {
 
   explicit FloatType(const short size) : size(size) {};
 
-  llvm::Type *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::Type* to_llvm(
+      const shared_ptr<llvm::LLVMContext> context) const override {
     switch (size) {
       case 16:
         return llvm::Type::getHalfTy(*context);
@@ -28,6 +30,8 @@ class FloatType : public Type {
         return nullptr;
     }
   };
+
+  const type_info& get_type_info() const override { return typeid(IntType); }
 
   string to_string() const override { return "f" + ::to_string(size); };
   string to_string_tree() const override {

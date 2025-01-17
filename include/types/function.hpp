@@ -15,8 +15,8 @@ class FunctionType : public Type {
   vector<shared_ptr<Type>> parameters;
   shared_ptr<Type> return_type;
 
-  explicit FunctionType(const vector<shared_ptr<Type>> &parameters,
-                        const shared_ptr<Type> &return_type)
+  explicit FunctionType(const vector<shared_ptr<Type>>& parameters,
+                        const shared_ptr<Type>& return_type)
       : parameters(parameters), return_type(return_type) {};
 
   llvm::FunctionType* to_llvm(
@@ -29,6 +29,10 @@ class FunctionType : public Type {
     llvm::Type* llvm_return_type = return_type->to_llvm(context);
 
     return llvm::FunctionType::get(llvm_return_type, llvm_parameters, false);
+  }
+
+  const type_info& get_type_info() const override {
+    return typeid(FunctionType);
   }
 
   string to_string() const override {

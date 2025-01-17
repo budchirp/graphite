@@ -8,10 +8,11 @@
 
 using namespace llvm;
 
-Value *BlockStatement::codegen() const {
+Value *BlockStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
   Value *last = nullptr;
   for (const auto &statement : statements) {
-    last = statement->codegen();
+    last = statement->codegen(context);
     if (context->builder->GetInsertBlock()->getTerminator()) {
       break;
     }
@@ -20,14 +21,21 @@ Value *BlockStatement::codegen() const {
   return last;
 }
 
-BasicBlock *BlockStatement::codegen_block(Function *parent,
-                                          const string &name) const {
+BasicBlock *BlockStatement::codegen_block(
+    const shared_ptr<CodegenContext> &context, Function *parent,
+    const string &name) const {
   auto block = BasicBlock::Create(*context->llvm_context, name, parent);
   context->builder->SetInsertPoint(block);
 
-  codegen();
+  codegen(context);
 
   return block;
+}
+
+void BlockStatement::analyze(const shared_ptr<ProgramContext> &context) {
+  for (const auto &statement : statements) {
+    statement->analyze(context);
+  }
 }
 
 string BlockStatement::to_string() const {

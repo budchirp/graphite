@@ -7,14 +7,17 @@
 #include <sstream>
 #include <string>
 
+#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
+#include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "types/boolean.hpp"
 
 using namespace llvm;
 using namespace std;
 
-Value *IfExpression::codegen() const {
-  auto condition_value = condition->codegen();
+Value *IfExpression::codegen(const shared_ptr<CodegenContext> &context) const {
+  auto condition_value = condition->codegen(context);
   if (!condition_value) {
     Logger::error(
         "Failed to generate low level code for condition in if expression",
@@ -37,14 +40,14 @@ Value *IfExpression::codegen() const {
   context->builder->CreateCondBr(condition_value, then_block, else_block);
 
   context->builder->SetInsertPoint(then_block);
-  auto then_value = consequence->codegen();
+  auto then_value = consequence->codegen(context);
   context->builder->CreateBr(merge_block);
   then_block = context->builder->GetInsertBlock();
 
   parent_function->insert(parent_function->end(), else_block);
 
   context->builder->SetInsertPoint(else_block);
-  auto else_value = alternative ? alternative->codegen() : nullptr;
+  auto else_value = alternative ? alternative->codegen(context) : nullptr;
   context->builder->CreateBr(merge_block);
   else_block = context->builder->GetInsertBlock();
 
@@ -63,6 +66,19 @@ Value *IfExpression::codegen() const {
   return then_value;
 }
 
+void IfExpression::analyze(
+    const shared_ptr<ProgramContext> &context) {
+  if (!Analyzer::compare(condition->get_type(), make_shared<BooleanType>())) {
+    Logger::error("Only booleans on if condition", LogTypes::Error::TYPE_MISMATCH, condition->get_position());
+    return;
+  }
+
+  condition->analyze(context);
+
+  consequence->analyze(context);
+  if (alternative) alternative->analyze(context);
+}
+
 string IfExpression::to_string() const {
   ostringstream result;
   result << "if (" << condition->to_string() << ") "
@@ -77,7 +93,7 @@ string IfExpression::to_string() const {
 
 string IfExpression::to_string_tree() const {
   ostringstream result;
-  result << "IfExpression(condition: " << condition->to_string_tree()
+  result << "IfExpression(type: " + type->to_string_tree() + ", condition: " << condition->to_string_tree()
          << ", consequence: " << consequence->to_string_tree()
          << ", alternative: " << alternative->to_string_tree() << ")";
   return result.str();
