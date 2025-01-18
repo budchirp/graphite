@@ -6,6 +6,7 @@
 #include "types/pointer.hpp"
 #include "types/string.hpp"
 #include "types/type.hpp"
+
 using namespace std;
 
 class Analyzer {

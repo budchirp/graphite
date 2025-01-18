@@ -1,5 +1,10 @@
 #include "compiler/compiler.hpp"
 
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/Support/CodeGen.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/raw_ostream.h>
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -17,16 +22,15 @@
 #include "parser/parser.hpp"
 #include "parser/parsers/statement/program.hpp"
 
-string join_strings(const vector<string>& strings, const string& delimiter) {
-    return accumulate(
-        strings.begin(), strings.end(), std::string(),
-        [&](const string& a, const string& b) {
-            return a.empty() ? b : a + delimiter + b;
-        });
+string join_strings(const vector<string> &strings, const string &delimiter) {
+  return accumulate(strings.begin(), strings.end(), std::string(),
+                    [&](const string &a, const string &b) {
+                      return a.empty() ? b : a + delimiter + b;
+                    });
 }
 
 void Compiler::compile(const filesystem::path &source_file_path,
-               const vector<string> &libs, const vector<string> &objs) {
+                       const vector<string> &libs, const vector<string> &objs) {
   auto filename = source_file_path.filename().stem().string();
 
   vector<string> _objs = {source_file_path.stem().string() + ".o"};
@@ -70,55 +74,49 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto program_parser = make_shared<ProgramParser>(parser);
   program_parser->parse();
 
-  cout << program->to_string() << endl;
-
   auto analyzer = make_shared<Analyzer>(program);
   analyzer->analyze();
 
-  auto codegen_context = make_shared<CodegenContext>(program_context);
-  auto codegen = make_shared<Codegen>();
-  auto ir = codegen->generate_ir(codegen_context, program);
+  Codegen::init();
 
-  auto ir_file_path = filesystem::path(source_file_path.stem().string() + ".ll");
-  ofstream ir_file(ir_file_path);
-  if (!ir_file.is_open()) {
+  auto codegen_context = make_shared<CodegenContext>(program_context);
+  auto codegen = make_shared<Codegen>(codegen_context);
+  codegen->codegen(program);
+  codegen->optimize();
+
+  error_code err_code;
+  llvm::raw_fd_ostream output_file(source_file_path.stem().string() + ".o",
+                                   err_code, llvm::sys::fs::OF_None);
+  if (err_code) {
     Logger::error("Failed to open file `" + source_file_path.string() + "`");
     return;
   }
 
-  ir_file << ir;
-  ir_file.close();
-
-  compile_ir(ir_file_path.stem());
-};
-
-void Compiler::compile_ir(const filesystem::path& ir_file_path) {
-  auto filename = ir_file_path.filename().stem().string();
-  Logger::log("Compiling `" + filename + ".ll`");
-
-  vector<string> command{"clang", "-c", "-o", filename + ".o",
-                               filename + ".ll"};
-  auto command_str = join_strings(command, " ") + " > /dev/null 2>&1";
-
-  Logger::log("Executing `" + command_str + "`\n");
-
-  auto result = system(command_str.c_str());
-  if (result > 0) {
-    Logger::error("Failed to generate object code for llvm ir");
+  llvm::legacy::PassManager pass;
+  if (codegen_context->target_machine->addPassesToEmitFile(
+          pass, output_file, nullptr, llvm::CodeGenFileType::ObjectFile)) {
+    Logger::error("Failed to generate object code");
     return;
   }
-}
 
-void Compiler::compile_objects(const vector<string> &objs, const filesystem::path &output_file_path) {
+  pass.run(*codegen_context->module);
+  output_file.flush();
+  
+  cout << endl;
+};
+
+void Compiler::compile_objects(const vector<string> &objs,
+                               const filesystem::path &output_file_path) {
   auto filename = output_file_path.filename().stem().string();
   Logger::log("Creating executable `" + filename + "`");
 
-  vector<string> command {"clang", ld_flags, "-o", filename, join_strings(objs, " ")};
+  vector<string> command{"clang", ld_flags, "-o", filename,
+                         join_strings(objs, " ")};
   auto command_str = join_strings(command, " ") + " > /dev/null 2>&1";
 
   Logger::log("Executing `" + command_str + "`");
 
-  auto result = system(command_str.c_str() );
+  auto result = system(command_str.c_str());
   if (result > 0) {
     Logger::error("Failed to generate executable");
     return;

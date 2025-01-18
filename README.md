@@ -16,6 +16,7 @@
 - [x] Basic codegen
 - [x] Type support
 - [x] If expressions
+- [ ] JIT and other shit that I dont know
 - [ ] For / While statements
 - [ ] Switch expressions
 - [ ] Stdlib

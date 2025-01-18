@@ -8,7 +8,6 @@
 #include <sstream>
 
 #include "codegen/codegen.hpp"
-#include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
 using namespace llvm;
@@ -60,11 +59,12 @@ Function *FunctionStatement::codegen_function(
 
   verifyFunction(*function);
 
+  // context->fpm->run(*function, *context->fam);
+
   return function;
 }
 
-void FunctionStatement::analyze(
-    const shared_ptr<ProgramContext> &context) {
+void FunctionStatement::analyze(const shared_ptr<ProgramContext> &context) {
   context->set_env(env);
 
   proto->analyze(context);

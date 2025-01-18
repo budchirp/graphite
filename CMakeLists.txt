@@ -46,7 +46,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE LLVM)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG_MODE=1)
-  target_compile_options(${PROJECT_NAME} PRIVATE -Og -g --debug)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Og -g --debug -fsanitize=address)
   target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
   target_compile_options(${PROJECT_NAME} PRIVATE -O3 -flto -DNDEBUG)

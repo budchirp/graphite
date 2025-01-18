@@ -3,9 +3,11 @@
 #include <format>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
+#include "cli/colors.hpp"
 #include "lexer/position.hpp"
 #include "logger/log_types.hpp"
 
@@ -18,14 +20,10 @@ void Logger::log(const string &message, LogTypes::Log type,
       break;
   }
 
-  if (!position) {
-    cerr << "[error][unknown position]: " << message << endl;
-    return;
-  }
+  ostringstream str;
+  str << Colors::GRAY << "[log][" << log_type << "] " << (position ? position->line : 0) << ":" << (position ? position->line : 0) << " " << Colors::WHITE << message << endl;
 
-  cout << format("[error][{}] {}:{} {}", log_type, position->line,
-                 position->column, message)
-       << endl;
+  cout << str.str();
 };
 
 void Logger::warn(const string &message, LogTypes::Warn type,
@@ -37,14 +35,10 @@ void Logger::warn(const string &message, LogTypes::Warn type,
       break;
   }
 
-  if (!position) {
-    cerr << "[error][unknown position]: " << message << endl;
-    return;
-  }
+  ostringstream str;
+  str << Colors::GRAY << "[" << Colors::YELLOW << "warning" << Colors::GRAY << "][" << warn_type << "] " << (position ? position->line : 0) << ":" << (position ? position->line : 0) << " " << Colors::WHITE << message << endl;
 
-  cout << format("[error][{}] {}:{} {}", warn_type, position->line,
-                 position->column, message)
-       << endl;
+  cout << str.str();
 };
 
 void Logger::error(const string &message, LogTypes::Error type,
@@ -72,15 +66,10 @@ void Logger::error(const string &message, LogTypes::Error type,
       break;
   }
 
-  if (!position) {
-    cerr << "[error][unknown position]: " << message << endl;
-    return;
-  }
+  ostringstream str;
+  str << Colors::GRAY << "[" << Colors::RED << "error" << Colors::GRAY << "][" << error_type << "] " << (position ? position->line : 0) << ":" << (position ? position->line : 0) << " " << Colors::WHITE << message << endl;
 
-  auto msg = format("[error][{}] {}:{} {}", error_type, position->line,
-                    position->column, message);
-
-  throw runtime_error(msg);
+  throw runtime_error(str.str());
 }
 
 void Logger::log(const string &message, LogTypes::Log type) {
@@ -94,13 +83,14 @@ void Logger::error(const string &message, LogTypes::Error type) {
 }
 
 void Logger::log(const string &message) {
-  cout << "[log]: " << message << endl;
+  cout << Colors::GRAY << "[log]: " << Colors::WHITE << message << endl;
 }
 void Logger::warn(const string &message) {
-  cout << "[warn]: " << message << endl;
+  cout << Colors::GRAY << "[" << Colors::YELLOW << "warning" << Colors::GRAY << "]: " << Colors::WHITE << message << endl;
 }
 void Logger::error(const string &message) {
-  auto msg = "[error]: " + message;
+  ostringstream str;
+  str << Colors::GRAY << "[" << Colors::YELLOW << "error" << Colors::GRAY << "]: " << Colors::WHITE << message << endl;
 
-  throw runtime_error(msg);
+  throw runtime_error(str.str());
 }

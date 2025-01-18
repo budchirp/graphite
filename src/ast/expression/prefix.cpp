@@ -60,6 +60,7 @@ void PrefixExpression::analyze(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_AMPERSAND: {
+      break;
     }
 
     default: {

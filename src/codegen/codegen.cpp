@@ -2,26 +2,54 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
+#include <llvm/Pass.h>
+#include <llvm/Passes/PassBuilder.h>
+#include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Transforms/Scalar/SimplifyCFG.h>
 
 #include <cstdio>
 #include <memory>
 
+#include "logger/log_types.hpp"
+#include "logger/logger.hpp"
+
 using namespace std;
 using namespace llvm;
 
-string Codegen::generate_ir(const shared_ptr<CodegenContext> &context, const shared_ptr<Program> &program) const {
-  program->codegen(context);
-
-  string ir_string;
-  raw_string_ostream ir_stream(ir_string);
-
-  context->module->print(ir_stream, nullptr);
-
-  return ir_stream.str();
+void Codegen::init() {
+  InitializeAllTargetInfos();
+  InitializeAllTargets();
+  InitializeAllTargetMCs();
+  InitializeAllAsmParsers();
+  InitializeAllAsmPrinters();
 }
 
-Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context, Value *value, llvm::Type *expectedType) {
+void Codegen::codegen(const shared_ptr<Program> &program) const {
+  program->codegen(context);
+}
+
+void Codegen::optimize() {
+  llvm::PassBuilder pb;
+
+  pb.registerModuleAnalyses(*context->mam);
+  pb.registerFunctionAnalyses(*context->fam);
+  pb.registerLoopAnalyses(*context->lam);
+  pb.registerCGSCCAnalyses(*context->cgam);
+
+  pb.crossRegisterProxies(*context->lam, *context->fam, *context->cgam,
+                          *context->mam);
+
+  llvm::ModulePassManager mpm = pb.buildModuleOptimizationPipeline(
+      llvm::OptimizationLevel::O2, ThinOrFullLTOPhase::None);
+
+  Logger::log("Optimizing your garbage");
+  mpm.run(*context->module, *context->mam);
+}
+
+Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
+                          Value *value, llvm::Type *expectedType) {
   if (value->getType()->isPointerTy() || expectedType->isPointerTy())
     return value;
 

@@ -4,7 +4,6 @@
 #include <llvm/Support/ManagedStatic.h>
 
 #include <memory>
-#include <string>
 
 #include "ast/program.hpp"
 #include "codegen/context.hpp"
@@ -12,12 +11,18 @@
 using namespace std;
 
 class Codegen {
-public:
-  explicit Codegen() = default;
+ private:
+  shared_ptr<CodegenContext> context;
+
+ public:
+  explicit Codegen(const shared_ptr<CodegenContext> &context)
+      : context(context) {};
   ~Codegen() { llvm::llvm_shutdown(); }
 
-  string generate_ir(const shared_ptr<CodegenContext> &context,
-                     const shared_ptr<Program> &program) const;
+  static void init();
+  void codegen(const shared_ptr<Program> &program) const;
+
+  void optimize();
 
   static llvm::Value *cast_type(const shared_ptr<CodegenContext> &context,
                                 llvm::Value *value, llvm::Type *expectedType);

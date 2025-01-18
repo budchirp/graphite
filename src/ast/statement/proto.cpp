@@ -7,8 +7,6 @@
 #include <sstream>
 
 #include "codegen/codegen.hpp"
-#include "logger/log_types.hpp"
-#include "logger/logger.hpp"
 
 using namespace llvm;
 

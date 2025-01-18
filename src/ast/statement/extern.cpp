@@ -1,16 +1,20 @@
-#include <memory>
+#include "ast/statement/extern.hpp"
+
 #include <llvm/IR/Value.h>
 
-#include "ast/statement/extern.hpp"
+#include <memory>
+
 #include "ast/statement/proto.hpp"
 #include "codegen/codegen.hpp"
 
 using namespace llvm;
 
-Value *ExternStatement::codegen(const shared_ptr<CodegenContext> &context) const { return proto->codegen_function(context); }
+Value *ExternStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
+  return proto->codegen_function(context);
+}
 
-void ExternStatement::analyze(
-    const shared_ptr<ProgramContext> &context) {
+void ExternStatement::analyze(const shared_ptr<ProgramContext> &context) {
   proto->analyze(context);
 }
 

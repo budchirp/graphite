@@ -1,4 +1,3 @@
-
 #include "ast/expression/if.hpp"
 
 #include <llvm/IR/Value.h>
