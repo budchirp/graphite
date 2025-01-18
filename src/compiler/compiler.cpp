@@ -70,7 +70,7 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto program_parser = make_shared<ProgramParser>(parser);
   program_parser->parse();
 
-  cout << program->to_string_tree() << endl;
+  cout << program->to_string() << endl;
 
   auto analyzer = make_shared<Analyzer>(program);
   analyzer->analyze();

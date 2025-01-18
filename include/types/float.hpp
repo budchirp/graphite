@@ -7,6 +7,9 @@
 #include "types/type.hpp"
 
 class FloatType : public Type {
+ private:
+  string name = "float";
+
  public:
   short size;
 
@@ -31,6 +34,7 @@ class FloatType : public Type {
     }
   };
 
+  string get_name() const override { return name; }
   const type_info& get_type_info() const override { return typeid(IntType); }
 
   string to_string() const override { return "f" + ::to_string(size); };

@@ -5,6 +5,7 @@
 
 #include "ast/expression.hpp"
 #include "parser/parsers/expression/identifier.hpp"
+#include "types/void.hpp"
 
 unique_ptr<Expression> IdentifierExpressionParser::parse() {
   return parse(true);
@@ -16,7 +17,7 @@ unique_ptr<Expression> IdentifierExpressionParser::parse(bool is_variable) {
   const auto identifier_token = parser->current_token;
   parser->eat_token();  // eat identifier
 
-  shared_ptr<Type> type = nullptr;
+  shared_ptr<Type> type = make_shared<VoidType>();
   if (is_variable) {
     type =
         parser->get_program()->get_env()->get_symbol(identifier_token.literal);

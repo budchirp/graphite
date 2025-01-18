@@ -1,14 +1,13 @@
+#include "logger/logger.hpp"
+
 #include <format>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
-#include "logger/logger.hpp"
 #include "lexer/position.hpp"
 #include "logger/log_types.hpp"
-
-Logger::Logger(shared_ptr<Position> position) : position(position) {}
 
 void Logger::log(const string &message, LogTypes::Log type,
                  const Position *position) {

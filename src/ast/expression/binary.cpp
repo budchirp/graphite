@@ -30,15 +30,6 @@ llvm::Value *BinaryExpression::codegen(
     return nullptr;
   }
 
-  if (!(left_value->getType()->isPointerTy() &&
-        left_value->getType()->getContainedType(0)->isIntegerTy(8)) &&
-      (right_value->getType()->isPointerTy() ||
-       left_value->getType()->isPointerTy())) {
-    Logger::error("Cannot do binary arithmetics on pointers",
-                  LogTypes::Error::TYPE_MISMATCH, &position);
-    return nullptr;
-  }
-
   right_value = Codegen::cast_type(context, right_value, left_value->getType());
   if (!right_value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
@@ -111,7 +102,7 @@ llvm::Value *BinaryExpression::codegen(
     }
   }
 
-  Logger::error("Unsupported operand type in binary expression",
+  Logger::error("Unsupported type for binary expression",
                 LogTypes::Error::SYNTAX, &position);
   return nullptr;
 }
@@ -162,8 +153,9 @@ void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
   auto type_operations = operations.at(left_type->get_type_info().name());
   auto _it = find(type_operations.begin(), type_operations.end(), op.type);
   if (_it == type_operations.end()) {
-    Logger::error("Unsupported operation for type `" + left_type->to_string() + "`",
-                  LogTypes::Error::SYNTAX, &position);
+    Logger::error(
+        "Unsupported operation for type `" + left_type->to_string() + "`",
+        LogTypes::Error::SYNTAX, &position);
   }
 }
 
@@ -173,7 +165,7 @@ string BinaryExpression::to_string() const {
 }
 
 string BinaryExpression::to_string_tree() const {
-  return "BinaryExpression(type: " + type->to_string_tree() + ", op: '" + op.to_string() +
-         "', left: " + left->to_string_tree() +
+  return "BinaryExpression(type: " + type->to_string_tree() + ", op: '" +
+         op.to_string() + "', left: " + left->to_string_tree() +
          ", right: " + right->to_string_tree() + ")";
 }

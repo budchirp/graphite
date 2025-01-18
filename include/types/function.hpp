@@ -11,6 +11,9 @@
 using namespace std;
 
 class FunctionType : public Type {
+ private:
+  string name = "function";
+
  public:
   vector<shared_ptr<Type>> parameters;
   shared_ptr<Type> return_type;
@@ -31,6 +34,7 @@ class FunctionType : public Type {
     return llvm::FunctionType::get(llvm_return_type, llvm_parameters, false);
   }
 
+  string get_name() const override { return name; }
   const type_info& get_type_info() const override {
     return typeid(FunctionType);
   }

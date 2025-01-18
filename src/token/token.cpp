@@ -1,16 +1,14 @@
-#include <sstream>
-
 #include "token/token.hpp"
+
+#include <sstream>
 
 Token::Token() {
   this->type = TokenType::TOKEN_EOF;
   this->literal = "";
 }
 
-Token::Token(const TokenType &token_type, const string &literal) {
-  this->type = token_type;
-  this->literal = literal;
-};
+Token::Token(const TokenType &token_type, const string &literal)
+    : type(token_type), literal(literal) {};
 
 string Token::to_string() const { return literal; }
 

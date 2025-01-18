@@ -13,7 +13,7 @@ class Logger {
   shared_ptr<Position> position;
 
  public:
-  explicit Logger(shared_ptr<Position> position);
+  explicit Logger(const shared_ptr<Position> &position) : position(position) {};
 
   static void log(const string &message, LogTypes::Log type,
                   const Position *position);

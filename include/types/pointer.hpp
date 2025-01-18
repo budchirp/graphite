@@ -9,6 +9,9 @@
 using namespace std;
 
 class PointerType : public Type {
+ private:
+  string name = " pointer";
+
  public:
   shared_ptr<Type> type;
 
@@ -18,6 +21,7 @@ class PointerType : public Type {
     return llvm::PointerType::get(type->to_llvm(context), 0);
   };
 
+  string get_name() const override { return type->get_name() + name; }
   const type_info& get_type_info() const override {
     return typeid(PointerType);
   }

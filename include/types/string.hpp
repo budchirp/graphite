@@ -6,6 +6,10 @@
 #include "types/type.hpp"
 
 class StringType : public Type {
+ private:
+  string name = "string";
+
+
  public:
   explicit StringType() = default;
 
@@ -14,8 +18,9 @@ class StringType : public Type {
     return llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0);
   };
 
+  string get_name() const override { return name; }
   const type_info& get_type_info() const override { return typeid(StringType); }
 
-  string to_string() const override { return "string"; };
+  string to_string() const override { return name; };
   string to_string_tree() const override { return "StringType()"; };
 };

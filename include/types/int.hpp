@@ -6,6 +6,9 @@
 #include "types/type.hpp"
 
 class IntType : public Type {
+ private:
+  string name = "int";
+
  public:
   short size;
   bool is_unsigned;
@@ -30,6 +33,7 @@ class IntType : public Type {
     }
   };
 
+  string get_name() const override { return name; }
   const type_info& get_type_info() const override {
     return typeid(IntType);
   }

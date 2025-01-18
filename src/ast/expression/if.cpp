@@ -33,7 +33,8 @@ Value *IfExpression::codegen(const shared_ptr<CodegenContext> &context) const {
 
   auto parent_function = context->builder->GetInsertBlock()->getParent();
 
-  auto then_block = BasicBlock::Create(*context->llvm_context, "then", parent_function);
+  auto then_block =
+      BasicBlock::Create(*context->llvm_context, "then", parent_function);
   auto else_block = BasicBlock::Create(*context->llvm_context, "else");
   auto merge_block = BasicBlock::Create(*context->llvm_context, "if");
 
@@ -66,10 +67,10 @@ Value *IfExpression::codegen(const shared_ptr<CodegenContext> &context) const {
   return then_value;
 }
 
-void IfExpression::analyze(
-    const shared_ptr<ProgramContext> &context) {
+void IfExpression::analyze(const shared_ptr<ProgramContext> &context) {
   if (!Analyzer::compare(condition->get_type(), make_shared<BooleanType>())) {
-    Logger::error("Only booleans on if condition", LogTypes::Error::TYPE_MISMATCH, condition->get_position());
+    Logger::error("Only booleans are allowed on if condition",
+                  LogTypes::Error::TYPE_MISMATCH, condition->get_position());
     return;
   }
 
@@ -93,7 +94,8 @@ string IfExpression::to_string() const {
 
 string IfExpression::to_string_tree() const {
   ostringstream result;
-  result << "IfExpression(type: " + type->to_string_tree() + ", condition: " << condition->to_string_tree()
+  result << "IfExpression(type: " + type->to_string_tree() + ", condition: "
+         << condition->to_string_tree()
          << ", consequence: " << consequence->to_string_tree()
          << ", alternative: " << alternative->to_string_tree() << ")";
   return result.str();

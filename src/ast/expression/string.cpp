@@ -2,6 +2,7 @@
 
 #include <llvm/IR/Value.h>
 
+#include <regex>
 #include <string>
 
 #include "codegen/codegen.hpp"
@@ -16,7 +17,7 @@ Value *StringExpression::codegen(const shared_ptr<CodegenContext> &context) cons
 void StringExpression::analyze(
     const shared_ptr<ProgramContext> &context) {}
 
-string StringExpression::to_string() const { return value; }
+string StringExpression::to_string() const { return "\"" + regex_replace(value, regex("\n"), "\\n") + "\""; }
 
 string StringExpression::to_string_tree() const {
   return "StringExpression(type: " + type->to_string_tree() + ", value: '" + value + "')";

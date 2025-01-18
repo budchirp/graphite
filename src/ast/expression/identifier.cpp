@@ -7,7 +7,8 @@
 
 using namespace llvm;
 
-Value *IdentifierExpression::codegen(const shared_ptr<CodegenContext> &context) const {
+Value *IdentifierExpression::codegen(
+    const shared_ptr<CodegenContext> &context) const {
   auto it = context->value_map.find(value);
   if (it == context->value_map.end()) {
     Logger::error("Undefined variable `" + value + "`",
@@ -18,16 +19,17 @@ Value *IdentifierExpression::codegen(const shared_ptr<CodegenContext> &context) 
   return it->second;
 }
 
-void IdentifierExpression::analyze(
-    const shared_ptr<ProgramContext> &context) {
-  auto var = context->get_env()->get_symbol(value);
-  if (!var) {
-    Logger::error("Undefined variable `" + value + "`", LogTypes::Error::UNDEFINED, &position);
+void IdentifierExpression::analyze(const shared_ptr<ProgramContext> &context) {
+  if (!context->get_env()->get_symbol(value)) {
+    Logger::error("Undefined variable `" + value + "`",
+                  LogTypes::Error::UNDEFINED, &position);
   }
 }
 
 string IdentifierExpression::to_string() const { return value; }
 
 string IdentifierExpression::to_string_tree() const {
-  return "IdentifierExpression(type: " + (type ? type->to_string_tree() : "'variable'") + ", value: '" + value + "')";
+  return "IdentifierExpression(type: " +
+         type->to_string_tree() + ", value: '" + value +
+         "')";
 }

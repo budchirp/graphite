@@ -28,7 +28,7 @@ void Env::init() {
   type_map.emplace("void", make_shared<VoidType>());
 }
 
-void Env::set_type(string name, shared_ptr<Type> type) {
+void Env::set_type(const string &name, const shared_ptr<Type> &type) {
   type_map.insert_or_assign(name, type);
 }
 
@@ -46,7 +46,7 @@ shared_ptr<Type> Env::get_type(const string &name) const {
   return nullptr;
 }
 
-void Env::set_symbol(string name, shared_ptr<Type> symbol) {
+void Env::set_symbol(const string &name, const shared_ptr<Type> &symbol) {
   symbol_map.insert_or_assign(name, symbol);
 }
 

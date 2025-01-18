@@ -67,7 +67,8 @@ llvm::Value *CallExpression::codegen(
 
 void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
   if (!context->get_env()->get_symbol(name->get_value())) {
-    Logger::error("Undefined function `" + name->get_value() + "` called");
+    Logger::error("Undefined function `" + name->get_value() + "` called",
+                  LogTypes::Error::UNDEFINED, name->get_position());
     return;
   }
 
@@ -75,6 +76,13 @@ void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
       context->get_env()->get_type(name->get_value()));
   if (!function_type) {
     Logger::error("Undefined function `" + name->get_value() + "` called");
+    return;
+  }
+
+  if (function_type->parameters.size() != arguments.size()) {
+    Logger::error("Incorrect number of arguments passed to function `" +
+                      name->get_value() + "`",
+                  LogTypes::Error::SYNTAX, name->get_position());
     return;
   }
 
@@ -114,8 +122,8 @@ string CallExpression::to_string() const {
 
 string CallExpression::to_string_tree() const {
   ostringstream result;
-  result << "CallExpression(type: " << type->to_string_tree() <<", name: " << name->to_string_tree()
-         << ", arguments: [";
+  result << "CallExpression(type: " << type->to_string_tree()
+         << ", name: " << name->to_string_tree() << ", arguments: [";
 
   for (auto i = 0; i < arguments.size(); ++i) {
     result << arguments[i]->to_string_tree();
