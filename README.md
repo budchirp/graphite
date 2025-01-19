@@ -13,16 +13,17 @@
 
 - [x] Lexer
 - [x] Parser
-- [x] Basic codegen
+- [x] Codegen
 - [x] Type support
-- [x] If expressions
-- [ ] JIT and other shit that I dont know
-- [ ] For / While statements
-- [ ] Switch expressions
-- [ ] Stdlib
-- [ ] Better errors
-- [ ] Structs
-- [ ] Arrays
-- [ ] Maps
-- [ ] CLI (graphitec for single files and graphite for project compilation)
 - [x] Type checking
+- [x] If expressions
+- [x] For / While statement (only for rn)
+- [x] Code optimization (idk how well it works)
+- [ ] Arrays
+- [ ] Structs
+- [ ] Module management
+- [ ] Classes
+- [ ] Stdlib
+- [ ] Maps
+- [ ] Switch expression
+- [ ] CLI (graphitec for single files and graphite for project compilation)

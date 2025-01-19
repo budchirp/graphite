@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "ast/expression/identifier.hpp"
 #include "parser.hpp"
 #include "parser/parser.hpp"
 
@@ -16,5 +17,5 @@ class IdentifierExpressionParser : public ExpressionParser {
       : parser(parser) {};
 
   unique_ptr<Expression> parse() override;
-  unique_ptr<Expression> parse(bool is_variable);
+  unique_ptr<IdentifierExpression> parse_identifier();
 };

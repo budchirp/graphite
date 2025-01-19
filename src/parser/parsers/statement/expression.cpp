@@ -4,17 +4,17 @@
 #include <map>
 #include <memory>
 
-#include "logger/logger.hpp"
+#include "logger/log_types.hpp"
 #include "parser/parsers/expression/binary.hpp"
 #include "parser/parsers/expression/boolean.hpp"
 #include "parser/parsers/expression/call.hpp"
 #include "parser/parsers/expression/group.hpp"
-#include "parser/parsers/expression/identifier.hpp"
 #include "parser/parsers/expression/if.hpp"
 #include "parser/parsers/expression/integer.hpp"
 #include "parser/parsers/expression/parser.hpp"
-#include "parser/parsers/expression/prefix.hpp"
 #include "parser/parsers/expression/string.hpp"
+#include "parser/parsers/expression/unary.hpp"
+#include "parser/parsers/expression/var_ref.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
 
@@ -30,7 +30,7 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>)>>
     prefix_parse_fns = {
         {TokenType::TOKEN_IDENTIFIER,
          [](const shared_ptr<Parser> &parser) {
-           return make_unique<IdentifierExpressionParser>(parser);
+           return make_unique<VarRefExpressionParser>(parser);
          }},
         {TokenType::TOKEN_INT,
          [](const shared_ptr<Parser> &parser) {
@@ -50,23 +50,23 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>)>>
          }},
         {TokenType::TOKEN_BANG,
          [](const shared_ptr<Parser> &parser) {
-           return make_unique<PrefixExpressionParser>(parser);
+           return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
         {TokenType::TOKEN_ASTERISK,
          [](const shared_ptr<Parser> &parser) {
-           return make_unique<PrefixExpressionParser>(parser);
+           return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
         {TokenType::TOKEN_AMPERSAND,
          [](const shared_ptr<Parser> &parser) {
-           return make_unique<PrefixExpressionParser>(parser);
+           return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
         {TokenType::TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser) {
-           return make_unique<PrefixExpressionParser>(parser);
+           return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
         {TokenType::TOKEN_MINUS,
          [](const shared_ptr<Parser> &parser) {
-           return make_unique<PrefixExpressionParser>(parser);
+           return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
         {TokenType::TOKEN_LEFT_PARENTHESES,
          [](const shared_ptr<Parser> &parser) {
@@ -79,6 +79,14 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>)>>
 map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>,
                                                      unique_ptr<Expression> &)>>
     binary_parse_fns = {
+        {TokenType::TOKEN_PLUSPLUS,
+         [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
+           return make_unique<UnaryExpressionParser>(parser, std::move(left));
+         }},
+        {TokenType::TOKEN_MINUSMINUS,
+         [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
+           return make_unique<UnaryExpressionParser>(parser, std::move(left));
+         }},
         {TokenType::TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
@@ -120,7 +128,9 @@ unique_ptr<Expression> ExpressionStatementParser::parse_expression(
     Precedence precedence) {
   auto prefix_parser_it = prefix_parse_fns.find(parser->current_token.type);
   if (prefix_parser_it == prefix_parse_fns.end()) {
-    Logger::error("Unknown prefix: " + parser->current_token.to_string());
+    parser->get_logger()->error(
+        "Unknown prefix: " + parser->current_token.to_string(),
+        LogTypes::Error::SYNTAX);
   }
 
   auto prefix_parser = prefix_parser_it->second(parser);

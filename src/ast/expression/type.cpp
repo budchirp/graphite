@@ -11,7 +11,7 @@ llvm::Value *TypeExpression::codegen(
 }
 
 void TypeExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  if (!context->get_env()->get_type(type->to_string())) {
+  if (!context->get_env()->get_type(type->get_name())) {
     Logger::error("Undefined type `" + type->to_string() + "`",
                   LogTypes::Error::UNDEFINED, &position);
   }

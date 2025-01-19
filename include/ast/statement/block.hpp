@@ -21,13 +21,15 @@ class BlockStatement : public Statement {
   vector<unique_ptr<Statement>> statements;
 
  public:
-  explicit BlockStatement(const Position &position, const shared_ptr<Type> &type,
+  explicit BlockStatement(const Position &position,
+                          const shared_ptr<Type> &type,
                           vector<unique_ptr<Statement>> statements)
       : position(position), type(type), statements(std::move(statements)) {};
 
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;
-  llvm::BasicBlock *codegen_block(const shared_ptr<CodegenContext> &context, llvm::Function *parent,
+  llvm::BasicBlock *codegen_block(const shared_ptr<CodegenContext> &context,
+                                  llvm::Function *parent,
                                   const string &name) const;
   void analyze(const shared_ptr<ProgramContext> &context) override;
 

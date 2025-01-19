@@ -40,8 +40,6 @@ class CodegenContext {
 
   explicit CodegenContext(const shared_ptr<ProgramContext> &program_context);
   ~CodegenContext() {
-    value_map.clear();
-
     delete target_machine;
   }
 

@@ -6,7 +6,6 @@
 #include "parser/parsers/statement/block.hpp"
 #include "parser/parsers/statement/proto.hpp"
 #include "types/function.hpp"
-#include "types/void.hpp"
 
 unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -24,7 +23,8 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
 
   auto proto = ProtoStatementParser(parser).parse();
   if (!proto) {
-    parser->get_logger()->error("Failed to parse the proto of the function", LogTypes::Error::INTERNAL);
+    parser->get_logger()->error("Failed to parse the proto of the function",
+                                LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
@@ -43,7 +43,8 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
 
   auto body = BlockStatementParser(parser).parse();
   if (!body) {
-    parser->get_logger()->error("Failed to parse the body of the function", LogTypes::Error::INTERNAL);
+    parser->get_logger()->error("Failed to parse the body of the function",
+                                LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
@@ -56,6 +57,6 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
 
   parser->get_program()->set_env(parent_env);
 
-  return make_unique<FunctionStatement>(position, make_shared<VoidType>(), env, std::move(proto),
+  return make_unique<FunctionStatement>(position, env, std::move(proto),
                                         std::move(body));
 }

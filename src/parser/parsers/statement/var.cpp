@@ -10,7 +10,6 @@
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
 #include "token/token_type.hpp"
-#include "types/void.hpp"
 
 unique_ptr<VarStatement> VarStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -22,11 +21,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
                                 LogTypes::Error::SYNTAX);
   }
 
-  auto identifier_expression_parser = IdentifierExpressionParser(parser);
-
-  auto name_expression = identifier_expression_parser.parse(false);
-  unique_ptr<IdentifierExpression> name(
-      dynamic_cast<IdentifierExpression *>(name_expression.release()));
+  auto name = IdentifierExpressionParser(parser).parse_identifier();
   if (!name) {
     parser->get_logger()->error(
         "Failed to parse the name of the variable statement",
@@ -72,7 +67,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
   parser->get_program()->get_env()->set_symbol(name->get_value(),
                                                type->get_type());
 
-  return make_unique<VarStatement>(position, make_shared<VoidType>(),
+  return make_unique<VarStatement>(position, 
                                    std::move(name), std::move(type),
                                    std::move(expression));
 }

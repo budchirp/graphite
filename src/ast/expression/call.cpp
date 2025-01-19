@@ -38,16 +38,17 @@ llvm::Value *CallExpression::codegen(
   for (const auto &argument : arguments) {
     llvm::Value *argument_value = argument->codegen(context);
     if (!argument_value) {
-      Logger::error(
-          "Failed to generate low level code for argument in function `" +
-              name->get_value() + "`",
-          LogTypes::Error::INTERNAL, argument->get_position());
+      Logger::error("Failed to generate low level code for argument `" +
+                        argument->to_string() + "` in function `" +
+                        name->get_value() + "`",
+                    LogTypes::Error::INTERNAL, argument->get_position());
       return nullptr;
     }
 
-    auto parameter_type = function->getFunctionType()->getParamType(idx);
+    auto function_type = dynamic_pointer_cast<FunctionType>(
+        context->get_program_context()->get_env()->get_type(name->get_value()));
     argument_value =
-        Codegen::cast_type(context, argument_value, parameter_type);
+        Codegen::cast_type(context, argument_value, function_type->parameters[idx]->to_llvm(context->llvm_context));
     if (!argument_value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
       return nullptr;
@@ -92,10 +93,9 @@ void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
 
     auto parameter_type = function_type->parameters[idx];
     if (!Analyzer::compare(argument->get_type(), parameter_type)) {
-      Logger::error("Type mismatch on callee `" + name->get_value() +
-                        "`\nExpected `" + parameter_type->to_string() +
-                        "` Received `" + argument->get_type()->to_string() +
-                        "`",
+      Logger::error("Type mismatch in argument `" + argument->to_string() +
+                        "`\nExpected `" + parameter_type->get_name() +
+                        "` Received `" + argument->get_type()->get_name() + "`",
                     LogTypes::Error::TYPE_MISMATCH, argument->get_position());
       return;
     }

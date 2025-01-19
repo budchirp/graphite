@@ -15,7 +15,8 @@ class Expression {
  public:
   virtual ~Expression() = default;
 
-  virtual llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const = 0;
+  virtual llvm::Value *codegen(
+      const shared_ptr<CodegenContext> &context) const = 0;
   virtual void analyze(const shared_ptr<ProgramContext> &context) = 0;
 
   virtual Position *get_position() = 0;

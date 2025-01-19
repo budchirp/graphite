@@ -25,6 +25,7 @@ class FunctionType : public Type {
   llvm::FunctionType* to_llvm(
       const shared_ptr<llvm::LLVMContext> context) const override {
     vector<llvm::Type*> llvm_parameters;
+    llvm_parameters.reserve(parameters.size());
     for (const auto& parameter : parameters) {
       llvm_parameters.push_back(parameter->to_llvm(context));
     }

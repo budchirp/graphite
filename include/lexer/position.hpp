@@ -1,9 +1,10 @@
 #pragma once
 
 class Position {
-public:
+ public:
   int line;
   int column;
 
-  explicit Position(const int &line, const int &column);
+  explicit Position(const int &line, const int &column)
+      : line(line), column(column) {};
 };

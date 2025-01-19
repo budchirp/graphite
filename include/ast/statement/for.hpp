@@ -4,33 +4,37 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "ast/expression.hpp"
-#include "ast/expression/identifier.hpp"
-#include "ast/expression/type.hpp"
 #include "ast/statement.hpp"
+#include "ast/statement/block.hpp"
+#include "ast/statement/var.hpp"
 #include "lexer/position.hpp"
 #include "types/void.hpp"
 
 using namespace std;
 
-class VarStatement : public Statement {
+class ForStatement : public Statement {
  private:
   Position position;
 
-  unique_ptr<IdentifierExpression> name;
-  unique_ptr<TypeExpression> variable_type;
-  unique_ptr<Expression> expression;
+  unique_ptr<Statement> init;
+  unique_ptr<Expression> condition;
+  unique_ptr<Expression> increment;
+
+  unique_ptr<BlockStatement> body;
 
  public:
-  explicit VarStatement(const Position &position,
-                        unique_ptr<IdentifierExpression> name,
-                        unique_ptr<TypeExpression> variable_type,
-                        unique_ptr<Expression> expression)
+  explicit ForStatement(const Position &position, unique_ptr<VarStatement> init,
+                        unique_ptr<Expression> condition,
+                        unique_ptr<Expression> increment,
+                        unique_ptr<BlockStatement> body)
       : position(position),
-        name(std::move(name)),
-        variable_type(std::move(variable_type)),
-        expression(std::move(expression)) {};
+        init(std::move(init)),
+        condition(std::move(condition)),
+        increment(std::move(increment)),
+        body(std::move(body)) {};
 
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;

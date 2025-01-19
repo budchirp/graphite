@@ -12,25 +12,27 @@
 
 using namespace std;
 
-class PrefixExpression : public Expression {
+class UnaryExpression : public Expression {
  private:
   Position position;
 
   shared_ptr<Type> type;
 
-  Token prefix;
+  Token op;
 
-  unique_ptr<Expression> right;
+  unique_ptr<Expression> expression;
 
  public:
-  explicit PrefixExpression(const Position &position, const shared_ptr<Type> &type,
-                            const Token &prefix, unique_ptr<Expression> right)
+  explicit UnaryExpression(const Position &position,
+                           const shared_ptr<Type> &type, const Token &op,
+                           unique_ptr<Expression> expression)
       : position(position),
         type(type),
-        prefix(prefix),
-        right(std::move(right)) {};
+        op(op),
+        expression(std::move(expression)) {};
 
-  llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const override;
+  llvm::Value *codegen(
+      const shared_ptr<CodegenContext> &context) const override;
   void analyze(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };

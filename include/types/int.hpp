@@ -6,9 +6,6 @@
 #include "types/type.hpp"
 
 class IntType : public Type {
- private:
-  string name = "int";
-
  public:
   short size;
   bool is_unsigned;
@@ -16,7 +13,8 @@ class IntType : public Type {
   explicit IntType(const short size, const bool is_unsigned)
       : size(size), is_unsigned(is_unsigned) {};
 
-  llvm::IntegerType *to_llvm(const shared_ptr<llvm::LLVMContext> context) const override {
+  llvm::IntegerType* to_llvm(
+      const shared_ptr<llvm::LLVMContext> context) const override {
     switch (size) {
       case 8:
         return llvm::Type::getInt8Ty(*context);
@@ -33,10 +31,8 @@ class IntType : public Type {
     }
   };
 
-  string get_name() const override { return name; }
-  const type_info& get_type_info() const override {
-    return typeid(IntType);
-  }
+  string get_name() const override { return to_string(); }
+  const type_info& get_type_info() const override { return typeid(IntType); }
 
   string to_string() const override { return "i" + ::to_string(size); };
   string to_string_tree() const override {

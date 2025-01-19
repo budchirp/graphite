@@ -12,7 +12,7 @@ unique_ptr<BlockStatement> BlockStatementParser::parse() {
 
   auto statement_parser = StatementParser(parser);
 
-  auto statements = std::vector<std::unique_ptr<Statement>>();
+  auto statements = vector<unique_ptr<Statement>>();
   shared_ptr<Type> last;
   while (parser->current_token.type != TokenType::TOKEN_RIGHT_BRACE) {
     if (auto statement = statement_parser.parse()) {

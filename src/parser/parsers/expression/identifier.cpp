@@ -1,35 +1,19 @@
 #include "ast/expression/identifier.hpp"
 
-#include <iostream>
 #include <memory>
 
 #include "ast/expression.hpp"
 #include "parser/parsers/expression/identifier.hpp"
-#include "types/void.hpp"
 
 unique_ptr<Expression> IdentifierExpressionParser::parse() {
-  return parse(true);
+  return parse_identifier();
 }
 
-unique_ptr<Expression> IdentifierExpressionParser::parse(bool is_variable) {
+unique_ptr<IdentifierExpression> IdentifierExpressionParser::parse_identifier() {
   const auto position = *parser->get_lexer()->position;
 
   const auto identifier_token = parser->current_token;
   parser->eat_token();  // eat identifier
 
-  shared_ptr<Type> type = make_shared<VoidType>();
-  if (is_variable) {
-    type =
-        parser->get_program()->get_env()->get_symbol(identifier_token.literal);
-
-    if (!type) {
-      parser->get_logger()->error(
-          "Undefined variable `" + identifier_token.literal + "`",
-          LogTypes::Error::UNDEFINED);
-      return nullptr;
-    }
-  }
-
-  return make_unique<IdentifierExpression>(position, type,
-                                           identifier_token.literal);
+  return make_unique<IdentifierExpression>(position, identifier_token.literal);
 }

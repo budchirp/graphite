@@ -25,7 +25,12 @@ class Lexer {
  public:
   shared_ptr<Position> position;
 
-  explicit Lexer(const string &source);
+  explicit Lexer(const string &source)
+      : source(source),
+        read_position(0),
+        position(make_shared<Position>(1, 0)) {
+    eat_char();
+  };
 
   Token next_token();
 };

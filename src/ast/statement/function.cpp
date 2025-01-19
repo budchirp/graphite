@@ -7,8 +7,10 @@
 #include <memory>
 #include <sstream>
 
+#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
+#include "types/void.hpp"
 
 using namespace llvm;
 
@@ -37,7 +39,7 @@ Function *FunctionStatement::codegen_function(
     context->value_map[string(arg.getName())] = &arg;
   }
 
-  BasicBlock *body_block = body->codegen_block(context, function, "entry");
+  auto body_block = body->codegen_block(context, function, "entry");
   if (!body_block) {
     Logger::error("Failed to generate low level code for function body",
                   LogTypes::Error::INTERNAL, body->get_position());
@@ -59,8 +61,6 @@ Function *FunctionStatement::codegen_function(
 
   verifyFunction(*function);
 
-  // context->fpm->run(*function, *context->fam);
-
   return function;
 }
 
@@ -69,6 +69,14 @@ void FunctionStatement::analyze(const shared_ptr<ProgramContext> &context) {
 
   proto->analyze(context);
   body->analyze(context);
+
+  auto _return = proto->return_type->get_type();
+  if (!Analyzer::compare(_return, make_shared<VoidType>()) &&
+      !Analyzer::compare(_return, body->get_type())) {
+    Logger::error("Type mismatch on return statement\nExpected `" +
+                  _return->get_name() + "` Received `" +
+                  body->get_type()->get_name() + "`");
+  }
 
   context->set_env(env->get_parent());
 }

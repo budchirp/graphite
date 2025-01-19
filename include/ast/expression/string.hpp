@@ -19,11 +19,12 @@ class StringExpression : public Expression {
   string value;
 
  public:
-  explicit StringExpression(const Position &position, const shared_ptr<Type> &type,
-                            const string &value)
+  explicit StringExpression(const Position &position,
+                            const shared_ptr<Type> &type, const string &value)
       : position(position), type(type), value(value) {};
 
-  llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const override;
+  llvm::Value *codegen(
+      const shared_ptr<CodegenContext> &context) const override;
   void analyze(const shared_ptr<ProgramContext> &context) override;
 
   string get_value() { return value; };

@@ -28,7 +28,7 @@ CodegenContext::CodegenContext(
   string error;
   auto target = llvm::TargetRegistry::lookupTarget(triple, error);
   if (!target) {
-    Logger::error(error);
+    Logger::error("Unsupported OS");
     return;
   }
 
@@ -53,9 +53,4 @@ CodegenContext::CodegenContext(
   si = make_shared<llvm::StandardInstrumentations>(*llvm_context, true);
 
   si->registerCallbacks(*pic, mam.get());
-
-  // fpm->addPass(llvm::InstCombinePass());
-  // fpm->addPass(llvm::ReassociatePass());
-  // fpm->addPass(llvm::GVNPass());
-  // fpm->addPass(llvm::SimplifyCFGPass());
 }

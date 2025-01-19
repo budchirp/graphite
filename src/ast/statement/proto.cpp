@@ -34,6 +34,8 @@ void ProtoStatement::analyze(const shared_ptr<ProgramContext> &context) {
   for (const auto &parameter : parameters) {
     parameter.second->analyze(context);
   }
+
+  return_type->analyze(context);
 }
 
 string ProtoStatement::to_string() const {

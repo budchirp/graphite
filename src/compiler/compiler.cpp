@@ -83,6 +83,7 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto codegen = make_shared<Codegen>(codegen_context);
   codegen->codegen(program);
   codegen->optimize();
+  codegen_context->module->print(llvm::errs(), nullptr);
 
   error_code err_code;
   llvm::raw_fd_ostream output_file(source_file_path.stem().string() + ".o",
@@ -101,7 +102,7 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
 
   pass.run(*codegen_context->module);
   output_file.flush();
-  
+
   cout << endl;
 };
 

@@ -3,13 +3,23 @@ extern print_number(number: i32) -> void
 
 extern add(a: i32, b: i32) -> i32
 
-fn main() -> i32 {
+fn add_ptr(a: *i32, b: *i32) -> i32 {
+  return add(*a, *b)
+}
+
+fn main(argc: i32) -> i32 {
   printf("start\n")
+  print_number(argc)
 
   var x: i32 = add(32, 32)
   var y: i32 = (x * 1)
 
-  print_number(y)
+  var a: i32 = add_ptr(&x, &y)
+  print_number(a)
+
+  for (var i: i32 = 10; i > 0; i--) {
+    print_number(i)
+  }
 
   var z: boolean = if (x == y) { true } else { false }
 

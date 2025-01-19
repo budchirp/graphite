@@ -9,13 +9,13 @@
 using namespace std;
 
 class TypeExpressionParser : public ExpressionParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit TypeExpressionParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 
   unique_ptr<Expression> parse() override;
-  shared_ptr<Type> parse_type(const shared_ptr<Parser> &parser);
+  shared_ptr<Type> parse_type();
 };

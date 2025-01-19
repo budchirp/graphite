@@ -4,17 +4,11 @@
 #include <string>
 #include <unordered_map>
 
-#include "lexer/position.hpp"
 #include "logger/logger.hpp"
 #include "token/grammar.hpp"
 #include "token/token_type.hpp"
 
 using namespace std;
-
-Lexer::Lexer(const string &source)
-    : source(source), read_position(0), position(make_shared<Position>(1, 0)) {
-  eat_char();
-}
 
 char Lexer::get_current_char() const {
   return (read_position < source.size()) ? source[read_position] : '\0';
@@ -92,13 +86,21 @@ Token Lexer::next_token() {
       break;
 
     case '+':
+      if (next_char == '+') {
+        eat_char();
+        token = Token(TokenType::TOKEN_PLUSPLUS, "++");
+      } else {
       token = Token(TokenType::TOKEN_PLUS, "+");
+      }
       break;
 
     case '-':
       if (next_char == '>') {
         eat_char();
         token = Token(TokenType::TOKEN_ARROW, "->");
+      } else if (next_char == '-') {
+        eat_char();
+        token = Token(TokenType::TOKEN_MINUSMINUS, "--");
       } else {
         token = Token(TokenType::TOKEN_MINUS, "-");
       }

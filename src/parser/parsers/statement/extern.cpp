@@ -5,7 +5,6 @@
 #include "logger/log_types.hpp"
 #include "parser/parsers/statement/proto.hpp"
 #include "types/function.hpp"
-#include "types/void.hpp"
 
 unique_ptr<ExternStatement> ExternStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -20,7 +19,8 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
 
   auto proto = ProtoStatementParser(parser).parse();
   if (!proto) {
-    parser->get_logger()->error("Failed to parse the proto of the function", LogTypes::Error::INTERNAL);
+    parser->get_logger()->error("Failed to parse the proto of the function",
+                                LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
@@ -36,6 +36,5 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
                                           proto->return_type->get_type()));
   env->set_symbol(proto->name->get_value(), proto->return_type->get_type());
 
-  return make_unique<ExternStatement>(position, make_shared<VoidType>(),
-                                      std::move(proto));
+  return make_unique<ExternStatement>(position, std::move(proto));
 }

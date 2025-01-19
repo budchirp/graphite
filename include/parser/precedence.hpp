@@ -24,6 +24,8 @@ class PrecedenceHelper {
         {TokenType::TOKEN_GREATER_THAN, Precedence::LESSGREATER},
         {TokenType::TOKEN_PLUS, Precedence::SUM},
         {TokenType::TOKEN_MINUS, Precedence::SUM},
+        {TokenType::TOKEN_PLUSPLUS, Precedence::SUM},
+        {TokenType::TOKEN_MINUSMINUS, Precedence::SUM},
         {TokenType::TOKEN_SLASH, Precedence::PRODUCT},
         {TokenType::TOKEN_ASTERISK, Precedence::PRODUCT},
         {TokenType::TOKEN_LEFT_PARENTHESES, Precedence::CALL}};

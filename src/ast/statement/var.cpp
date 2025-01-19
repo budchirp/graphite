@@ -24,16 +24,18 @@ Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
     return nullptr;
   }
 
-  value = Codegen::cast_type(
-      context, value,
-      variable_type->get_type()->to_llvm(context->llvm_context));
+  auto type = variable_type->get_type()->to_llvm(context->llvm_context);
+  value = Codegen::cast_type(context, value, type);
   if (!value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
     return nullptr;
   }
 
-  context->value_map.insert({name->get_value(), value});
-  return value;
+  auto ptr = context->builder->CreateAlloca(type, nullptr, "addr");
+  context->builder->CreateStore(value, ptr);
+
+  context->value_map.emplace(name->get_value(), ptr);
+  return ptr;
 }
 
 void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
@@ -42,8 +44,8 @@ void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
 
   if (!Analyzer::compare(expression->get_type(), variable_type->get_type())) {
     Logger::error(
-        "Type mismatch\nExpected `" + variable_type->get_type()->to_string() +
-            "` Received `" + expression->get_type()->to_string() + "`",
+        "Type mismatch\nExpected `" + variable_type->get_type()->get_name() +
+            "` Received `" + expression->get_type()->get_name() + "`",
         LogTypes::Error::TYPE_MISMATCH, variable_type->get_position());
     return;
   }
@@ -51,15 +53,15 @@ void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
 
 string VarStatement::to_string() const {
   ostringstream oss;
-  oss << "var " << name->to_string() << ": " << type->to_string() << " = "
-      << expression->to_string();
+  oss << "var " << name->to_string() << ": " << variable_type->to_string()
+      << " = " << expression->to_string();
   return oss.str();
 }
 
 string VarStatement::to_string_tree() const {
   ostringstream oss;
   oss << "VarStatement(name: " + name->to_string_tree() + ", expression: "
-      << expression->to_string_tree() << ", type: " << type->to_string_tree()
-      << ")";
+      << expression->to_string_tree()
+      << ", type: " << variable_type->to_string_tree() << ")";
   return oss.str();
 }

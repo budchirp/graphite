@@ -5,7 +5,6 @@
 #include "logger/log_types.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
-#include "types/void.hpp"
 
 unique_ptr<ReturnStatement> ReturnStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -21,6 +20,6 @@ unique_ptr<ReturnStatement> ReturnStatementParser::parse() {
     return nullptr;
   }
 
-  return make_unique<ReturnStatement>(position, make_shared<VoidType>(),
+  return make_unique<ReturnStatement>(position, expression->get_type(),
                                       std::move(expression));
 }

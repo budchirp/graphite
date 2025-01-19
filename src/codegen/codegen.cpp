@@ -2,6 +2,7 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Pass.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Support/TargetSelect.h>
@@ -12,22 +13,21 @@
 #include <cstdio>
 #include <memory>
 
-#include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
 using namespace std;
 using namespace llvm;
 
 void Codegen::init() {
-  InitializeAllTargetInfos();
-  InitializeAllTargets();
-  InitializeAllTargetMCs();
-  InitializeAllAsmParsers();
-  InitializeAllAsmPrinters();
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
+  InitializeNativeTargetAsmParser();
 }
 
 void Codegen::codegen(const shared_ptr<Program> &program) const {
   program->codegen(context);
+
+  llvm::verifyModule(*context->module);
 }
 
 void Codegen::optimize() {
@@ -42,7 +42,7 @@ void Codegen::optimize() {
                           *context->mam);
 
   llvm::ModulePassManager mpm = pb.buildModuleOptimizationPipeline(
-      llvm::OptimizationLevel::O2, ThinOrFullLTOPhase::None);
+      llvm::OptimizationLevel::O3, ThinOrFullLTOPhase::None);
 
   Logger::log("Optimizing your garbage");
   mpm.run(*context->module, *context->mam);

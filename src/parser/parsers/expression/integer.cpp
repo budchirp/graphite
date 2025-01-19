@@ -17,10 +17,10 @@ unique_ptr<Expression> IntegerExpressionParser::parse() {
   parser->eat_token();  // eat integer
 
   try {
-    long long value = std::stoll(integer_token.literal);
+    long long value = stoll(integer_token.literal);
 
-    if (value > std::numeric_limits<int>::max() ||
-        value < std::numeric_limits<int>::min()) {
+    if (value > numeric_limits<int>::max() ||
+        value < numeric_limits<int>::min()) {
       parser->get_logger()->error("Integer too big", LogTypes::Error::SYNTAX);
     }
 

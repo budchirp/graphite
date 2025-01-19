@@ -16,10 +16,6 @@ class Env {
 
  public:
   explicit Env(const shared_ptr<Env> &parent) : parent(parent) {};
-  ~Env() {
-    type_map.clear();
-    symbol_map.clear();
-  }
 
   void init();
 

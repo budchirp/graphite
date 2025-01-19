@@ -25,6 +25,8 @@ unique_ptr<Expression> BinaryExpressionParser::parse() {
 
   shared_ptr<Type> type;
   switch (operator_token.type) {
+    case TOKEN_LESS_THAN:
+    case TOKEN_GREATER_THAN:
     case TOKEN_EQUAL:
     case TOKEN_NOT_EQUAL:
       type = make_shared<BooleanType>();
