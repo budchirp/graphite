@@ -14,6 +14,7 @@ enum TokenType {
   TOKEN_VAR,
 
   TOKEN_FOR,
+  TOKEN_WHILE,
 
   TOKEN_IDENTIFIER,
   TOKEN_INT,

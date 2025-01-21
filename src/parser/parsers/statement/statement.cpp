@@ -8,6 +8,7 @@
 #include "parser/parsers/statement/function.hpp"
 #include "parser/parsers/statement/return.hpp"
 #include "parser/parsers/statement/var.hpp"
+#include "parser/parsers/statement/while.hpp"
 #include "token/token_type.hpp"
 
 unique_ptr<Statement> StatementParser::parse() {
@@ -36,6 +37,10 @@ unique_ptr<Statement> StatementParser::parse() {
 
     case TOKEN_FOR: {
       return ForStatementParser(parser).parse();
+    }
+
+    case TOKEN_WHILE: {
+      return WhileStatementParser(parser).parse();
     }
 
     default:

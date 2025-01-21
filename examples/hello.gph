@@ -21,6 +21,12 @@ fn main(argc: i32) -> i32 {
     print_number(i)
   }
 
+  var i: i32 = 0;
+  while (i < 10) {
+    print_number(i)
+    i++
+  }
+
   var z: boolean = if (x == y) { true } else { false }
 
   if (z) {

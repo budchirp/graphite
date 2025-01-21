@@ -16,8 +16,13 @@
 - [x] Codegen
 - [x] Type support
 - [x] Type checking
+- [x] Function definition
+- [x] Variable definition
+- [ ] Mutable/Immutable variables
+- [ ] Null
 - [x] If expressions
-- [x] For / While statement (only for rn)
+- [x] For & While statement
+- [x] Object generation
 - [x] Code optimization (idk how well it works)
 - [ ] Arrays
 - [ ] Structs
@@ -26,4 +31,4 @@
 - [ ] Stdlib
 - [ ] Maps
 - [ ] Switch expression
-- [ ] CLI (graphitec for single files and graphite for project compilation)
+- [ ] CLI
