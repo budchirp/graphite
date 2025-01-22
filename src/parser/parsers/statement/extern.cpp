@@ -17,21 +17,23 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
     return nullptr;
   }
 
-  auto proto = ProtoStatementParser(parser).parse();
-  if (!proto) {
+  auto proto_statement = ProtoStatementParser(parser).parse();
+  if (!proto_statement) {
     parser->get_logger()->error("Failed to parse the proto of the function",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
-  vector<shared_ptr<Type>> parameter_types;
-  for (const auto &[_, type] : proto->parameters) {
-    parameter_types.push_back(type->get_type());
+  vector<pair<string, shared_ptr<Type>>> parameters;
+  for (const auto &[parameter_name, parameter_type_expression] : proto_statement->parameters) {
+    parameters.emplace_back(parameter_name->get_identifier(), parameter_type_expression->get_type());
   }
 
-  parser->get_program()->get_env()->set_function(proto->name->get_value(),
-                make_shared<FunctionType>(parameter_types,
-                                          proto->return_type->get_type()));
+  parser->get_program()->get_env()->add_function(
+      proto_statement->name->get_identifier(),
+      make_shared<EnvFunction>(
+          make_shared<FunctionType>(parameters,
+                                    proto_statement->return_type->get_type())));
 
-  return make_unique<ExternStatement>(position, std::move(proto));
+  return make_unique<ExternStatement>(position, std::move(proto_statement));
 }

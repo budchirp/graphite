@@ -15,11 +15,12 @@ class FunctionType : public Type {
   string name = "function";
 
  public:
-  vector<shared_ptr<Type>> parameters;
+  vector<pair<string, shared_ptr<Type>>> parameters;
   shared_ptr<Type> return_type;
 
-  explicit FunctionType(const vector<shared_ptr<Type>>& parameters,
-                        const shared_ptr<Type>& return_type)
+  explicit FunctionType(
+      const vector<pair<string, shared_ptr<Type>>>& parameters,
+      const shared_ptr<Type>& return_type)
       : parameters(parameters), return_type(return_type) {};
 
   llvm::FunctionType* to_llvm(
@@ -27,12 +28,11 @@ class FunctionType : public Type {
     vector<llvm::Type*> llvm_parameters;
     llvm_parameters.reserve(parameters.size());
     for (const auto& parameter : parameters) {
-      llvm_parameters.push_back(parameter->to_llvm(context));
+      llvm_parameters.push_back(parameter.second->to_llvm(context));
     }
 
-    llvm::Type* llvm_return_type = return_type->to_llvm(context);
-
-    return llvm::FunctionType::get(llvm_return_type, llvm_parameters, false);
+    return llvm::FunctionType::get(return_type->to_llvm(context),
+                                   llvm_parameters, false);
   }
 
   string get_name() const override { return name; }

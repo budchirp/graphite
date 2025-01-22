@@ -31,9 +31,10 @@ void Lexer::eat_whitespace() {
   }
 
   while (current_char == '\n') {
-    position->column = 0;
+    position->column = 1;
     position->line++;
     eat_char();
+    eat_whitespace();
   }
 
   while (current_char == ' ' || current_char == '\t') {
@@ -50,99 +51,106 @@ Token Lexer::next_token() {
     case '!':
       if (next_char == '=') {
         eat_char();
-        token = Token(TokenType::TOKEN_NOT_EQUAL, "!=");
+        token = Token(TOKEN_NOT_EQUAL, "!=");
+      } else if (next_char == '!') {
+        eat_char();
+        token = Token(TOKEN_BANG_BANG, "!!");
       } else {
-        token = Token(TokenType::TOKEN_BANG, "!");
+        token = Token(TOKEN_BANG, "!");
       }
       break;
 
     case '=':
       if (next_char == '=') {
         eat_char();
-        token = Token(TokenType::TOKEN_EQUAL, "==");
+        token = Token(TOKEN_EQUAL, "==");
       } else {
-        token = Token(TokenType::TOKEN_ASSIGN, "=");
+        token = Token(TOKEN_ASSIGN, "=");
       }
       break;
 
     case '&':
       if (next_char == '&') {
         eat_char();
-        token = Token(TokenType::TOKEN_AND, "&&");
+        token = Token(TOKEN_AND, "&&");
       } else {
-        token = Token(TokenType::TOKEN_AMPERSAND, "&");
+        token = Token(TOKEN_AMPERSAND, "&");
       }
       break;
 
     case '|':
       if (next_char == '|') {
         eat_char();
-        token = Token(TokenType::TOKEN_OR, "||");
+        token = Token(TOKEN_OR, "||");
       } else {
         Logger::error("Unknown char " + ::to_string(current_char));
       }
       break;
 
     case '<':
-      token = Token(TokenType::TOKEN_LESS_THAN, "<");
+      token = Token(TOKEN_LESS_THAN, "<");
       break;
 
     case '>':
-      token = Token(TokenType::TOKEN_GREATER_THAN, ">");
+      token = Token(TOKEN_GREATER_THAN, ">");
       break;
 
     case '+':
       if (next_char == '+') {
         eat_char();
-        token = Token(TokenType::TOKEN_PLUSPLUS, "++");
+        token = Token(TOKEN_PLUSPLUS, "++");
       } else {
-        token = Token(TokenType::TOKEN_PLUS, "+");
+        token = Token(TOKEN_PLUS, "+");
       }
       break;
 
     case '-':
       if (next_char == '>') {
         eat_char();
-        token = Token(TokenType::TOKEN_ARROW, "->");
+        token = Token(TOKEN_ARROW, "->");
       } else if (next_char == '-') {
         eat_char();
-        token = Token(TokenType::TOKEN_MINUSMINUS, "--");
+        token = Token(TOKEN_MINUSMINUS, "--");
       } else {
-        token = Token(TokenType::TOKEN_MINUS, "-");
+        token = Token(TOKEN_MINUS, "-");
       }
       break;
 
     case '*':
-      token = Token(TokenType::TOKEN_ASTERISK, "*");
+      token = Token(TOKEN_ASTERISK, "*");
       break;
 
     case '/':
-      token = Token(TokenType::TOKEN_SLASH, "/");
+      token = Token(TOKEN_SLASH, "/");
+      break;
+
+    case '?':
+      token = Token(TOKEN_QUESTION_MARK, "?");
       break;
 
     case ':':
-      token = Token(TokenType::TOKEN_COLON, ":");
+      token = Token(TOKEN_COLON, ":");
 
       break;
 
     case ';':
-      token = Token(TokenType::TOKEN_SEMICOLON, ";");
+      token = Token(TOKEN_SEMICOLON, ";");
       break;
 
     case ',':
-      token = Token(TokenType::TOKEN_COMMA, ",");
+      token = Token(TOKEN_COMMA, ",");
       break;
 
     case '(':
-      token = Token(TokenType::TOKEN_LEFT_PARENTHESES, "(");
+      token = Token(TOKEN_LEFT_PARENTHESES, "(");
       break;
 
     case ')':
-      token = Token(TokenType::TOKEN_RIGHT_PARENTHESES, ")");
+      token = Token(TOKEN_RIGHT_PARENTHESES, ")");
       break;
 
     case '{':
-      token = Token(TokenType::TOKEN_LEFT_BRACE, "{");
+      token = Token(TOKEN_LEFT_BRACE, "{");
       break;
 
     case '"': {
@@ -171,16 +179,16 @@ Token Lexer::next_token() {
         eat_char();
       } while (current_char != '"');
 
-      token = Token(TokenType::TOKEN_STRING, str);
+      token = Token(TOKEN_STRING, str);
       break;
     }
 
     case '}':
-      token = Token(TokenType::TOKEN_RIGHT_BRACE, "}");
+      token = Token(TOKEN_RIGHT_BRACE, "}");
       break;
 
     case '\0':
-      token = Token(TokenType::TOKEN_EOF, "");
+      token = Token(TOKEN_EOF, "");
       break;
 
     default:
@@ -196,7 +204,7 @@ Token Lexer::next_token() {
         if (keywords.find(identifier) != keywords.end()) {
           token = Token(keywords.at(identifier), identifier);
         } else {
-          token = Token(TokenType::TOKEN_IDENTIFIER, identifier);
+          token = Token(TOKEN_IDENTIFIER, identifier);
         }
       } else if (isdigit(current_char)) {
         string number;
@@ -207,9 +215,7 @@ Token Lexer::next_token() {
           eat_char();
         } while (isdigit(current_char));
 
-        token = Token(TokenType::TOKEN_INT, number);
-      } else {
-        Logger::error("Unknown char " + ::to_string(current_char));
+        token = Token(TOKEN_INT, number);
       }
   }
 

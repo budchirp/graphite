@@ -14,11 +14,11 @@ Value *BooleanExpression::codegen(
   return context->builder->getInt1(value);
 }
 
-void BooleanExpression::analyze(
-    const shared_ptr<ProgramContext> &context) {}
+void BooleanExpression::analyze(const shared_ptr<ProgramContext> &context) {}
 
 string BooleanExpression::to_string() const { return ::to_string(value); }
 
 string BooleanExpression::to_string_tree() const {
-  return "BooleanExpression(type: " + type->to_string_tree() + ", value: '" + ::to_string(value) + "')";
+  return "BooleanExpression(type: " + type->to_string_tree() + ", value: '" +
+         ::to_string(value) + "')";
 }

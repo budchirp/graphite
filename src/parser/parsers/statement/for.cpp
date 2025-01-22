@@ -20,7 +20,7 @@ unique_ptr<ForStatement> ForStatementParser::parse() {
 
   parser->eat_token();  // eat (
 
-  auto init = VarStatementParser(parser).parse();
+  auto init_statement = VarStatementParser(parser).parse();
 
   if (parser->current_token.type != TokenType::TOKEN_SEMICOLON) {
     parser->get_logger()->error("Expected semicolon after initializer",
@@ -31,7 +31,7 @@ unique_ptr<ForStatement> ForStatementParser::parse() {
   parser->eat_token();  // eat ;
 
   auto expression_statement_parser = ExpressionStatementParser(parser);
-  auto condition =
+  auto condition_expression =
       expression_statement_parser.parse_expression(Precedence::LOWEST);
 
   if (parser->current_token.type != TokenType::TOKEN_SEMICOLON) {
@@ -42,7 +42,7 @@ unique_ptr<ForStatement> ForStatementParser::parse() {
 
   parser->eat_token();  // eat ;
 
-  auto increment =
+  auto increment_expression =
       expression_statement_parser.parse_expression(Precedence::LOWEST);
 
   if (parser->current_token.type != TokenType::TOKEN_RIGHT_PARENTHESES) {
@@ -58,14 +58,14 @@ unique_ptr<ForStatement> ForStatementParser::parse() {
     return nullptr;
   }
 
-  auto body = BlockStatementParser(parser).parse();
-  if (!body) {
+  auto body_statement = BlockStatementParser(parser).parse();
+  if (!body_statement) {
     parser->get_logger()->error("Failed to parse the body of the for statement",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
-  return make_unique<ForStatement>(position, std::move(init),
-                                   std::move(condition), std::move(increment),
-                                   std::move(body));
+  return make_unique<ForStatement>(position, std::move(init_statement),
+                                   std::move(condition_expression), std::move(increment_expression),
+                                   std::move(body_statement));
 }

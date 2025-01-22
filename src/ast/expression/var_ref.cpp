@@ -12,14 +12,14 @@ using namespace llvm;
 
 Value *VarRefExpression::codegen(
     const shared_ptr<CodegenContext> &context) const {
-  auto it = context->value_map.find(identifier->get_value());
-  if (it == context->value_map.end()) {
-    Logger::error("Undefined variable `" + identifier->get_value() + "`",
+  auto variable = context->get_env()->get_variable(name);
+  if (!variable || !variable->value) {
+    Logger::error("Undefined variable `" + name + "`",
                   LogTypes::Error::UNDEFINED, &position);
     return nullptr;
   }
 
-  auto value = it->second;
+  auto value = variable->value;
   if (Analyzer::is_pointer(type).first) return value;
 
   return value->getType()->isPointerTy()
@@ -29,15 +29,16 @@ Value *VarRefExpression::codegen(
 }
 
 void VarRefExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  if (!context->get_env()->get_variable(identifier->get_value())) {
-    Logger::error("Undefined variable `" + identifier->get_value() + "`",
+  auto variable = context->get_env()->get_variable(name);
+  if (!variable || !variable->type) {
+    Logger::error("Undefined variable `" + name + "`",
                   LogTypes::Error::UNDEFINED, &position);
   }
 }
 
-string VarRefExpression::to_string() const { return identifier->to_string(); }
+string VarRefExpression::to_string() const { return name; }
 
 string VarRefExpression::to_string_tree() const {
   return "VarRefExpression(type: " + type->to_string_tree() +
-         ", identifier: '" + identifier->get_value() + "')";
+         ", name: '" + name + "')";
 }

@@ -19,6 +19,8 @@ class PrecedenceHelper {
   static Precedence precedence_for(const TokenType &tokenType) {
     static const std::unordered_map<TokenType, Precedence> precedenceMap = {
         {TOKEN_AS, Precedence::CALL},
+        {TOKEN_ASSIGN, Precedence::CALL},
+        {TOKEN_BANG_BANG, Precedence::CALL},
         {TOKEN_EQUAL, Precedence::EQUALS},
         {TOKEN_NOT_EQUAL, Precedence::EQUALS},
         {TOKEN_LESS_THAN, Precedence::LESSGREATER},

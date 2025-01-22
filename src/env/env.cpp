@@ -1,10 +1,13 @@
 #include "env/env.hpp"
 
+#include <memory>
+
 #include "logger/logger.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
-#include "types/function.hpp"
 #include "types/int.hpp"
+#include "types/null.hpp"
+#include "types/pointer.hpp"
 #include "types/string.hpp"
 #include "types/type.hpp"
 #include "types/void.hpp"
@@ -25,9 +28,17 @@ void Env::init() {
   type_names.emplace("f64", make_shared<FloatType>(64));
   type_names.emplace("boolean", make_shared<BooleanType>());
   type_names.emplace("void", make_shared<VoidType>());
+  type_names.emplace("null", make_shared<NullType>(nullptr));
+
+  variables.emplace(
+      "null", make_shared<EnvVariable>(make_shared<NullType>(nullptr), false));
+  variables.emplace(
+      "nullptr",
+      make_shared<EnvVariable>(
+          make_shared<PointerType>(make_shared<NullType>(nullptr)), false));
 }
 
-void Env::set_type(const string &name, const shared_ptr<Type> &type) {
+void Env::add_type(const string &name, const shared_ptr<Type> &type) {
   type_names.insert_or_assign(name, type);
 }
 
@@ -45,11 +56,12 @@ shared_ptr<Type> Env::get_type(const string &name) const {
   return nullptr;
 }
 
-void Env::set_variable(const string &name, const shared_ptr<Type> &variable) {
+void Env::add_variable(const string &name,
+                       const shared_ptr<EnvVariable> &variable) {
   variables.insert_or_assign(name, variable);
 }
 
-shared_ptr<Type> Env::get_variable(const string &name) const {
+shared_ptr<EnvVariable> Env::get_variable(const string &name) const {
   auto it = variables.find(name);
   if (it != variables.end()) {
     return it->second;
@@ -63,11 +75,12 @@ shared_ptr<Type> Env::get_variable(const string &name) const {
   return nullptr;
 }
 
-void Env::set_function(const string &name, const shared_ptr<FunctionType> &function) {
+void Env::add_function(const string &name,
+                       const shared_ptr<EnvFunction> &function) {
   functions.insert_or_assign(name, function);
 }
 
-shared_ptr<FunctionType> Env::get_function(const string &name) const {
+shared_ptr<EnvFunction> Env::get_function(const string &name) const {
   auto it = functions.find(name);
   if (it != functions.end()) {
     return it->second;

@@ -36,14 +36,15 @@ class CodegenContext {
 
   llvm::TargetMachine *target_machine;
 
-  unordered_map<string, llvm::Value *> value_map;
-
   explicit CodegenContext(const shared_ptr<ProgramContext> &program_context);
-  ~CodegenContext() {
-    delete target_machine;
-  }
+  ~CodegenContext() { delete target_machine; }
 
   shared_ptr<ProgramContext> get_program_context() const {
     return program_context;
+  }
+
+  void set_env(const shared_ptr<Env> &env) { program_context->set_env(env); }
+  shared_ptr<Env> get_env() const {
+    return program_context->get_env();
   }
 };

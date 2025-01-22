@@ -10,7 +10,8 @@
 
 using namespace llvm;
 
-Value *ReturnStatement::codegen(const shared_ptr<CodegenContext> &context) const {
+Value *ReturnStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
   if (Value *value = expression->codegen(context)) {
     auto function = context->builder->GetInsertBlock()->getParent();
     auto return_type = function->getReturnType();
@@ -30,8 +31,7 @@ Value *ReturnStatement::codegen(const shared_ptr<CodegenContext> &context) const
   return nullptr;
 }
 
-void ReturnStatement::analyze(
-    const shared_ptr<ProgramContext> &context) {
+void ReturnStatement::analyze(const shared_ptr<ProgramContext> &context) {
   expression->analyze(context);
 }
 

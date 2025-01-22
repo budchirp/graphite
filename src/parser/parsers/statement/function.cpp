@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "env/env.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/statement/block.hpp"
 #include "parser/parsers/statement/proto.hpp"
@@ -21,8 +22,8 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   auto env = make_shared<Env>(parser->get_program()->get_env());
   parser->get_program()->set_env(env);
 
-  auto proto = ProtoStatementParser(parser).parse();
-  if (!proto) {
+  auto proto_statement = ProtoStatementParser(parser).parse();
+  if (!proto_statement) {
     parser->get_logger()->error("Failed to parse the proto of the function",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
@@ -34,28 +35,29 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
     return nullptr;
   }
 
-  vector<shared_ptr<Type>> parameter_types;
-  for (const auto &[name, type] : proto->parameters) {
-    env->set_variable(name->get_value(), type->get_type());
+  vector<pair<string, shared_ptr<Type>>> parameters;
+  for (const auto &[parameter_name, parameter_type_expression] : proto_statement->parameters) {
+    env->add_variable(parameter_name->get_identifier(),
+                      make_shared<EnvVariable>(parameter_type_expression->get_type(), false));
 
-    parameter_types.push_back(type->get_type());
+    parameters.emplace_back(parameter_name->get_identifier(), parameter_type_expression->get_type());
   }
 
-  auto body = BlockStatementParser(parser).parse();
-  if (!body) {
+  auto body_statement = BlockStatementParser(parser).parse();
+  if (!body_statement) {
     parser->get_logger()->error("Failed to parse the body of the function",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
   auto parent_env = env->get_parent();
-  parent_env->set_function(
-      proto->name->get_value(),
-      make_shared<FunctionType>(parameter_types,
-                                proto->return_type->get_type()));
+  parent_env->add_function(
+      proto_statement->name->get_identifier(),
+      make_shared<EnvFunction>(
+          make_shared<FunctionType>(parameters, proto_statement->return_type->get_type())));
 
   parser->get_program()->set_env(parent_env);
 
-  return make_unique<FunctionStatement>(position, env, std::move(proto),
-                                        std::move(body));
+  return make_unique<FunctionStatement>(position, env, std::move(proto_statement),
+                                        std::move(body_statement));
 }

@@ -4,12 +4,12 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
 
-#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "analyzer/analyzer.hpp"
+#include "ast/expression/var_ref.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
@@ -49,6 +49,16 @@ llvm::Value *BinaryExpression::codegen(
   }
 
   switch (op.type) {
+    case TOKEN_ASSIGN: {
+      if (auto *variable = dynamic_cast<VarRefExpression *>(left.get())) {
+        auto ptr = context->get_env()->get_variable(variable->get_name())->value;
+        context->builder->CreateStore(right_value, ptr);
+        return right_value;
+      }
+
+      return nullptr;
+    }
+
     default: {
       if (Analyzer::is_boolean(type).first) {
         switch (op.type) {
@@ -130,6 +140,18 @@ llvm::Value *BinaryExpression::codegen(
           default:
             return nullptr;
         }
+      } else if (Analyzer::is_null(type).first ||
+                 Analyzer::is_pointer(type).first) {
+        switch (op.type) {
+          case TokenType::TOKEN_EQUAL:
+            return context->builder->CreateICmpEQ(left_value, right_value,
+                                                  "eq");
+          case TokenType::TOKEN_NOT_EQUAL:
+            return context->builder->CreateICmpNE(left_value, right_value,
+                                                  "ne");
+          default:
+            return nullptr;
+        }
       }
     }
   }
@@ -139,53 +161,56 @@ llvm::Value *BinaryExpression::codegen(
 
 void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
   left->analyze(context);
-  
-  if (op.type == TOKEN_AS) return;
-  
   right->analyze(context);
+
+  if (op.type == TOKEN_AS) return;
 
   auto left_type = left->get_type();
   auto right_type = right->get_type();
 
-  if (Analyzer::is_pointer(left_type).first ||
-      Analyzer::is_pointer(right_type).first) {
-    Logger::error("Can't do binary arithmetics on pointers",
-                  LogTypes::Error::TYPE_MISMATCH, &position);
-    return;
-  }
-
-  if (!Analyzer::compare(left_type, right_type)) {
+  if (!Analyzer::compare(left_type, right_type,
+                         op.type == TOKEN_ASSIGN || op.type == TOKEN_EQUAL ||
+                             op.type == TOKEN_NOT_EQUAL)) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
     return;
   }
 
-  static const unordered_map<string, vector<TokenType>> operations = {
-      {typeid(IntType).name(),
-       {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH, TOKEN_EQUAL,
-        TOKEN_NOT_EQUAL, TOKEN_LESS_THAN, TOKEN_GREATER_THAN}},
-      {typeid(FloatType).name(),
-       {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH, TOKEN_EQUAL,
-        TOKEN_NOT_EQUAL, TOKEN_LESS_THAN, TOKEN_GREATER_THAN}},
-      {typeid(BooleanType).name(),
-       {TOKEN_AND, TOKEN_OR, TOKEN_EQUAL, TOKEN_NOT_EQUAL}},
-      {typeid(StringType).name(), {TOKEN_EQUAL, TOKEN_NOT_EQUAL}}};
+  switch (op.type) {
+    case TOKEN_EQUAL:
+    case TOKEN_NOT_EQUAL:
+    case TOKEN_ASSIGN: {
+      return;
+    }
 
-  auto it = operations.find(left_type->get_type_info().name());
-  if (it == operations.end()) {
-    cout << left_type->to_string() << endl;
-    cout << right_type->to_string() << endl;
+    default: {
+      static const unordered_map<string, vector<TokenType>> operations = {
+          {typeid(IntType).name(),
+           {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH,
+            TOKEN_LESS_THAN, TOKEN_GREATER_THAN}},
+          {typeid(FloatType).name(),
+           {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH,
+            TOKEN_LESS_THAN, TOKEN_GREATER_THAN}},
+          {typeid(BooleanType).name(), {TOKEN_AND, TOKEN_OR}},
+          {typeid(StringType).name(), {}},
+          {typeid(PointerType).name(), {}},
+          {typeid(NullType).name(), {}}};
 
-    Logger::error("Unsupported type for binary expression",
-                  LogTypes::Error::TYPE_MISMATCH, &position);
-    return;
-  }
+      auto types_it = operations.find(left_type->get_type_info().name());
+      if (types_it == operations.end()) {
+        Logger::error("Unsupported type for binary expression",
+                      LogTypes::Error::TYPE_MISMATCH, &position);
+        return;
+      }
 
-  auto type_operations = operations.at(left_type->get_type_info().name());
-  auto _it = find(type_operations.begin(), type_operations.end(), op.type);
-  if (_it == type_operations.end()) {
-    Logger::error(
-        "Unsupported operation for type `" + left_type->to_string() + "`",
-        LogTypes::Error::SYNTAX, &position);
+      auto type_operations = operations.at(left_type->get_type_info().name());
+      auto operations_it = find(type_operations.begin(), type_operations.end(), op.type);
+      if (operations_it == type_operations.end()) {
+        Logger::error(
+            "Unsupported operation for type `" + left_type->to_string() + "`",
+            LogTypes::Error::SYNTAX, &position);
+        return;
+      }
+    }
   }
 }
 

@@ -26,7 +26,7 @@ void Program::analyze() {
 string Program::to_string() const {
   ostringstream result;
 
-  for (auto i = 0; i < statements.size(); ++i) {
+  for (size_t i = 0; i < statements.size(); ++i) {
     result << statements[i]->to_string();
     if (i < statements.size() - 1) {
       result << "\n";
@@ -40,7 +40,7 @@ string Program::to_string_tree() const {
   ostringstream result;
   result << "Program(statements: [";
 
-  for (auto i = 0; i < statements.size(); ++i) {
+  for (size_t i = 0; i < statements.size(); ++i) {
     result << statements[i]->to_string_tree();
     if (i < statements.size() - 1) {
       result << ", ";

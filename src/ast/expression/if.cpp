@@ -35,24 +35,24 @@ Value *IfExpression::codegen(const shared_ptr<CodegenContext> &context) const {
   auto then_block =
       BasicBlock::Create(*context->llvm_context, "then", parent_function);
   auto else_block = BasicBlock::Create(*context->llvm_context, "else");
-  auto merge_block = BasicBlock::Create(*context->llvm_context, "if");
+  auto end_block = BasicBlock::Create(*context->llvm_context, "if");
 
   context->builder->CreateCondBr(condition_value, then_block, else_block);
 
   context->builder->SetInsertPoint(then_block);
   auto then_value = consequence->codegen(context);
-  context->builder->CreateBr(merge_block);
+  context->builder->CreateBr(end_block);
   then_block = context->builder->GetInsertBlock();
 
   parent_function->insert(parent_function->end(), else_block);
 
   context->builder->SetInsertPoint(else_block);
   auto else_value = alternative ? alternative->codegen(context) : nullptr;
-  context->builder->CreateBr(merge_block);
+  context->builder->CreateBr(end_block);
   else_block = context->builder->GetInsertBlock();
 
-  parent_function->insert(parent_function->end(), merge_block);
-  context->builder->SetInsertPoint(merge_block);
+  parent_function->insert(parent_function->end(), end_block);
+  context->builder->SetInsertPoint(end_block);
 
   if (else_value && (then_value->getType() == else_value->getType())) {
     PHINode *phi =

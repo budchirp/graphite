@@ -18,42 +18,54 @@ using namespace llvm;
 Value *ForStatement::codegen(const shared_ptr<CodegenContext> &context) const {
   auto parent_function = context->builder->GetInsertBlock()->getParent();
 
-  auto loop_condition =
+  auto condition_block =
       BasicBlock::Create(*context->llvm_context, "loop.condition");
-  auto loop_body = BasicBlock::Create(*context->llvm_context, "loop.body");
-  auto loop_increment =
+  auto body_block = BasicBlock::Create(*context->llvm_context, "loop.body");
+  auto increment_block =
       BasicBlock::Create(*context->llvm_context, "loop.increment");
-  auto loop_end = BasicBlock::Create(*context->llvm_context, "loop.end");
+  auto end_block = BasicBlock::Create(*context->llvm_context, "loop.end");
 
-  init->codegen(context);
-  context->builder->CreateBr(loop_condition);
+  auto init_value = init->codegen(context);
+  if (!init_value) {
+    Logger::error(
+        "Failed to generate low level code for initializer in for statement",
+        LogTypes::Error::INTERNAL, init->get_position());
+    return nullptr;
+  }
+  context->builder->CreateBr(condition_block);
 
-  parent_function->insert(parent_function->end(), loop_condition);
-  context->builder->SetInsertPoint(loop_condition);
+  parent_function->insert(parent_function->end(), condition_block);
+  context->builder->SetInsertPoint(condition_block);
 
   auto condition_value = condition->codegen(context);
   if (!condition_value) {
     Logger::error(
         "Failed to generate low level code for condition in for statement",
-        LogTypes::Error::INTERNAL, &position);
+        LogTypes::Error::INTERNAL, condition->get_position());
     return nullptr;
   }
 
-  context->builder->CreateCondBr(condition_value, loop_body, loop_end);
+  context->builder->CreateCondBr(condition_value, body_block, end_block);
 
-  parent_function->insert(parent_function->end(), loop_body);
-  context->builder->SetInsertPoint(loop_body);
+  parent_function->insert(parent_function->end(), body_block);
+  context->builder->SetInsertPoint(body_block);
   body->codegen(context);
 
-  context->builder->CreateBr(loop_increment);
+  context->builder->CreateBr(increment_block);
 
-  parent_function->insert(parent_function->end(), loop_increment);
-  context->builder->SetInsertPoint(loop_increment);
-  increment->codegen(context);
-  context->builder->CreateBr(loop_condition);
+  parent_function->insert(parent_function->end(), increment_block);
+  context->builder->SetInsertPoint(increment_block);
+  auto increment_value = increment->codegen(context);
+  if (!increment_value) {
+    Logger::error(
+        "Failed to generate low level code for expression in for statement",
+        LogTypes::Error::INTERNAL, increment->get_position());
+    return nullptr;
+  }
+  context->builder->CreateBr(condition_block);
 
-  parent_function->insert(parent_function->end(), loop_end);
-  context->builder->SetInsertPoint(loop_end);
+  parent_function->insert(parent_function->end(), end_block);
+  context->builder->SetInsertPoint(end_block);
 
   return Constant::getNullValue(llvm::Type::getVoidTy(*context->llvm_context));
 }

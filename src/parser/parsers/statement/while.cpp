@@ -20,9 +20,8 @@ unique_ptr<WhileStatement> WhileStatementParser::parse() {
 
   parser->eat_token();  // eat (
 
-  auto expression_statement_parser = ExpressionStatementParser(parser);
   auto condition =
-      expression_statement_parser.parse_expression(Precedence::LOWEST);
+      ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
 
   if (parser->current_token.type != TokenType::TOKEN_RIGHT_PARENTHESES) {
     parser->get_logger()->error("Expected right parentheses after condition",

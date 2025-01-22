@@ -30,8 +30,6 @@ class BooleanExpression : public Expression {
 
   shared_ptr<Type> get_type() const override { return type; }
 
-  bool get_value() const { return value; };
-
   string to_string() const override;
   string to_string_tree() const override;
 };

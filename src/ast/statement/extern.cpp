@@ -1,6 +1,7 @@
 #include "ast/statement/extern.hpp"
 
 #include <llvm/IR/Value.h>
+#include <llvm/IR/Verifier.h>
 
 #include <memory>
 
@@ -11,7 +12,13 @@ using namespace llvm;
 
 Value *ExternStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
-  return proto->codegen_function(context);
+  auto function = proto->codegen_function(context);
+
+  context->get_env()
+      ->get_function(proto->name->get_identifier())
+      ->add_llvm_value(function);
+
+  return function;
 }
 
 void ExternStatement::analyze(const shared_ptr<ProgramContext> &context) {

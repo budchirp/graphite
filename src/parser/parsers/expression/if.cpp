@@ -20,8 +20,8 @@ unique_ptr<Expression> IfExpressionParser::parse() {
     return nullptr;
   }
 
-  auto condition = GroupExpressionParser(parser).parse();
-  if (!condition) {
+  auto condition_expression = GroupExpressionParser(parser).parse();
+  if (!condition_expression) {
     parser->get_logger()->error(
         "Failed to parse the condition of the if expression",
         LogTypes::Error::INTERNAL);
@@ -35,14 +35,14 @@ unique_ptr<Expression> IfExpressionParser::parse() {
   }
 
   auto block_statement_parser = BlockStatementParser(parser);
-  auto consequence = block_statement_parser.parse();
-  if (!consequence) {
+  auto consequence_statement = block_statement_parser.parse();
+  if (!consequence_statement) {
     parser->get_logger()->error("Failed to parse if body",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
-  unique_ptr<BlockStatement> alternative = nullptr;
+  unique_ptr<BlockStatement> alternative_statement = nullptr;
   if (parser->current_token.type == TokenType::TOKEN_ELSE) {
     parser->eat_token();  // eat else
 
@@ -52,15 +52,16 @@ unique_ptr<Expression> IfExpressionParser::parse() {
       return nullptr;
     }
 
-    alternative = block_statement_parser.parse();
-    if (!alternative) {
+    alternative_statement = block_statement_parser.parse();
+    if (!alternative_statement) {
       parser->get_logger()->error("Failed to parse else body",
                                   LogTypes::Error::SYNTAX);
       return nullptr;
     }
   }
 
-  return make_unique<IfExpression>(position, consequence->get_type(),
-                                   std::move(condition), std::move(consequence),
-                                   std::move(alternative));
+  return make_unique<IfExpression>(position, consequence_statement->get_type(),
+                                   std::move(condition_expression),
+                                   std::move(consequence_statement),
+                                   std::move(alternative_statement));
 }

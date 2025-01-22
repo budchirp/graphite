@@ -1,5 +1,7 @@
 #include "codegen/codegen.hpp"
 
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
@@ -10,6 +12,7 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Transforms/Scalar/SimplifyCFG.h>
 
+#include <climits>
 #include <cstdio>
 #include <memory>
 
@@ -25,6 +28,13 @@ void Codegen::init() {
 }
 
 void Codegen::codegen(const shared_ptr<Program> &program) const {
+  program->get_env()->get_variable("null")->add_llvm_value(
+      llvm::ConstantInt::getSigned(
+          llvm::Type::getInt32Ty(*context->llvm_context), -1));
+
+  program->get_env()->get_variable("nullptr")->add_llvm_value(
+      ConstantPointerNull::get(PointerType::get(*context->llvm_context, 0)));
+
   program->codegen(context);
 
   llvm::verifyModule(*context->module);

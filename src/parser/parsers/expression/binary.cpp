@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "ast/expression.hpp"
+#include "ast/expression/var_ref.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/binary.hpp"
 #include "parser/parsers/expression/type.hpp"
@@ -25,7 +26,7 @@ unique_ptr<Expression> BinaryExpressionParser::parse() {
 
     return make_unique<BinaryExpression>(*left->get_position(),
                                          type->get_type(), operator_token,
-                                         std::move(left), nullptr);
+                                         std::move(left), std::move(type));
   }
 
   auto right = ExpressionStatementParser(parser).parse_expression(
@@ -45,6 +46,26 @@ unique_ptr<Expression> BinaryExpressionParser::parse() {
     case TOKEN_NOT_EQUAL:
       type = make_shared<BooleanType>();
       break;
+
+    case TOKEN_ASSIGN: {
+      if (auto variable = dynamic_cast<VarRefExpression *>(left.get())) {
+        if (!parser->get_program()
+                 ->get_env()
+                 ->get_variable(variable->get_name())
+                 ->is_mutable) {
+          parser->get_logger()->error("Cannot mutate an immutable variable",
+                                      LogTypes::Error::SYNTAX);
+          return nullptr;
+        }
+      } else {
+        parser->get_logger()->error(
+            "Expected variable reference as left hand side expression",
+            LogTypes::Error::SYNTAX);
+        return nullptr;
+      }
+
+      break;
+    }
 
     default:
       type = left->get_type();

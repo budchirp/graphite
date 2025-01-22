@@ -26,7 +26,7 @@ class IdentifierExpression : public Expression {
       const shared_ptr<CodegenContext> &context) const override;
   void analyze(const shared_ptr<ProgramContext> &context) override;
 
-  string get_value() const { return value; };
+  string get_identifier() const { return value; };
 
   Position *get_position() override { return &position; };
 

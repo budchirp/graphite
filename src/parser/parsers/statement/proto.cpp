@@ -62,17 +62,16 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
     parser->eat_token();  // eat :
 
-    auto type_expression = type_expression_parser.parse();
-    unique_ptr<TypeExpression> type(
-        dynamic_cast<TypeExpression *>(type_expression.release()));
-    if (!type) {
+    unique_ptr<TypeExpression> type_expression(
+        dynamic_cast<TypeExpression *>(type_expression_parser.parse().release()));
+    if (!type_expression) {
       parser->get_logger()->error(
           "Failed to parse the parameter type of the proto",
           LogTypes::Error::INTERNAL);
       return nullptr;
     }
 
-    parameters.emplace_back(std::move(parameter), std::move(type));
+    parameters.emplace_back(std::move(parameter), std::move(type_expression));
 
     if (parser->current_token.type == TokenType::TOKEN_COMMA) {
       parser->eat_token();  // eat ,
@@ -93,15 +92,14 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   parser->eat_token();  // eat ->
 
-  auto return_type_expression = type_expression_parser.parse();
-  unique_ptr<TypeExpression> return_type(
-      dynamic_cast<TypeExpression *>(return_type_expression.release()));
-  if (!return_type) {
+  unique_ptr<TypeExpression> return_type_expression(
+      dynamic_cast<TypeExpression *>(type_expression_parser.parse().release()));
+  if (!return_type_expression) {
     parser->get_logger()->error("Failed to parse the return type of the proto",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
   return make_unique<ProtoStatement>(
-      position, std::move(name), std::move(parameters), std::move(return_type));
+      position, std::move(name), std::move(parameters), std::move(return_type_expression));
 }

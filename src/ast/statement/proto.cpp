@@ -1,8 +1,10 @@
 #include "ast/statement/proto.hpp"
 
 #include <llvm/IR/Value.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Support/Casting.h>
 
+#include <cstddef>
 #include <memory>
 #include <sstream>
 
@@ -17,15 +19,17 @@ Value *ProtoStatement::codegen(
 Function *ProtoStatement::codegen_function(
     const shared_ptr<CodegenContext> &context) const {
   auto function = Function::Create(
-      static_cast<llvm::FunctionType *>(context->get_program_context()
-                                            ->get_env()
-                                            ->get_function(name->get_value())
-                                            ->to_llvm(context->llvm_context)),
-      Function::ExternalLinkage, name->get_value(), context->module.get());
+      static_cast<llvm::FunctionType *>(
+          context->get_env()
+              ->get_function(name->get_identifier())
+              ->type->to_llvm(context->llvm_context)),
+      Function::ExternalLinkage, name->get_identifier(), context->module.get());
 
-  int idx = 0;
+  size_t idx = 0;
   for (auto &argument : function->args())
-    argument.setName(parameters[idx++].first->get_value());
+    argument.setName(parameters[idx++].first->get_identifier());
+
+  verifyFunction(*function);
 
   return function;
 }
@@ -42,7 +46,7 @@ string ProtoStatement::to_string() const {
   ostringstream oss;
   oss << name->to_string() << "(";
 
-  for (auto i = 0; i < parameters.size(); ++i) {
+  for (size_t i = 0; i < parameters.size(); ++i) {
     oss << parameters[i].first->to_string() << ": "
         << parameters[i].second->to_string();
     if (i < parameters.size() - 1) {
@@ -58,7 +62,7 @@ string ProtoStatement::to_string_tree() const {
   ostringstream oss;
   oss << "ProtoStatement(name: " << name->to_string_tree() << ", parameters: [";
 
-  for (auto i = 0; i < parameters.size(); ++i) {
+  for (size_t i = 0; i < parameters.size(); ++i) {
     oss << "(value: " << parameters[i].first->to_string_tree()
         << ", type: " << parameters[i].second->to_string_tree() << ")";
     if (i < parameters.size() - 1) {

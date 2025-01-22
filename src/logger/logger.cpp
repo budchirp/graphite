@@ -1,6 +1,5 @@
 #include "logger/logger.hpp"
 
-#include <format>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -21,7 +20,10 @@ void Logger::log(const string &message, LogTypes::Log type,
   }
 
   ostringstream str;
-  str << Colors::GRAY << "[log][" << log_type << "] " << (position ? position->line : 0) << ":" << (position ? position->line : 0) << " " << Colors::WHITE << message << endl;
+  str << Colors::GRAY << "[log][" << log_type << "] "
+      << (position ? position->line : 0) << ":"
+      << (position ? position->line : 0) << " " << Colors::WHITE << message
+      << endl;
 
   cout << str.str();
 };
@@ -36,7 +38,10 @@ void Logger::warn(const string &message, LogTypes::Warn type,
   }
 
   ostringstream str;
-  str << Colors::GRAY << "[" << Colors::YELLOW << "warning" << Colors::GRAY << "][" << warn_type << "] " << (position ? position->line : 0) << ":" << (position ? position->line : 0) << " " << Colors::WHITE << message << endl;
+  str << Colors::GRAY << "[" << Colors::YELLOW << "warning" << Colors::GRAY
+      << "][" << warn_type << "] " << (position ? position->line : 0) << ":"
+      << (position ? position->line : 0) << " " << Colors::WHITE << message
+      << endl;
 
   cout << str.str();
 };
@@ -67,8 +72,12 @@ void Logger::error(const string &message, LogTypes::Error type,
   }
 
   ostringstream str;
-  str << Colors::GRAY << "[" << Colors::RED << "error" << Colors::GRAY << "][" << error_type << "] " << (position ? position->line : 0) << ":" << (position ? position->line : 0) << " " << Colors::WHITE << message << endl;
+  str << Colors::GRAY << "[" << Colors::RED << "error" << Colors::GRAY << "]["
+      << error_type << "] " << (position ? position->line : 0) << ":"
+      << (position ? position->line : 0) << " " << Colors::WHITE << message
+      << endl;
 
+  // cerr << str.str();
   throw runtime_error(str.str());
 }
 
@@ -86,11 +95,13 @@ void Logger::log(const string &message) {
   cout << Colors::GRAY << "[log]: " << Colors::WHITE << message << endl;
 }
 void Logger::warn(const string &message) {
-  cout << Colors::GRAY << "[" << Colors::YELLOW << "warning" << Colors::GRAY << "]: " << Colors::WHITE << message << endl;
+  cout << Colors::GRAY << "[" << Colors::YELLOW << "warning" << Colors::GRAY
+       << "]: " << Colors::WHITE << message << endl;
 }
 void Logger::error(const string &message) {
   ostringstream str;
-  str << Colors::GRAY << "[" << Colors::YELLOW << "error" << Colors::GRAY << "]: " << Colors::WHITE << message << endl;
+  str << Colors::GRAY << "[" << Colors::YELLOW << "error" << Colors::GRAY
+      << "]: " << Colors::WHITE << message << endl;
 
   throw runtime_error(str.str());
 }

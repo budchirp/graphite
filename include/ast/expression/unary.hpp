@@ -6,6 +6,7 @@
 #include <string>
 
 #include "ast/expression.hpp"
+#include "ast/expression/var_ref.hpp"
 #include "lexer/position.hpp"
 #include "token/token.hpp"
 #include "types/type.hpp"
@@ -20,12 +21,12 @@ class UnaryExpression : public Expression {
 
   Token op;
 
-  unique_ptr<Expression> expression;
+  unique_ptr<VarRefExpression> expression;
 
  public:
   explicit UnaryExpression(const Position &position,
                            const shared_ptr<Type> &type, const Token &op,
-                           unique_ptr<Expression> expression)
+                           unique_ptr<VarRefExpression> expression)
       : position(position),
         type(type),
         op(op),

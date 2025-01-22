@@ -17,6 +17,7 @@
 #include "parser/parsers/expression/var_ref.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
+#include "token/token_type.hpp"
 
 unique_ptr<ExpressionStatement> ExpressionStatementParser::parse() {
   auto expression = parse_expression(Precedence::LOWEST);
@@ -87,6 +88,10 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<UnaryExpressionParser>(parser, std::move(left));
          }},
+        {TOKEN_BANG_BANG,
+         [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
+           return make_unique<UnaryExpressionParser>(parser, std::move(left));
+         }},
         {TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
@@ -100,6 +105,10 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>,
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
         {TOKEN_ASTERISK,
+         [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
+           return make_unique<BinaryExpressionParser>(parser, std::move(left));
+         }},
+        {TOKEN_ASSIGN,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
@@ -138,7 +147,7 @@ unique_ptr<Expression> ExpressionStatementParser::parse_expression(
   }
 
   auto prefix_parser = prefix_parser_it->second(parser);
-  auto left = prefix_parser->parse();
+  auto expression = prefix_parser->parse();
 
   while (PrecedenceHelper::precedence_for(parser->current_token.type) >
          precedence) {
@@ -147,9 +156,9 @@ unique_ptr<Expression> ExpressionStatementParser::parse_expression(
       break;
     }
 
-    auto infix_parser = infix_parser_it->second(parser, left);
-    left = infix_parser->parse();
+    auto infix_parser = infix_parser_it->second(parser, expression);
+    expression = infix_parser->parse();
   }
 
-  return left;
+  return expression;
 }

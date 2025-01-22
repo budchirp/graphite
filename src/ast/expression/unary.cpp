@@ -2,6 +2,7 @@
 
 #include <llvm/IR/Value.h>
 
+#include <cmath>
 #include <memory>
 #include <string>
 
@@ -25,24 +26,23 @@ Value *UnaryExpression::codegen(
     return nullptr;
   }
 
+  auto type = expression->get_type();
+  auto llvm_type = type->to_llvm(context->llvm_context);
+
   switch (op.type) {
     case TOKEN_ASTERISK: {
-      return context->builder->CreateLoad(
-          expression->get_type()->to_llvm(context->llvm_context), value,
-          "load");
+      return context->builder->CreateLoad(llvm_type, value, "load");
     }
 
     case TOKEN_AMPERSAND: {
-      AllocaInst *alloca = context->builder->CreateAlloca(
-          expression->get_type()->to_llvm(context->llvm_context), nullptr,
-          "addr");
+      AllocaInst *alloca =
+          context->builder->CreateAlloca(llvm_type, nullptr, "addr");
       context->builder->CreateStore(value, alloca);
 
       return alloca;
     }
 
     case TOKEN_MINUS: {
-      auto type = expression->get_type();
       if (Analyzer::is_int(type).first) {
         return context->builder->CreateNeg(value, "neg");
       } else if (Analyzer::is_float(type).first) {
@@ -61,48 +61,38 @@ Value *UnaryExpression::codegen(
     }
 
     case TOKEN_MINUSMINUS: {
-      auto type = expression->get_type();
-      auto llvm_type = type->to_llvm(context->llvm_context);
-
       Value *new_value;
       if (Analyzer::is_int(type).first) {
         new_value = context->builder->CreateSub(
             value, ConstantInt::get(llvm_type, 1), "dec");
-      } else if (Analyzer::is_float(type).first) {
+      } else {
         new_value = context->builder->CreateFSub(
             value, ConstantFP::get(llvm_type, 1.0), "dec");
       }
 
-      if (auto *var = dynamic_cast<VarRefExpression *>(expression.get())) {
-        context->builder->CreateStore(new_value,
-                                      context->value_map[var->get_value()]);
-        new_value = context->value_map[var->get_value()];
-      }
+      auto ptr =
+          context->get_env()->get_variable(expression->get_name())->value;
+      context->builder->CreateStore(new_value, ptr);
 
-      return new_value;
+      return ptr;
       break;
     }
 
     case TOKEN_PLUSPLUS: {
-      auto type = expression->get_type();
-      auto llvm_type = type->to_llvm(context->llvm_context);
-
       Value *new_value;
       if (Analyzer::is_int(type).first) {
         new_value = context->builder->CreateAdd(
             value, ConstantInt::get(llvm_type, 1), "inc");
-      } else if (Analyzer::is_float(type).first) {
+      } else {
         new_value = context->builder->CreateFAdd(
             value, ConstantFP::get(llvm_type, 1.0), "inc");
       }
 
-      if (auto *var = dynamic_cast<VarRefExpression *>(expression.get())) {
-        context->builder->CreateStore(new_value,
-                                      context->value_map[var->get_value()]);
-        new_value = context->value_map[var->get_value()];
-      }
+      auto ptr =
+          context->get_env()->get_variable(expression->get_name())->value;
+      context->builder->CreateStore(new_value, ptr);
 
-      return new_value;
+      return ptr;
     }
 
     default:
@@ -114,16 +104,7 @@ void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
   expression->analyze(context);
 
   switch (op.type) {
-    case TOKEN_ASTERISK: {
-      if (!Analyzer::is_pointer(expression->get_type()).first) {
-        Logger::error("Cannot dereference non-pointer type",
-                      LogTypes::Error::TYPE_MISMATCH, &position);
-        return;
-      }
-
-      break;
-    }
-
+    case TOKEN_ASTERISK:
     case TOKEN_AMPERSAND: {
       break;
     }
@@ -143,6 +124,14 @@ void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
     case TOKEN_PLUSPLUS:
     case TOKEN_MINUS:
     case TOKEN_PLUS: {
+      if (!context->get_env()
+               ->get_variable(expression->get_name())
+               ->is_mutable) {
+        Logger::error("Cannot mutate an immutable variable",
+                      LogTypes::Error::SYNTAX, &position);
+        return;
+      }
+
       if (!Analyzer::compare(expression->get_type(),
                              make_shared<IntType>(32, false))) {
         Logger::error(

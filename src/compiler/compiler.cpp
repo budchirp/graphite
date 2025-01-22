@@ -113,7 +113,7 @@ void Compiler::compile_objects(const vector<string> &objs,
 
   vector<string> command{"clang", ld_flags, "-o", filename,
                          join_strings(objs, " ")};
-  auto command_str = join_strings(command, " ") + " > /dev/null 2>&1";
+  auto command_str = join_strings(command, " ");
 
   Logger::log("Executing `" + command_str + "`");
 

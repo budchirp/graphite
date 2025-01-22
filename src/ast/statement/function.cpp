@@ -9,6 +9,7 @@
 
 #include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
+#include "env/env.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 #include "types/void.hpp"
@@ -21,23 +22,24 @@ Value *FunctionStatement::codegen(
 }
 Function *FunctionStatement::codegen_function(
     const shared_ptr<CodegenContext> &context) const {
-  auto function = context->module->getFunction(proto->name->get_value());
+  auto function = context->module->getFunction(proto->name->get_identifier());
   if (function) {
-    Logger::warn("Function `" + proto->name->get_value() + "` exists",
+    Logger::warn("Function `" + proto->name->get_identifier() + "` exists",
                  LogTypes::Warn::SUGGESTION, proto->name->get_position());
   } else {
     function = proto->codegen_function(context);
     if (!function) {
       Logger::error("Failed to generate low level code for function `" +
-                        proto->name->get_value() + "`",
+                        proto->name->get_identifier() + "`",
                     LogTypes::Error::INTERNAL, proto->get_position());
       return nullptr;
     }
   }
 
-  context->value_map.clear();
-  for (auto &arg : function->args()) {
-    context->value_map[string(arg.getName())] = &arg;
+  context->set_env(env);
+
+  for (auto &argument : function->args()) {
+    context->get_env()->get_variable(argument.getName().str())->add_llvm_value(&argument);
   }
 
   auto body_block = body->codegen_block(context, function, "entry");
@@ -60,7 +62,11 @@ Function *FunctionStatement::codegen_function(
     }
   }
 
-  verifyFunction(*function);
+  context->set_env(env->get_parent());
+
+  context->get_env()
+      ->get_function(proto->name->get_identifier())
+      ->add_llvm_value(function);
 
   return function;
 }
@@ -74,8 +80,8 @@ void FunctionStatement::analyze(const shared_ptr<ProgramContext> &context) {
   auto return_type = proto->return_type->get_type();
   if (!Analyzer::compare(return_type, make_shared<VoidType>()) &&
       !Analyzer::compare(return_type, body->get_type())) {
-    Logger::error("Type mismatch on return statement\nExpected `" +
-                      return_type->to_string() + "` Received `" +
+    Logger::error("Function `" + proto->name->get_identifier() + "` \nexpected `" +
+                      return_type->to_string() + "` as return type but received `" +
                       body->get_type()->to_string() + "`",
                   LogTypes::Error::TYPE_MISMATCH,
                   proto->return_type->get_position());

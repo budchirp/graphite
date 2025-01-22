@@ -3,34 +3,52 @@ extern print_number(number: i32) -> void
 
 extern add(a: i32, b: i32) -> i32
 
-fn add_ptr(a: *i32, b: *i32) -> i32 {
-  print_number(a as i32)
-
-  return add(*a, *b)
-}
-
 # comment
 fn main(argc: i32) -> i32 {
-  printf("start\n")
-  print_number(argc)
+  printf("Start\n")
 
-  var x: i32 = add(32, 32)
-  var y: i32 = (x * 1)
+  printf("\nAdding numbers\n")
+  var x: i32? = add(32, 32)
+  var y: i32 = (x!! * 1)
+  print_number(y)
 
-  var a: i32 = add_ptr(&x, &y)
-  print_number(a)
-
-  for (var i: i32 = 10; i > 0; i--) {
+  printf("\nFor loop\n")
+  for (var mut i: i32 = 10; i > 0; i--) {
     print_number(i)
   }
 
-  var i: i32 = 0;
+  printf("\nVar without initializer\n")
+  var j: i32
+  if (j == null) {
+    printf("j is null\n")
+  }
+  j = y
+  if (j != null) {
+    printf("j is not null yay\n")
+  }
+  print_number(j!!)
+
+  printf("\nVar without initializer - pointer\n")
+  var k: *i32
+  if (k == nullptr) {
+    printf("k is null\n")
+  }
+  k = &y
+  if (k != nullptr) {
+    printf("k is not null yay\n")
+  }
+  print_number((*(k!!)) as i32)
+
+  printf("\nWhile loop\n")
+  var mut i: i32 = 0;
   while (i < 10) {
     print_number(i)
     i++
   }
 
+  printf("\nBoolean check\n")
   var z: boolean = if (x == y) { true } else { false }
+  print_number(z as i32)
 
   if (z) {
     printf("x and y is 64\n")
@@ -38,7 +56,7 @@ fn main(argc: i32) -> i32 {
     printf("x and y is not 64\n")
   }
 
-  printf("end\n")
+  printf("End\n")
 
   return (10 - 10) * 10
 }

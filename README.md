@@ -18,8 +18,8 @@
 - [x] Type checking
 - [x] Function definition
 - [x] Variable definition
-- [ ] Mutable/Immutable variables
-- [ ] Null
+- [x] Mutable/Immutable variables
+- [x] Null (?, !!, null, nullptr)
 - [x] If expression
 - [x] For & While statement
 - [x] Object generation
@@ -32,3 +32,5 @@
 - [ ] Maps
 - [ ] Switch expression
 - [ ] CLI
+
+- [ ] Fix bugs with pointers

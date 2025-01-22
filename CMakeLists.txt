@@ -17,7 +17,7 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
 endif()
 
 add_compile_options(
-  -Wall -Wextra -Wpedantic -Wno-sign-compare
+  -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wnull-dereference -Wnon-virtual-dtor -Woverloaded-virtual -Wdouble-promotion -fstack-protector-strong -fno-omit-frame-pointer -pie -fPIE -Wno-sign-compare -Wno-shadow
 )
 
 include(FetchContent)
@@ -37,18 +37,18 @@ message(STATUS "Found headers: ${HEADERS}")
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*/*.cpp" "src/*.cpp")
 message(STATUS "Found sources: ${SOURCES}")
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_compile_definitions(DEBUG_MODE=1)
+  add_compile_options(-Og -g --debug -fsanitize=address)
+  add_link_options(-fsanitize=address)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_compile_options(-O3 -flto -DNDEBUG)
+  add_link_options(-flto)
+endif()
+
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} PRIVATE argman)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LLVM)
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG_MODE=1)
-  target_compile_options(${PROJECT_NAME} PRIVATE -Og -g --debug)
-  target_link_options(${PROJECT_NAME} PRIVATE)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-  target_compile_options(${PROJECT_NAME} PRIVATE -O3 -flto -DNDEBUG)
-  target_link_options(${PROJECT_NAME} PRIVATE -flto)
-endif()

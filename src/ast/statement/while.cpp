@@ -19,15 +19,15 @@ Value *WhileStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
   auto parent_function = context->builder->GetInsertBlock()->getParent();
 
-  auto loop_condition =
+  auto condition_block =
       BasicBlock::Create(*context->llvm_context, "loop.condition");
-  auto loop_body = BasicBlock::Create(*context->llvm_context, "loop.body");
-  auto loop_end = BasicBlock::Create(*context->llvm_context, "loop.end");
+  auto body_block = BasicBlock::Create(*context->llvm_context, "loop.body");
+  auto end_block = BasicBlock::Create(*context->llvm_context, "loop.end");
 
-  context->builder->CreateBr(loop_condition);
+  context->builder->CreateBr(condition_block);
 
-  parent_function->insert(parent_function->end(), loop_condition);
-  context->builder->SetInsertPoint(loop_condition);
+  parent_function->insert(parent_function->end(), condition_block);
+  context->builder->SetInsertPoint(condition_block);
 
   auto condition_value = condition->codegen(context);
   if (!condition_value) {
@@ -37,16 +37,16 @@ Value *WhileStatement::codegen(
     return nullptr;
   }
 
-  context->builder->CreateCondBr(condition_value, loop_body, loop_end);
+  context->builder->CreateCondBr(condition_value, body_block, end_block);
 
-  parent_function->insert(parent_function->end(), loop_body);
-  context->builder->SetInsertPoint(loop_body);
+  parent_function->insert(parent_function->end(), body_block);
+  context->builder->SetInsertPoint(body_block);
   body->codegen(context);
 
-  context->builder->CreateBr(loop_condition);
+  context->builder->CreateBr(condition_block);
 
-  parent_function->insert(parent_function->end(), loop_end);
-  context->builder->SetInsertPoint(loop_end);
+  parent_function->insert(parent_function->end(), end_block);
+  context->builder->SetInsertPoint(end_block);
 
   return Constant::getNullValue(llvm::Type::getVoidTy(*context->llvm_context));
 }

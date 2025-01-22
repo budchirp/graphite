@@ -1,5 +1,6 @@
 #include "ast/statement/var.hpp"
 
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/Value.h>
@@ -16,10 +17,18 @@
 using namespace llvm;
 
 Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
-  auto value = expression->codegen(context);
+  Value *value;
+  if (expression) {
+    value = expression->codegen(context);
+  } else if (Analyzer::is_pointer(variable_type->get_type()).first) {
+    value = context->get_env()->get_variable("nullptr")->value;
+  } else {
+    value = context->get_env()->get_variable("null")->value;
+  }
+
   if (!value) {
     Logger::error(
-        "Failed to generate initializer for variable " + name->get_value(),
+        "Failed to generate initializer for variable " + name->get_identifier(),
         LogTypes::Error::UNKNOWN, expression->get_position());
     return nullptr;
   }
@@ -27,27 +36,36 @@ Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
   auto type = variable_type->get_type()->to_llvm(context->llvm_context);
   value = Codegen::cast_type(context, value, type);
   if (!value) {
-    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
+    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
+                  variable_type->get_position());
     return nullptr;
   }
 
-  auto ptr = context->builder->CreateAlloca(type, nullptr, "addr");
-  context->builder->CreateStore(value, ptr);
+  if (is_mutable) {
+    auto ptr = context->builder->CreateAlloca(type, nullptr, "addr");
+    context->builder->CreateStore(value, ptr);
 
-  context->value_map.emplace(name->get_value(), ptr);
-  return ptr;
+    value = ptr;
+  }
+
+  context->get_env()->get_variable(name->get_identifier())->add_llvm_value(value);
+
+  return value;
 }
 
 void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
   variable_type->analyze(context);
-  expression->analyze(context);
+  if (expression) {
+    expression->analyze(context);
 
-  if (!Analyzer::compare(expression->get_type(), variable_type->get_type())) {
-    Logger::error(
-        "Type mismatch\nExpected `" + variable_type->get_type()->get_name() +
-            "` Received `" + expression->get_type()->get_name() + "`",
-        LogTypes::Error::TYPE_MISMATCH, variable_type->get_position());
-    return;
+    if (!Analyzer::compare(variable_type->get_type(), expression->get_type(),
+                           true)) {
+      Logger::error(
+          "Type mismatch\nExpected `" + variable_type->get_type()->to_string() +
+              "` Received `" + expression->get_type()->to_string() + "`",
+          LogTypes::Error::TYPE_MISMATCH, variable_type->get_position());
+      return;
+    }
   }
 }
 

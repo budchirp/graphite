@@ -10,7 +10,7 @@
 #include "parser/parsers/statement/expression.hpp"
 
 unique_ptr<Expression> CallExpressionParser::parse() {
-  unique_ptr<IdentifierExpression> name(
+  unique_ptr<IdentifierExpression> name_expression(
       dynamic_cast<IdentifierExpression *>(left.release()));
 
   if (parser->current_token.type != TokenType::TOKEN_LEFT_PARENTHESES) {
@@ -42,14 +42,17 @@ unique_ptr<Expression> CallExpressionParser::parse() {
 
   parser->eat_token();  // eat ')'
 
-  auto type = parser->get_program()->get_env()->get_function(name->get_value())->return_type;
+  auto type = parser->get_program()
+                  ->get_env()
+                  ->get_function(name_expression->get_identifier())
+                  ->type->return_type;
   if (!type) {
     parser->get_logger()->error(
-        "Undefined function `" + name->get_value() + "` called",
+        "Undefined function `" + name_expression->get_identifier() + "` called",
         LogTypes::Error::UNDEFINED);
     return nullptr;
   }
 
-  return make_unique<CallExpression>(
-      position, type, std::move(name), std::move(arguments));
+  return make_unique<CallExpression>(position, type, std::move(name_expression),
+                                     std::move(arguments));
 }

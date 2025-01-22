@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 
-#include "ast/expression/identifier.hpp"
 #include "types/type.hpp"
 #include "ast/expression.hpp"
 #include "lexer/position.hpp"
@@ -17,17 +16,18 @@ private:
 
   shared_ptr<Type> type;
 
+  string name;
+
 public:
-  unique_ptr<IdentifierExpression> identifier;
 
   explicit VarRefExpression(const Position &position, const shared_ptr<Type> &type,
-                                unique_ptr<IdentifierExpression> identifier)
-      : position(position), type(type), identifier(std::move(identifier)) {};
+                                const string &name)
+      : position(position), type(type), name(name) {};
 
   llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const override;
   void analyze(const shared_ptr<ProgramContext> &context) override;
 
-  string get_value() const { return identifier->get_value(); };
+  string get_name() const { return name; };
 
   Position *get_position() override { return &position; };
 

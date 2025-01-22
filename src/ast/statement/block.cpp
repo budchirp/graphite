@@ -2,6 +2,7 @@
 
 #include <llvm/IR/Value.h>
 
+#include <cstddef>
 #include <sstream>
 
 #include "codegen/codegen.hpp"
@@ -10,15 +11,15 @@ using namespace llvm;
 
 Value *BlockStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
-  Value *last = nullptr;
+  Value *last_statement;
   for (const auto &statement : statements) {
-    last = statement->codegen(context);
+    last_statement = statement->codegen(context);
     if (context->builder->GetInsertBlock()->getTerminator()) {
       break;
     }
   }
 
-  return last;
+  return last_statement;
 }
 
 BasicBlock *BlockStatement::codegen_block(
@@ -52,9 +53,9 @@ string BlockStatement::to_string() const {
 
 string BlockStatement::to_string_tree() const {
   ostringstream oss;
-  oss << "BlockStatement(statement: [";
+  oss << "BlockStatement(type: " << type->to_string_tree() << ", statement: [";
 
-  for (auto i = 0; i < statements.size(); ++i) {
+  for (size_t i = 0; i < statements.size(); ++i) {
     oss << statements[i]->to_string_tree();
     if (i < statements.size() - 1) {
       oss << ", ";

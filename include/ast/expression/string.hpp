@@ -27,8 +27,6 @@ class StringExpression : public Expression {
       const shared_ptr<CodegenContext> &context) const override;
   void analyze(const shared_ptr<ProgramContext> &context) override;
 
-  string get_value() { return value; };
-
   Position *get_position() override { return &position; };
 
   shared_ptr<Type> get_type() const override { return type; }
