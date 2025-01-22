@@ -29,7 +29,7 @@ Value *VarRefExpression::codegen(
 }
 
 void VarRefExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  if (!context->get_env()->get_symbol(identifier->get_value())) {
+  if (!context->get_env()->get_variable(identifier->get_value())) {
     Logger::error("Undefined variable `" + identifier->get_value() + "`",
                   LogTypes::Error::UNDEFINED, &position);
   }

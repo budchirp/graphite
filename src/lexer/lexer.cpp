@@ -24,6 +24,12 @@ void Lexer::eat_char() {
 }
 
 void Lexer::eat_whitespace() {
+  if (current_char == '#') {
+    while (current_char != '\n') {
+      eat_char();
+    }
+  }
+
   while (current_char == '\n') {
     position->column = 0;
     position->line++;
@@ -90,7 +96,7 @@ Token Lexer::next_token() {
         eat_char();
         token = Token(TokenType::TOKEN_PLUSPLUS, "++");
       } else {
-      token = Token(TokenType::TOKEN_PLUS, "+");
+        token = Token(TokenType::TOKEN_PLUS, "+");
       }
       break;
 

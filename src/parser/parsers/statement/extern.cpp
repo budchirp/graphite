@@ -29,12 +29,9 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
     parameter_types.push_back(type->get_type());
   }
 
-  auto env = parser->get_program()->get_env();
-
-  env->set_type(proto->name->get_value(),
+  parser->get_program()->get_env()->set_function(proto->name->get_value(),
                 make_shared<FunctionType>(parameter_types,
                                           proto->return_type->get_type()));
-  env->set_symbol(proto->name->get_value(), proto->return_type->get_type());
 
   return make_unique<ExternStatement>(position, std::move(proto));
 }

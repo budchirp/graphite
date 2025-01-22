@@ -29,6 +29,8 @@ llvm::Value *BinaryExpression::codegen(
     return nullptr;
   }
 
+  if (op.type == TOKEN_AS) return left_value;
+
   auto right_value = right->codegen(context);
   if (!right_value) {
     Logger::error(
@@ -41,74 +43,94 @@ llvm::Value *BinaryExpression::codegen(
   auto llvm_type = type->to_llvm(context->llvm_context);
   right_value = Codegen::cast_type(context, right_value, llvm_type);
   if (!right_value) {
-    Logger::error("Type mismatch",
-                  LogTypes::Error::TYPE_MISMATCH, right->get_position());
+    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
+                  right->get_position());
     return nullptr;
   }
 
-  if (Analyzer::is_boolean(type).first) {
-    switch (op.type) {
-      case TokenType::TOKEN_AND:
-        return context->builder->CreateAnd(left_value, right_value, "and");
-      case TokenType::TOKEN_OR:
-        return context->builder->CreateOr(left_value, right_value, "or");
-      case TokenType::TOKEN_EQUAL:
-        return context->builder->CreateICmpEQ(left_value, right_value, "eq");
-      case TokenType::TOKEN_NOT_EQUAL:
-        return context->builder->CreateICmpNE(left_value, right_value, "ne");
-      default:
-        return nullptr;
-    }
-  } else if (Analyzer::is_int(type).first) {
-    switch (op.type) {
-      case TokenType::TOKEN_PLUS:
-        return context->builder->CreateAdd(left_value, right_value, "add");
-      case TokenType::TOKEN_MINUS:
-        return context->builder->CreateSub(left_value, right_value, "sub");
-      case TokenType::TOKEN_ASTERISK:
-        return context->builder->CreateMul(left_value, right_value, "mul");
-      case TokenType::TOKEN_SLASH:
-        return context->builder->CreateSDiv(left_value, right_value, "div");
-      case TokenType::TOKEN_EQUAL:
-        return context->builder->CreateICmpEQ(left_value, right_value, "eq");
-      case TokenType::TOKEN_NOT_EQUAL:
-        return context->builder->CreateICmpNE(left_value, right_value, "ne");
-      case TokenType::TOKEN_LESS_THAN:
-        return context->builder->CreateICmpSLT(left_value, right_value, "lt");
-      case TokenType::TOKEN_GREATER_THAN:
-        return context->builder->CreateICmpSGT(left_value, right_value, "gt");
-      default:
-        return nullptr;
-    }
-  } else if (Analyzer::is_float(type).first) {
-    switch (op.type) {
-      case TokenType::TOKEN_PLUS:
-        return context->builder->CreateFAdd(left_value, right_value, "fadd");
-      case TokenType::TOKEN_MINUS:
-        return context->builder->CreateFSub(left_value, right_value, "fsub");
-      case TokenType::TOKEN_ASTERISK:
-        return context->builder->CreateFMul(left_value, right_value, "fmul");
-      case TokenType::TOKEN_SLASH:
-        return context->builder->CreateFDiv(left_value, right_value, "fdiv");
-      case TokenType::TOKEN_EQUAL:
-        return context->builder->CreateFCmpUEQ(left_value, right_value, "eq");
-      case TokenType::TOKEN_NOT_EQUAL:
-        return context->builder->CreateFCmpUNE(left_value, right_value, "ne");
-      case TokenType::TOKEN_LESS_THAN:
-        return context->builder->CreateFCmpULT(left_value, right_value, "lt");
-      case TokenType::TOKEN_GREATER_THAN:
-        return context->builder->CreateFCmpUGT(left_value, right_value, "gt");
-      default:
-        return nullptr;
-    }
-  } else if (Analyzer::is_string(type).first) {
-    switch (op.type) {
-      case TokenType::TOKEN_EQUAL:
-        return context->builder->CreateICmpEQ(left_value, right_value, "streq");
-      case TokenType::TOKEN_NOT_EQUAL:
-        return context->builder->CreateICmpNE(left_value, right_value, "strne");
-      default:
-        return nullptr;
+  switch (op.type) {
+    default: {
+      if (Analyzer::is_boolean(type).first) {
+        switch (op.type) {
+          case TokenType::TOKEN_AND:
+            return context->builder->CreateAnd(left_value, right_value, "and");
+          case TokenType::TOKEN_OR:
+            return context->builder->CreateOr(left_value, right_value, "or");
+          case TokenType::TOKEN_EQUAL:
+            return context->builder->CreateICmpEQ(left_value, right_value,
+                                                  "eq");
+          case TokenType::TOKEN_NOT_EQUAL:
+            return context->builder->CreateICmpNE(left_value, right_value,
+                                                  "ne");
+          default:
+            return nullptr;
+        }
+      } else if (Analyzer::is_int(type).first) {
+        switch (op.type) {
+          case TokenType::TOKEN_PLUS:
+            return context->builder->CreateAdd(left_value, right_value, "add");
+          case TokenType::TOKEN_MINUS:
+            return context->builder->CreateSub(left_value, right_value, "sub");
+          case TokenType::TOKEN_ASTERISK:
+            return context->builder->CreateMul(left_value, right_value, "mul");
+          case TokenType::TOKEN_SLASH:
+            return context->builder->CreateSDiv(left_value, right_value, "div");
+          case TokenType::TOKEN_EQUAL:
+            return context->builder->CreateICmpEQ(left_value, right_value,
+                                                  "eq");
+          case TokenType::TOKEN_NOT_EQUAL:
+            return context->builder->CreateICmpNE(left_value, right_value,
+                                                  "ne");
+          case TokenType::TOKEN_LESS_THAN:
+            return context->builder->CreateICmpSLT(left_value, right_value,
+                                                   "lt");
+          case TokenType::TOKEN_GREATER_THAN:
+            return context->builder->CreateICmpSGT(left_value, right_value,
+                                                   "gt");
+          default:
+            return nullptr;
+        }
+      } else if (Analyzer::is_float(type).first) {
+        switch (op.type) {
+          case TokenType::TOKEN_PLUS:
+            return context->builder->CreateFAdd(left_value, right_value,
+                                                "fadd");
+          case TokenType::TOKEN_MINUS:
+            return context->builder->CreateFSub(left_value, right_value,
+                                                "fsub");
+          case TokenType::TOKEN_ASTERISK:
+            return context->builder->CreateFMul(left_value, right_value,
+                                                "fmul");
+          case TokenType::TOKEN_SLASH:
+            return context->builder->CreateFDiv(left_value, right_value,
+                                                "fdiv");
+          case TokenType::TOKEN_EQUAL:
+            return context->builder->CreateFCmpUEQ(left_value, right_value,
+                                                   "eq");
+          case TokenType::TOKEN_NOT_EQUAL:
+            return context->builder->CreateFCmpUNE(left_value, right_value,
+                                                   "ne");
+          case TokenType::TOKEN_LESS_THAN:
+            return context->builder->CreateFCmpULT(left_value, right_value,
+                                                   "lt");
+          case TokenType::TOKEN_GREATER_THAN:
+            return context->builder->CreateFCmpUGT(left_value, right_value,
+                                                   "gt");
+          default:
+            return nullptr;
+        }
+      } else if (Analyzer::is_string(type).first) {
+        switch (op.type) {
+          case TokenType::TOKEN_EQUAL:
+            return context->builder->CreateICmpEQ(left_value, right_value,
+                                                  "streq");
+          case TokenType::TOKEN_NOT_EQUAL:
+            return context->builder->CreateICmpNE(left_value, right_value,
+                                                  "strne");
+          default:
+            return nullptr;
+        }
+      }
     }
   }
 
@@ -117,6 +139,9 @@ llvm::Value *BinaryExpression::codegen(
 
 void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
   left->analyze(context);
+  
+  if (op.type == TOKEN_AS) return;
+  
   right->analyze(context);
 
   auto left_type = left->get_type();

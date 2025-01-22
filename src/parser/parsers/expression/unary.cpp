@@ -1,9 +1,9 @@
 #include "parser/parsers/expression/unary.hpp"
 
-#include <iostream>
 #include <memory>
 
 #include "ast/expression.hpp"
+#include "ast/expression/type.hpp"
 #include "ast/expression/unary.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "token/token.hpp"
@@ -37,6 +37,10 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
 
     switch (op_token.type) {
       case TOKEN_ASTERISK: {
+        if (dynamic_cast<TypeExpression *>(expression.get())) {
+          break;
+        }
+
         type = dynamic_pointer_cast<PointerType>(type)->type;
         break;
       }
@@ -46,7 +50,6 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
         break;
 
       default:
-        type = expression->get_type();
         break;
     }
   }

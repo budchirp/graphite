@@ -46,9 +46,10 @@ llvm::Value *CallExpression::codegen(
     }
 
     auto function_type = dynamic_pointer_cast<FunctionType>(
-        context->get_program_context()->get_env()->get_type(name->get_value()));
-    argument_value =
-        Codegen::cast_type(context, argument_value, function_type->parameters[idx]->to_llvm(context->llvm_context));
+        context->get_program_context()->get_env()->get_function(name->get_value()));
+    argument_value = Codegen::cast_type(
+        context, argument_value,
+        function_type->parameters[idx]->to_llvm(context->llvm_context));
     if (!argument_value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
       return nullptr;
@@ -67,20 +68,14 @@ llvm::Value *CallExpression::codegen(
 }
 
 void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  if (!context->get_env()->get_symbol(name->get_value())) {
+  auto function = context->get_env()->get_function(name->get_value());
+  if (!function) {
     Logger::error("Undefined function `" + name->get_value() + "` called",
                   LogTypes::Error::UNDEFINED, name->get_position());
     return;
   }
 
-  auto function_type = dynamic_pointer_cast<FunctionType>(
-      context->get_env()->get_type(name->get_value()));
-  if (!function_type) {
-    Logger::error("Undefined function `" + name->get_value() + "` called");
-    return;
-  }
-
-  if (function_type->parameters.size() != arguments.size()) {
+  if (function->parameters.size() != arguments.size()) {
     Logger::error("Incorrect number of arguments passed to function `" +
                       name->get_value() + "`",
                   LogTypes::Error::SYNTAX, name->get_position());
@@ -91,11 +86,12 @@ void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
   for (const auto &argument : arguments) {
     argument->analyze(context);
 
-    auto parameter_type = function_type->parameters[idx];
+    auto parameter_type = function->parameters[idx];
     if (!Analyzer::compare(argument->get_type(), parameter_type)) {
       Logger::error("Type mismatch in argument `" + argument->to_string() +
-                        "`\nExpected `" + parameter_type->get_name() +
-                        "` Received `" + argument->get_type()->get_name() + "`",
+                        "`\nExpected `" + parameter_type->to_string() +
+                        "` Received `" + argument->get_type()->to_string() +
+                        "`",
                     LogTypes::Error::TYPE_MISMATCH, argument->get_position());
       return;
     }

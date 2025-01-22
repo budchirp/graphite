@@ -20,7 +20,7 @@
 - [x] Variable definition
 - [ ] Mutable/Immutable variables
 - [ ] Null
-- [x] If expressions
+- [x] If expression
 - [x] For & While statement
 - [x] Object generation
 - [x] Code optimization (idk how well it works)

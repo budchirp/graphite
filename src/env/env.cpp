@@ -1,40 +1,39 @@
 #include "env/env.hpp"
 
-#include <iostream>
-
 #include "logger/logger.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
+#include "types/function.hpp"
 #include "types/int.hpp"
 #include "types/string.hpp"
 #include "types/type.hpp"
 #include "types/void.hpp"
 
 void Env::init() {
-  type_map.emplace("string", make_shared<StringType>());
-  type_map.emplace("i8", make_shared<IntType>(8, false));
-  type_map.emplace("i16", make_shared<IntType>(16, false));
-  type_map.emplace("i32", make_shared<IntType>(32, false));
-  type_map.emplace("i64", make_shared<IntType>(64, false));
-  type_map.emplace("u8", make_shared<IntType>(8, true));
-  type_map.emplace("u16", make_shared<IntType>(16, true));
-  type_map.emplace("u32", make_shared<IntType>(32, true));
-  type_map.emplace("u64", make_shared<IntType>(64, true));
-  type_map.emplace("f8", make_shared<FloatType>(8));
-  type_map.emplace("f16", make_shared<FloatType>(16));
-  type_map.emplace("f32", make_shared<FloatType>(32));
-  type_map.emplace("f64", make_shared<FloatType>(64));
-  type_map.emplace("boolean", make_shared<BooleanType>());
-  type_map.emplace("void", make_shared<VoidType>());
+  type_names.emplace("string", make_shared<StringType>());
+  type_names.emplace("i8", make_shared<IntType>(8, false));
+  type_names.emplace("i16", make_shared<IntType>(16, false));
+  type_names.emplace("i32", make_shared<IntType>(32, false));
+  type_names.emplace("i64", make_shared<IntType>(64, false));
+  type_names.emplace("u8", make_shared<IntType>(8, true));
+  type_names.emplace("u16", make_shared<IntType>(16, true));
+  type_names.emplace("u32", make_shared<IntType>(32, true));
+  type_names.emplace("u64", make_shared<IntType>(64, true));
+  type_names.emplace("f8", make_shared<FloatType>(8));
+  type_names.emplace("f16", make_shared<FloatType>(16));
+  type_names.emplace("f32", make_shared<FloatType>(32));
+  type_names.emplace("f64", make_shared<FloatType>(64));
+  type_names.emplace("boolean", make_shared<BooleanType>());
+  type_names.emplace("void", make_shared<VoidType>());
 }
 
 void Env::set_type(const string &name, const shared_ptr<Type> &type) {
-  type_map.insert_or_assign(name, type);
+  type_names.insert_or_assign(name, type);
 }
 
 shared_ptr<Type> Env::get_type(const string &name) const {
-  auto it = type_map.find(name);
-  if (it != type_map.end()) {
+  auto it = type_names.find(name);
+  if (it != type_names.end()) {
     return it->second;
   }
 
@@ -46,18 +45,36 @@ shared_ptr<Type> Env::get_type(const string &name) const {
   return nullptr;
 }
 
-void Env::set_symbol(const string &name, const shared_ptr<Type> &symbol) {
-  symbol_map.insert_or_assign(name, symbol);
+void Env::set_variable(const string &name, const shared_ptr<Type> &variable) {
+  variables.insert_or_assign(name, variable);
 }
 
-shared_ptr<Type> Env::get_symbol(const string &name) const {
-  auto it = symbol_map.find(name);
-  if (it != symbol_map.end()) {
+shared_ptr<Type> Env::get_variable(const string &name) const {
+  auto it = variables.find(name);
+  if (it != variables.end()) {
     return it->second;
   }
 
   if (parent) {
-    return parent->get_symbol(name);
+    return parent->get_variable(name);
+  }
+
+  Logger::warn("Accessed to an undefined symbol `" + name + "`");
+  return nullptr;
+}
+
+void Env::set_function(const string &name, const shared_ptr<FunctionType> &function) {
+  functions.insert_or_assign(name, function);
+}
+
+shared_ptr<FunctionType> Env::get_function(const string &name) const {
+  auto it = functions.find(name);
+  if (it != functions.end()) {
+    return it->second;
+  }
+
+  if (parent) {
+    return parent->get_function(name);
   }
 
   Logger::warn("Accessed to an undefined symbol `" + name + "`");

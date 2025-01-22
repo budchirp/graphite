@@ -5,6 +5,7 @@
 #include "ast/expression.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/binary.hpp"
+#include "parser/parsers/expression/type.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "token/token_type.hpp"
 #include "types/boolean.hpp"
@@ -13,6 +14,19 @@
 unique_ptr<Expression> BinaryExpressionParser::parse() {
   const auto operator_token = parser->current_token;
   parser->eat_token();  // eat operator
+
+  if (operator_token.type == TOKEN_AS) {
+    parser->get_logger()->warn(
+        "The use of the `as` keyword is discouraged, as there is no assurance "
+        "that the specified type will match the type of the expression.",
+        LogTypes::Warn::SUGGESTION);
+
+    auto type = TypeExpressionParser(parser).parse();
+
+    return make_unique<BinaryExpression>(*left->get_position(),
+                                         type->get_type(), operator_token,
+                                         std::move(left), nullptr);
+  }
 
   auto right = ExpressionStatementParser(parser).parse_expression(
       PrecedenceHelper::precedence_for(operator_token.type));

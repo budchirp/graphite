@@ -24,7 +24,7 @@ class PointerType : public Type {
     return typeid(PointerType);
   }
 
-  string to_string() const override { return "*" + type->to_string(); };
+  string to_string() const override { return "*" + type->get_name(); };
   string to_string_tree() const override {
     return "PointerType(type: " + type->to_string_tree() + ")";
   };

@@ -9,6 +9,7 @@
 
 #include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
+#include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 #include "types/void.hpp"
 
@@ -70,12 +71,14 @@ void FunctionStatement::analyze(const shared_ptr<ProgramContext> &context) {
   proto->analyze(context);
   body->analyze(context);
 
-  auto _return = proto->return_type->get_type();
-  if (!Analyzer::compare(_return, make_shared<VoidType>()) &&
-      !Analyzer::compare(_return, body->get_type())) {
+  auto return_type = proto->return_type->get_type();
+  if (!Analyzer::compare(return_type, make_shared<VoidType>()) &&
+      !Analyzer::compare(return_type, body->get_type())) {
     Logger::error("Type mismatch on return statement\nExpected `" +
-                  _return->get_name() + "` Received `" +
-                  body->get_type()->get_name() + "`");
+                      return_type->to_string() + "` Received `" +
+                      body->get_type()->to_string() + "`",
+                  LogTypes::Error::TYPE_MISMATCH,
+                  proto->return_type->get_position());
   }
 
   context->set_env(env->get_parent());

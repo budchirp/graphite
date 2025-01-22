@@ -28,98 +28,102 @@ unique_ptr<ExpressionStatement> ExpressionStatementParser::parse() {
 
 map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>)>>
     prefix_parse_fns = {
-        {TokenType::TOKEN_IDENTIFIER,
+        {TOKEN_IDENTIFIER,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<VarRefExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_INT,
+        {TOKEN_INT,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<IntegerExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_STRING,
+        {TOKEN_STRING,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<StringExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_TRUE,
+        {TOKEN_TRUE,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<BooleanExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_FALSE,
+        {TOKEN_FALSE,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<BooleanExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_BANG,
+        {TOKEN_BANG,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
-        {TokenType::TOKEN_ASTERISK,
+        {TOKEN_ASTERISK,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
-        {TokenType::TOKEN_AMPERSAND,
+        {TOKEN_AMPERSAND,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
-        {TokenType::TOKEN_PLUS,
+        {TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
-        {TokenType::TOKEN_MINUS,
+        {TOKEN_MINUS,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<UnaryExpressionParser>(parser, nullptr);
          }},
-        {TokenType::TOKEN_LEFT_PARENTHESES,
+        {TOKEN_LEFT_PARENTHESES,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<GroupExpressionParser>(parser);
          }},
-        {TokenType::TOKEN_IF, [](const shared_ptr<Parser> &parser) {
+        {TOKEN_IF, [](const shared_ptr<Parser> &parser) {
            return make_unique<IfExpressionParser>(parser);
          }}};
 
 map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>,
                                                      unique_ptr<Expression> &)>>
     binary_parse_fns = {
-        {TokenType::TOKEN_PLUSPLUS,
+        {TOKEN_PLUSPLUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<UnaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_MINUSMINUS,
+        {TOKEN_MINUSMINUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<UnaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_PLUS,
+        {TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_MINUS,
+        {TOKEN_MINUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_SLASH,
+        {TOKEN_SLASH,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_ASTERISK,
+        {TOKEN_ASTERISK,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_EQUAL,
+        {TOKEN_EQUAL,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_NOT_EQUAL,
+        {TOKEN_NOT_EQUAL,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_LESS_THAN,
+        {TOKEN_LESS_THAN,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_GREATER_THAN,
+        {TOKEN_GREATER_THAN,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
          }},
-        {TokenType::TOKEN_LEFT_PARENTHESES,
+        {TOKEN_AS,
+         [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
+           return make_unique<BinaryExpressionParser>(parser, std::move(left));
+         }},
+        {TOKEN_LEFT_PARENTHESES,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<CallExpressionParser>(parser, std::move(left));
          }}};

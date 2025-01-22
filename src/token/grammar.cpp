@@ -1,8 +1,11 @@
 #include "token/grammar.hpp"
 
+#include "token/token_type.hpp"
+
 const unordered_map<string, TokenType> keywords = {
-    {"fn", TokenType::TOKEN_FUN}, {"extern", TokenType::TOKEN_EXTERN},
-    {"if", TokenType::TOKEN_IF}, {"else", TokenType::TOKEN_ELSE},
-    {"var", TokenType::TOKEN_VAR}, {"return", TokenType::TOKEN_RETURN},
-    {"true", TokenType::TOKEN_TRUE}, {"false", TokenType::TOKEN_FALSE},
-    {"for", TokenType::TOKEN_FOR}, {"while", TokenType::TOKEN_WHILE}};
+    {"fn", TOKEN_FUN},    {"extern", TOKEN_EXTERN},
+    {"if", TOKEN_IF},     {"else", TOKEN_ELSE},
+    {"var", TOKEN_VAR},   {"return", TOKEN_RETURN},
+    {"true", TOKEN_TRUE}, {"false", TOKEN_FALSE},
+    {"for", TOKEN_FOR},   {"while", TOKEN_WHILE},
+    {"as", TOKEN_AS}};

@@ -64,7 +64,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
     return nullptr;
   }
 
-  parser->get_program()->get_env()->set_symbol(name->get_value(),
+  parser->get_program()->get_env()->set_variable(name->get_value(),
                                                type->get_type());
 
   return make_unique<VarStatement>(position, 

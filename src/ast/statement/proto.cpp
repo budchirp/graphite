@@ -17,10 +17,10 @@ Value *ProtoStatement::codegen(
 Function *ProtoStatement::codegen_function(
     const shared_ptr<CodegenContext> &context) const {
   auto function = Function::Create(
-      static_cast<FunctionType *>(context->get_program_context()
-                                      ->get_env()
-                                      ->get_type(name->get_value())
-                                      ->to_llvm(context->llvm_context)),
+      static_cast<llvm::FunctionType *>(context->get_program_context()
+                                            ->get_env()
+                                            ->get_function(name->get_value())
+                                            ->to_llvm(context->llvm_context)),
       Function::ExternalLinkage, name->get_value(), context->module.get());
 
   int idx = 0;

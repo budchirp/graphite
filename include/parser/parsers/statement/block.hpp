@@ -8,10 +8,10 @@
 using namespace std;
 
 class BlockStatementParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit BlockStatementParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 

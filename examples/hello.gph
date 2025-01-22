@@ -4,9 +4,12 @@ extern print_number(number: i32) -> void
 extern add(a: i32, b: i32) -> i32
 
 fn add_ptr(a: *i32, b: *i32) -> i32 {
+  print_number(a as i32)
+
   return add(*a, *b)
 }
 
+# comment
 fn main(argc: i32) -> i32 {
   printf("start\n")
   print_number(argc)

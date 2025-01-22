@@ -18,17 +18,18 @@ class PrecedenceHelper {
  public:
   static Precedence precedence_for(const TokenType &tokenType) {
     static const std::unordered_map<TokenType, Precedence> precedenceMap = {
-        {TokenType::TOKEN_EQUAL, Precedence::EQUALS},
-        {TokenType::TOKEN_NOT_EQUAL, Precedence::EQUALS},
-        {TokenType::TOKEN_LESS_THAN, Precedence::LESSGREATER},
-        {TokenType::TOKEN_GREATER_THAN, Precedence::LESSGREATER},
-        {TokenType::TOKEN_PLUS, Precedence::SUM},
-        {TokenType::TOKEN_MINUS, Precedence::SUM},
-        {TokenType::TOKEN_PLUSPLUS, Precedence::SUM},
-        {TokenType::TOKEN_MINUSMINUS, Precedence::SUM},
-        {TokenType::TOKEN_SLASH, Precedence::PRODUCT},
-        {TokenType::TOKEN_ASTERISK, Precedence::PRODUCT},
-        {TokenType::TOKEN_LEFT_PARENTHESES, Precedence::CALL}};
+        {TOKEN_AS, Precedence::CALL},
+        {TOKEN_EQUAL, Precedence::EQUALS},
+        {TOKEN_NOT_EQUAL, Precedence::EQUALS},
+        {TOKEN_LESS_THAN, Precedence::LESSGREATER},
+        {TOKEN_GREATER_THAN, Precedence::LESSGREATER},
+        {TOKEN_PLUS, Precedence::SUM},
+        {TOKEN_MINUS, Precedence::SUM},
+        {TOKEN_PLUSPLUS, Precedence::SUM},
+        {TOKEN_MINUSMINUS, Precedence::SUM},
+        {TOKEN_SLASH, Precedence::PRODUCT},
+        {TOKEN_ASTERISK, Precedence::PRODUCT},
+        {TOKEN_LEFT_PARENTHESES, Precedence::CALL}};
 
     if (const auto it = precedenceMap.find(tokenType);
         it != precedenceMap.end()) {

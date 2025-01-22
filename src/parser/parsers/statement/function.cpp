@@ -36,7 +36,7 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
 
   vector<shared_ptr<Type>> parameter_types;
   for (const auto &[name, type] : proto->parameters) {
-    env->set_symbol(name->get_value(), type->get_type());
+    env->set_variable(name->get_value(), type->get_type());
 
     parameter_types.push_back(type->get_type());
   }
@@ -49,11 +49,10 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   }
 
   auto parent_env = env->get_parent();
-  parent_env->set_type(proto->name->get_value(),
-                       make_shared<FunctionType>(
-                           parameter_types, proto->return_type->get_type()));
-  parent_env->set_symbol(proto->name->get_value(),
-                         proto->return_type->get_type());
+  parent_env->set_function(
+      proto->name->get_value(),
+      make_shared<FunctionType>(parameter_types,
+                                proto->return_type->get_type()));
 
   parser->get_program()->set_env(parent_env);
 
