@@ -48,7 +48,9 @@ Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
     value = ptr;
   }
 
-  context->get_env()->get_variable(name->get_identifier())->add_llvm_value(value);
+  context->get_env()
+      ->get_variable(name->get_identifier())
+      ->add_llvm_value(value);
 
   return value;
 }
@@ -72,14 +74,16 @@ void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
 string VarStatement::to_string() const {
   ostringstream oss;
   oss << "var " << name->to_string() << ": " << variable_type->to_string()
-      << " = " << expression->to_string();
+      << expression
+      ? (" = " + expression->to_string())
+      : "";
   return oss.str();
 }
 
 string VarStatement::to_string_tree() const {
   ostringstream oss;
   oss << "VarStatement(name: " + name->to_string_tree() + ", expression: "
-      << expression->to_string_tree()
+      << (expression ? expression->to_string_tree() : "empty")
       << ", type: " << variable_type->to_string_tree() << ")";
   return oss.str();
 }

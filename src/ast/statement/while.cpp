@@ -62,6 +62,11 @@ void WhileStatement::analyze(const shared_ptr<ProgramContext> &context) {
   body->analyze(context);
 }
 
-string WhileStatement::to_string() const { return "for"; }
+string WhileStatement::to_string() const {
+  return "while (" + condition->to_string() + ") " + body->to_string();
+}
 
-string WhileStatement::to_string_tree() const { return "WhileStatement()"; }
+string WhileStatement::to_string_tree() const {
+  return "WhileStatement(condition: " + condition->to_string_tree() +
+         ", body: " + body->to_string_tree() + ")";
+}

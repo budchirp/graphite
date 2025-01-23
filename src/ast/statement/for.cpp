@@ -85,6 +85,14 @@ void ForStatement::analyze(const shared_ptr<ProgramContext> &context) {
   body->analyze(context);
 }
 
-string ForStatement::to_string() const { return "for"; }
+string ForStatement::to_string() const {
+  return "for (" + init->to_string() + "; " + condition->to_string() + "; " +
+         increment->to_string() + ") " + body->to_string();
+}
 
-string ForStatement::to_string_tree() const { return "ForStatement()"; }
+string ForStatement::to_string_tree() const {
+  return "ForStatement(init: " + init->to_string_tree() +
+         ", condition: " + condition->to_string_tree() +
+         ", increment: " + increment->to_string_tree() +
+         ", body: " + body->to_string_tree() + ")";
+}

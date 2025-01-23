@@ -96,6 +96,7 @@ string IfExpression::to_string_tree() const {
   result << "IfExpression(type: " + type->to_string_tree() + ", condition: "
          << condition->to_string_tree()
          << ", consequence: " << consequence->to_string_tree()
-         << ", alternative: " << alternative->to_string_tree() << ")";
+         << ", alternative: "
+         << (alternative ? alternative->to_string_tree() : "empty") << ")";
   return result.str();
 }

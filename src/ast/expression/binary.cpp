@@ -4,6 +4,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
 
+#include <ios>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -51,7 +52,8 @@ llvm::Value *BinaryExpression::codegen(
   switch (op.type) {
     case TOKEN_ASSIGN: {
       if (auto *variable = dynamic_cast<VarRefExpression *>(left.get())) {
-        auto ptr = context->get_env()->get_variable(variable->get_name())->value;
+        auto ptr =
+            context->get_env()->get_variable(variable->get_name())->value;
         context->builder->CreateStore(right_value, ptr);
         return right_value;
       }
@@ -203,7 +205,8 @@ void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
       }
 
       auto type_operations = operations.at(left_type->get_type_info().name());
-      auto operations_it = find(type_operations.begin(), type_operations.end(), op.type);
+      auto operations_it =
+          find(type_operations.begin(), type_operations.end(), op.type);
       if (operations_it == type_operations.end()) {
         Logger::error(
             "Unsupported operation for type `" + left_type->to_string() + "`",
@@ -220,7 +223,8 @@ string BinaryExpression::to_string() const {
 }
 
 string BinaryExpression::to_string_tree() const {
-  return "BinaryExpression(type: " + type->to_string_tree() + ", op: '" +
-         op.to_string() + "', left: " + left->to_string_tree() +
+  return "BinaryExpression(type: " + (type ? type->to_string_tree() : "") +
+         ", op: " + op.literal +
+         ", left: " + left->to_string_tree() +
          ", right: " + right->to_string_tree() + ")";
 }
