@@ -30,7 +30,12 @@
 - [ ] Classes
 - [ ] Stdlib
 - [ ] Maps
+- [ ] Scope management and ownership system similar to crab lang
 - [ ] Switch expression
 - [ ] CLI
 
+- [ ] Multiple codegen backend support
+
 - [ ] Fix bugs with pointers
+
+- [ ] ~~Add unit tests~~

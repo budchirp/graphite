@@ -17,7 +17,7 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
 endif()
 
 add_compile_options(
-  -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wnull-dereference -Wnon-virtual-dtor -Woverloaded-virtual -Wdouble-promotion -fstack-protector-strong -fno-omit-frame-pointer -pie -fPIE -Wno-sign-compare -Wno-shadow
+  -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wnull-dereference -Wnon-virtual-dtor -Woverloaded-virtual -Wdouble-promotion -fstack-protector-strong -fno-omit-frame-pointer -pie -fPIE -Wno-sign-compare -Wno-shadow
 )
 
 include(FetchContent)
