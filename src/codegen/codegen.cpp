@@ -59,7 +59,7 @@ void Codegen::optimize() {
 }
 
 Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
-                          Value *value, llvm::Type *expectedType) {
+                          Value *value, llvm::Type *expectedType, bool strict) {
   if (value->getType()->isPointerTy() || expectedType->isPointerTy())
     return value;
 
@@ -94,5 +94,5 @@ Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
     return context->builder->CreateFPToSI(value, expectedType);
   }
 
-  return nullptr;
+  return strict ? nullptr : value;
 }

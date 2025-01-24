@@ -124,9 +124,8 @@ void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
     case TOKEN_PLUSPLUS:
     case TOKEN_MINUS:
     case TOKEN_PLUS: {
-      if (!context->get_env()
-               ->get_variable(expression->get_name())
-               ->is_mutable) {
+      auto variable = context->get_env()->get_variable(expression->get_name());
+      if (!variable->is_mutable) {
         Logger::error("Cannot mutate an immutable variable",
                       LogTypes::Error::SYNTAX, &position);
         return;

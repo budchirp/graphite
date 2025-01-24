@@ -30,12 +30,13 @@ void Env::init() {
   type_names.emplace("void", make_shared<VoidType>());
   type_names.emplace("null", make_shared<NullType>(nullptr));
 
+  auto null_type = make_shared<NullType>(nullptr);
   variables.emplace(
-      "null", make_shared<EnvVariable>(make_shared<NullType>(nullptr), false));
-  variables.emplace(
-      "nullptr",
-      make_shared<EnvVariable>(
-          make_shared<PointerType>(make_shared<NullType>(nullptr)), false));
+      "null", make_shared<EnvVariable>(null_type, null_type, false, true));
+
+  auto nullptr_type = make_shared<PointerType>(make_shared<NullType>(nullptr));
+  variables.emplace("nullptr", make_shared<EnvVariable>(
+                                   nullptr_type, nullptr_type, false, true));
 }
 
 void Env::add_type(const string &name, const shared_ptr<Type> &type) {

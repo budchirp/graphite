@@ -19,6 +19,7 @@ class VarStatement : public Statement {
   Position position;
 
   bool is_mutable;
+  bool is_initialized;
 
   unique_ptr<IdentifierExpression> name;
   unique_ptr<TypeExpression> variable_type;
@@ -26,11 +27,13 @@ class VarStatement : public Statement {
 
  public:
   explicit VarStatement(const Position &position, const bool &is_mutable,
+                        const bool &is_initialized,
                         unique_ptr<IdentifierExpression> name,
                         unique_ptr<TypeExpression> variable_type,
                         unique_ptr<Expression> expression)
       : position(position),
         is_mutable(is_mutable),
+        is_initialized(is_initialized),
         name(std::move(name)),
         variable_type(std::move(variable_type)),
         expression(std::move(expression)) {};

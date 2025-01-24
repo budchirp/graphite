@@ -83,7 +83,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
     parser->eat_token();  // eat =
 
     expression =
-        expression_statement_parser.parse_expression(Precedence::LOWEST);
+        expression_statement_parser.parse_expression(type, Precedence::LOWEST);
     if (!expression) {
       parser->get_logger()->error(
           "Failed to parse the expression of the variable statement",
@@ -92,22 +92,26 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
     }
   }
 
+  shared_ptr<Type> new_type = type;
   if (!expression) {
-    if (auto pointer_type = Analyzer::is_pointer(type); pointer_type.first) {
-      type = make_shared<PointerType>(
-          make_shared<NullType>(pointer_type.second->type));
+    if (!Analyzer::is_null(type).first ||
+        !Analyzer::is_null(Analyzer::is_pointer(type).second).first) {
+      if (auto pointer_type = Analyzer::is_pointer(type); pointer_type.first) {
+        new_type = make_shared<PointerType>(
+            make_shared<NullType>(pointer_type.second->pointee_type));
+      }
+
+      new_type = make_shared<NullType>(type);
     }
-
-    type = make_shared<NullType>(type);
-
-    is_mutable = true;
   }
 
   parser->get_program()->get_env()->add_variable(
-      name_expression->get_identifier(), make_shared<EnvVariable>(type, is_mutable));
+      name_expression->get_identifier(),
+      make_shared<EnvVariable>(new_type, type, is_mutable,
+                               expression != nullptr));
 
   return make_unique<VarStatement>(
-      position, is_mutable, std::move(name_expression),
+      position, is_mutable, expression != nullptr, std::move(name_expression),
       make_unique<TypeExpression>(position, std::move(type)),
       std::move(expression));
 }

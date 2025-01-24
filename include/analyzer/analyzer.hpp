@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "ast/program.hpp"
+#include "types/array.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
 #include "types/function.hpp"
@@ -34,7 +35,7 @@ class Analyzer {
   static pair<bool, shared_ptr<StringType>> is_string(
       const shared_ptr<Type> &type) {
     if (auto [is_ptr, ptr] = is_pointer(type); is_ptr) {
-      auto pointer = dynamic_pointer_cast<StringType>(ptr->type);
+      auto pointer = dynamic_pointer_cast<StringType>(ptr->pointee_type);
 
       return {pointer != nullptr, pointer};
     }
@@ -46,6 +47,13 @@ class Analyzer {
     auto int_type = dynamic_pointer_cast<IntType>(type);
 
     return {int_type != nullptr, int_type};
+  }
+
+  static pair<bool, shared_ptr<ArrayType>> is_array(
+      const shared_ptr<Type> &type) {
+    auto array_type = dynamic_pointer_cast<ArrayType>(type);
+
+    return {array_type != nullptr, array_type};
   }
 
   static pair<bool, shared_ptr<BooleanType>> is_boolean(
@@ -85,14 +93,19 @@ class Analyzer {
 
   static bool compare(const shared_ptr<Type> &a, const shared_ptr<Type> &b,
                       bool allow_null = false) {
-    if (allow_null && (is_null(a).first)) {
+    if (allow_null && (is_null(a).first || is_null(b).first)) {
       return true;
     }
 
     auto a_pointer_type = is_pointer(a);
     auto b_pointer_type = is_pointer(b);
     if (a_pointer_type.first && b_pointer_type.first) {
-      return compare(a_pointer_type.second->type, b_pointer_type.second->type);
+      if (allow_null && (is_null(a_pointer_type.second->pointee_type).first ||
+                         is_null(b_pointer_type.second->pointee_type).first)) {
+        return true;
+      }
+
+      return compare(a_pointer_type.second->pointee_type, b_pointer_type.second->pointee_type);
     }
 
     return a->get_type_info() == b->get_type_info();

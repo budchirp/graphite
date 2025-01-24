@@ -25,5 +25,6 @@ class Codegen {
   void optimize();
 
   static llvm::Value *cast_type(const shared_ptr<CodegenContext> &context,
-                                llvm::Value *value, llvm::Type *expectedType);
+                                llvm::Value *value, llvm::Type *expectedType,
+                                bool strict = true);
 };

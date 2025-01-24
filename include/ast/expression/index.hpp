@@ -2,33 +2,38 @@
 
 #include <llvm/IR/Value.h>
 
+#include <memory>
 #include <string>
 
 #include "ast/expression.hpp"
+#include "ast/expression/var_ref.hpp"
 #include "lexer/position.hpp"
 #include "types/type.hpp"
 
 using namespace std;
 
-class IntegerExpression : public Expression {
+class IndexExpression : public Expression {
  private:
   Position position;
 
   shared_ptr<Type> type;
 
-  long long value;
+  unique_ptr<VarRefExpression> variable;
+  unique_ptr<Expression> index;
 
  public:
-  explicit IntegerExpression(const Position &position,
-                             const shared_ptr<Type> &type,
-                             const long long &value)
-      : position(position), type(type), value(value) {};
+  explicit IndexExpression(const Position &position,
+                           const shared_ptr<Type> &type,
+                           unique_ptr<VarRefExpression> variable,
+                           unique_ptr<Expression> index)
+      : position(position),
+        type(type),
+        variable(std::move(variable)),
+        index(std::move(index)) {};
 
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;
   void analyze(const shared_ptr<ProgramContext> &context) override;
-  
-  long long get_value() const { return value; };
 
   Position *get_position() override { return &position; };
 

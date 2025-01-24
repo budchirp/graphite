@@ -13,12 +13,23 @@ using namespace std;
 
 struct EnvVariable {
   shared_ptr<Type> type;
+  shared_ptr<Type> actual_type;
+
   llvm::Value *value;
+
   bool is_mutable;
+  bool is_initialized;
 
-  explicit EnvVariable(const shared_ptr<Type> &type, bool is_mutable)
-      : type(type), value(nullptr), is_mutable(is_mutable) {}
+  explicit EnvVariable(const shared_ptr<Type> &type,
+                       const shared_ptr<Type> &actual_type, bool is_mutable,
+                       bool is_initialized)
+      : type(type),
+        actual_type(actual_type),
+        value(nullptr),
+        is_mutable(is_mutable),
+        is_initialized(is_initialized) {}
 
+  void set_type(const shared_ptr<Type> &type) { this->type = type; }
   void add_llvm_value(llvm::Value *value) { this->value = value; }
 };
 

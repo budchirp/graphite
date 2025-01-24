@@ -29,7 +29,7 @@ llvm::Value *CallExpression::codegen(
   size_t idx = 0;
 
   for (const auto &argument : arguments) {
-    llvm::Value *argument_value = argument->codegen(context);
+    auto argument_value = argument->codegen(context);
     if (!argument_value) {
       Logger::error("Failed to generate low level code for argument `" +
                         argument->to_string() + "` in function `" +
@@ -45,7 +45,7 @@ llvm::Value *CallExpression::codegen(
                               ->type->parameters[idx++]
                               .second->to_llvm(context->llvm_context));
     if (!argument_value) {
-      Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
+      Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, argument->get_position());
       return nullptr;
     }
 
@@ -104,7 +104,6 @@ string CallExpression::to_string() const {
   }
 
   result << ")";
-
   return result.str();
 }
 
@@ -121,6 +120,5 @@ string CallExpression::to_string_tree() const {
   }
 
   result << "])";
-
   return result.str();
 }

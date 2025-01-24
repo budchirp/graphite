@@ -42,7 +42,9 @@ llvm::Value *BinaryExpression::codegen(
 
   auto type = left->get_type();
   auto llvm_type = type->to_llvm(context->llvm_context);
-  right_value = Codegen::cast_type(context, right_value, llvm_type);
+  right_value = Codegen::cast_type(
+      context, right_value, llvm_type,
+      !(op.type == TOKEN_EQUAL || op.type == TOKEN_NOT_EQUAL));
   if (!right_value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                   right->get_position());
@@ -51,11 +53,12 @@ llvm::Value *BinaryExpression::codegen(
 
   switch (op.type) {
     case TOKEN_ASSIGN: {
-      if (auto *variable = dynamic_cast<VarRefExpression *>(left.get())) {
-        auto ptr =
-            context->get_env()->get_variable(variable->get_name())->value;
-        context->builder->CreateStore(right_value, ptr);
-        return right_value;
+      if (auto *variable_expression =
+              dynamic_cast<VarRefExpression *>(left.get())) {
+        auto variable =
+            context->get_env()->get_variable(variable_expression->get_name());
+        context->builder->CreateStore(right_value, variable->value);
+        return variable->value;
       }
 
       return nullptr;
@@ -224,7 +227,6 @@ string BinaryExpression::to_string() const {
 
 string BinaryExpression::to_string_tree() const {
   return "BinaryExpression(type: " + (type ? type->to_string_tree() : "") +
-         ", op: " + op.literal +
-         ", left: " + left->to_string_tree() +
+         ", op: " + op.literal + ", left: " + left->to_string_tree() +
          ", right: " + right->to_string_tree() + ")";
 }

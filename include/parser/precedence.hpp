@@ -17,7 +17,8 @@ enum class Precedence {
 class PrecedenceHelper {
  public:
   static Precedence precedence_for(const TokenType &tokenType) {
-    static const std::unordered_map<TokenType, Precedence> precedenceMap = {
+    static const std::unordered_map<TokenType, Precedence> precedence_map = {
+        {TOKEN_LEFT_BRACKET, Precedence::CALL},
         {TOKEN_AS, Precedence::CALL},
         {TOKEN_ASSIGN, Precedence::CALL},
         {TOKEN_BANG_BANG, Precedence::CALL},
@@ -33,8 +34,8 @@ class PrecedenceHelper {
         {TOKEN_ASTERISK, Precedence::PRODUCT},
         {TOKEN_LEFT_PARENTHESES, Precedence::CALL}};
 
-    if (const auto it = precedenceMap.find(tokenType);
-        it != precedenceMap.end()) {
+    if (const auto it = precedence_map.find(tokenType);
+        it != precedence_map.end()) {
       return it->second;
     }
 

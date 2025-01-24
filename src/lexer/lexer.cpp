@@ -153,6 +153,18 @@ Token Lexer::next_token() {
       token = Token(TOKEN_LEFT_BRACE, "{");
       break;
 
+    case '}':
+      token = Token(TOKEN_RIGHT_BRACE, "}");
+      break;
+
+    case '[':
+      token = Token(TOKEN_LEFT_BRACKET, "[");
+      break;
+
+    case ']':
+      token = Token(TOKEN_RIGHT_BRACKET, "]");
+      break;
+
     case '"': {
       eat_char();  // eat "
 
@@ -182,10 +194,6 @@ Token Lexer::next_token() {
       token = Token(TOKEN_STRING, str);
       break;
     }
-
-    case '}':
-      token = Token(TOKEN_RIGHT_BRACE, "}");
-      break;
 
     case '\0':
       token = Token(TOKEN_EOF, "");

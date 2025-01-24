@@ -1,6 +1,5 @@
 #include "parser/parsers/expression/unary.hpp"
 
-#include <iostream>
 #include <memory>
 
 #include "analyzer/analyzer.hpp"
@@ -39,8 +38,8 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
     switch (op_token.type) {
       case TOKEN_BANG_BANG: {
         if (auto null_type = Analyzer::is_null(type);
-            null_type.first && null_type.second->type) {
-          type = null_type.second->type;
+            null_type.first && null_type.second->child_type) {
+          type = null_type.second->child_type;
         } else {
           parser->get_logger()->error(
               "Trying to make a non-null value non-null",
@@ -48,9 +47,8 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
           return nullptr;
         }
 
-        return make_unique<VarRefExpression>(
-            *expression->get_position(), type,
-            expression->get_name());
+        return make_unique<VarRefExpression>(*expression->get_position(), type,
+                                             expression->get_name());
 
         break;
       }
@@ -62,8 +60,10 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
     op_token = parser->current_token;
     parser->eat_token();  // eat prefix
 
-    unique_ptr<VarRefExpression> _expression(
-        dynamic_cast<VarRefExpression *>(ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST).release()));
+    unique_ptr<VarRefExpression> _expression(dynamic_cast<VarRefExpression *>(
+        ExpressionStatementParser(parser)
+            .parse_expression(Precedence::LOWEST)
+            .release()));
     if (!_expression) {
       parser->get_logger()->error("Expected variable reference expression",
                                   LogTypes::Error::SYNTAX);
@@ -77,7 +77,7 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
       case TOKEN_ASTERISK: {
         if (auto pointer_type = Analyzer::is_pointer(type);
             pointer_type.first) {
-          type = pointer_type.second->type;
+          type = pointer_type.second->pointee_type;
         } else {
           parser->get_logger()->error("Cannot dereference non-pointer type",
                                       LogTypes::Error::TYPE_MISMATCH);

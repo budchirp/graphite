@@ -24,7 +24,7 @@
 - [x] For & While statement
 - [x] Object generation
 - [x] Code optimization (idk how well it works)
-- [ ] Arrays
+- [x] Arrays
 - [ ] Structs
 - [ ] Module management
 - [ ] Classes

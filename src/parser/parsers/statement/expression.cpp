@@ -5,11 +5,13 @@
 #include <memory>
 
 #include "logger/log_types.hpp"
+#include "parser/parsers/expression/array.hpp"
 #include "parser/parsers/expression/binary.hpp"
 #include "parser/parsers/expression/boolean.hpp"
 #include "parser/parsers/expression/call.hpp"
 #include "parser/parsers/expression/group.hpp"
 #include "parser/parsers/expression/if.hpp"
+#include "parser/parsers/expression/index.hpp"
 #include "parser/parsers/expression/integer.hpp"
 #include "parser/parsers/expression/parser.hpp"
 #include "parser/parsers/expression/string.hpp"
@@ -40,6 +42,10 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>)>>
         {TOKEN_STRING,
          [](const shared_ptr<Parser> &parser) {
            return make_unique<StringExpressionParser>(parser);
+         }},
+        {TOKEN_LEFT_BRACKET,
+         [](const shared_ptr<Parser> &parser) {
+           return make_unique<ArrayExpressionParser>(parser);
          }},
         {TOKEN_TRUE,
          [](const shared_ptr<Parser> &parser) {
@@ -92,6 +98,10 @@ map<TokenType, function<unique_ptr<ExpressionParser>(shared_ptr<Parser>,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<UnaryExpressionParser>(parser, std::move(left));
          }},
+        {TOKEN_LEFT_BRACKET,
+         [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
+           return make_unique<IndexExpressionParser>(parser, std::move(left));
+         }},
         {TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser, unique_ptr<Expression> &left) {
            return make_unique<BinaryExpressionParser>(parser, std::move(left));
@@ -142,7 +152,7 @@ unique_ptr<Expression> ExpressionStatementParser::parse_expression(
   auto prefix_parser_it = prefix_parse_fns.find(parser->current_token.type);
   if (prefix_parser_it == prefix_parse_fns.end()) {
     parser->get_logger()->error(
-        "Unknown prefix: " + parser->current_token.to_string(),
+        "Unknown prefix / postfix: " + parser->current_token.to_string(),
         LogTypes::Error::SYNTAX);
   }
 
@@ -151,14 +161,34 @@ unique_ptr<Expression> ExpressionStatementParser::parse_expression(
 
   while (PrecedenceHelper::precedence_for(parser->current_token.type) >
          precedence) {
-    auto infix_parser_it = binary_parse_fns.find(parser->current_token.type);
-    if (infix_parser_it == binary_parse_fns.end()) {
+    auto unary_parser_it = binary_parse_fns.find(parser->current_token.type);
+    if (unary_parser_it == binary_parse_fns.end()) {
       break;
     }
 
-    auto infix_parser = infix_parser_it->second(parser, expression);
-    expression = infix_parser->parse();
+    auto unary_parser = unary_parser_it->second(parser, expression);
+    expression = unary_parser->parse();
   }
 
   return expression;
+}
+
+unique_ptr<Expression> ExpressionStatementParser::parse_expression(
+    const shared_ptr<Type> &type, Precedence precedence) {
+  switch (parser->current_token.type) {
+    case TOKEN_INT: {
+      return IntegerExpressionParser(parser).parse_integer(type);
+      break;
+    }
+
+    case TOKEN_LEFT_BRACKET: {
+      return ArrayExpressionParser(parser).parse_array(type);
+      break;
+    }
+
+    default: {
+      return parse_expression(precedence);
+      break;
+    }
+  }
 }

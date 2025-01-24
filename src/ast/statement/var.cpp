@@ -18,10 +18,12 @@ using namespace llvm;
 
 Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
   Value *value;
-  if (expression) {
+  if (is_initialized) {
     value = expression->codegen(context);
   } else if (Analyzer::is_pointer(variable_type->get_type()).first) {
     value = context->get_env()->get_variable("nullptr")->value;
+  } else if (Analyzer::is_array(variable_type->get_type()).first) {
+    value = context->builder->CreateAlloca(variable_type->get_type()->to_llvm(context->llvm_context), nullptr, "array");
   } else {
     value = context->get_env()->get_variable("null")->value;
   }
@@ -41,7 +43,7 @@ Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
     return nullptr;
   }
 
-  if (is_mutable) {
+  if (!is_initialized || is_mutable) {
     auto ptr = context->builder->CreateAlloca(type, nullptr, "addr");
     context->builder->CreateStore(value, ptr);
 

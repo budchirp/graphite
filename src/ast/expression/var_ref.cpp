@@ -4,7 +4,6 @@
 #include <alloca.h>
 #include <llvm/IR/Value.h>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
 
@@ -20,9 +19,7 @@ Value *VarRefExpression::codegen(
   }
 
   auto value = variable->value;
-  if (Analyzer::is_pointer(type).first) return value;
-
-  return value->getType()->isPointerTy()
+  return (!variable->is_initialized || variable->is_mutable)
              ? context->builder->CreateLoad(
                    type->to_llvm(context->llvm_context), value, "load")
              : value;

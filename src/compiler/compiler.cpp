@@ -46,7 +46,7 @@ void Compiler::compile(const filesystem::path &source_file_path,
 
   _objs.insert(_objs.end(), objs.begin(), objs.end());
   compile_objects(_objs, filename);
-};
+}
 
 void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto filename = source_file_path.filename().stem().string();
@@ -82,8 +82,8 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto codegen_context = make_shared<CodegenContext>(program_context);
   auto codegen = make_shared<Codegen>(codegen_context);
   codegen->codegen(program);
-  codegen->optimize();
   codegen_context->module->print(llvm::errs(), nullptr);
+  codegen->optimize();
 
   error_code err_code;
   llvm::raw_fd_ostream output_file(source_file_path.stem().string() + ".o",
