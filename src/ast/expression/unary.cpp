@@ -6,18 +6,15 @@
 #include <memory>
 #include <string>
 
-#include "analyzer/analyzer.hpp"
 #include "ast/expression/var_ref.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
-#include "token/token_type.hpp"
+#include "semantic/type_helper.hpp"
 #include "types/boolean.hpp"
 #include "types/int.hpp"
 
-using namespace llvm;
-
-Value *UnaryExpression::codegen(
+llvm::Value *UnaryExpression::codegen(
     const shared_ptr<CodegenContext> &context) const {
   auto value = expression->codegen(context);
   if (!value) {
@@ -35,7 +32,7 @@ Value *UnaryExpression::codegen(
     }
 
     case TOKEN_AMPERSAND: {
-      AllocaInst *alloca =
+      llvm::AllocaInst *alloca =
           context->builder->CreateAlloca(llvm_type, nullptr, "addr");
       context->builder->CreateStore(value, alloca);
 
@@ -43,9 +40,9 @@ Value *UnaryExpression::codegen(
     }
 
     case TOKEN_MINUS: {
-      if (Analyzer::is_int(type).first) {
+      if (TypeHelper::is_int(type)) {
         return context->builder->CreateNeg(value, "neg");
-      } else if (Analyzer::is_float(type).first) {
+      } else if (TypeHelper::is_float(type)) {
         return context->builder->CreateFNeg(value, "neg");
       }
 
@@ -61,17 +58,19 @@ Value *UnaryExpression::codegen(
     }
 
     case TOKEN_MINUSMINUS: {
-      Value *new_value;
-      if (Analyzer::is_int(type).first) {
+      llvm::Value *new_value;
+      if (TypeHelper::is_int(type)) {
         new_value = context->builder->CreateSub(
-            value, ConstantInt::get(llvm_type, 1), "dec");
+            value, llvm::ConstantInt::get(llvm_type, 1), "dec");
       } else {
         new_value = context->builder->CreateFSub(
-            value, ConstantFP::get(llvm_type, 1.0), "dec");
+            value, llvm::ConstantFP::get(llvm_type, 1.0), "dec");
       }
 
-      auto ptr =
-          context->get_env()->get_variable(expression->get_name())->value;
+      auto ptr = context->get_env()
+                     ->get_current_scope()
+                     ->get_variable(expression->get_name())
+                     ->value;
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;
@@ -79,17 +78,19 @@ Value *UnaryExpression::codegen(
     }
 
     case TOKEN_PLUSPLUS: {
-      Value *new_value;
-      if (Analyzer::is_int(type).first) {
+      llvm::Value *new_value;
+      if (TypeHelper::is_int(type)) {
         new_value = context->builder->CreateAdd(
-            value, ConstantInt::get(llvm_type, 1), "inc");
+            value, llvm::ConstantInt::get(llvm_type, 1), "inc");
       } else {
         new_value = context->builder->CreateFAdd(
-            value, ConstantFP::get(llvm_type, 1.0), "inc");
+            value, llvm::ConstantFP::get(llvm_type, 1.0), "inc");
       }
 
-      auto ptr =
-          context->get_env()->get_variable(expression->get_name())->value;
+      auto ptr = context->get_env()
+                     ->get_current_scope()
+                     ->get_variable(expression->get_name())
+                     ->value;
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;
@@ -100,8 +101,8 @@ Value *UnaryExpression::codegen(
   }
 }
 
-void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  expression->analyze(context);
+void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
+  expression->validate(context);
 
   switch (op.type) {
     case TOKEN_ASTERISK:
@@ -110,8 +111,8 @@ void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_BANG: {
-      if (!Analyzer::compare(expression->get_type(),
-                             make_shared<BooleanType>())) {
+      if (!TypeHelper::compare(expression->get_type(),
+                               make_shared<BooleanType>())) {
         Logger::error("Bang operator only supported with booleans",
                       LogTypes::Error::TYPE_MISMATCH, &position);
         return;
@@ -124,15 +125,16 @@ void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
     case TOKEN_PLUSPLUS:
     case TOKEN_MINUS:
     case TOKEN_PLUS: {
-      auto variable = context->get_env()->get_variable(expression->get_name());
+      auto variable = context->get_env()->get_current_scope()->get_variable(
+          expression->get_name());
       if (!variable->is_mutable) {
         Logger::error("Cannot mutate an immutable variable",
                       LogTypes::Error::SYNTAX, &position);
         return;
       }
 
-      if (!Analyzer::compare(expression->get_type(),
-                             make_shared<IntType>(32, false))) {
+      if (!TypeHelper::compare(expression->get_type(),
+                               make_shared<IntType>(32, false))) {
         Logger::error(
             op.literal + " operator only supported with integer or floats",
             LogTypes::Error::TYPE_MISMATCH, &position);
@@ -147,6 +149,44 @@ void UnaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
                     LogTypes::Error::SYNTAX, &position);
       return;
     }
+  }
+}
+
+void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
+  expression->resolve_types(context);
+
+  auto expression_type = expression->get_type();
+  switch (op.type) {
+    case TOKEN_BANG_BANG: {
+      if (auto null_type = TypeHelper::is_null(expression_type)) {
+        type = null_type->child_type;
+      } else {
+        Logger::error("Trying to make a non-null type non-null", LogTypes::Error::TYPE_MISMATCH, expression->get_position());
+        return;
+      }
+
+      break;
+    }
+
+    case TOKEN_ASTERISK: {
+      if (auto pointer_type = TypeHelper::is_pointer(expression_type)) {
+        type = pointer_type->pointee_type;
+      } else {
+        Logger::error("Cannot dereference non-pointer type", LogTypes::Error::TYPE_MISMATCH, expression->get_position());
+        return;
+      }
+
+      break;
+    }
+
+    case TOKEN_AMPERSAND: {
+      type = make_shared<PointerType>(expression_type);
+      break;
+    }
+
+    default:
+      type = expression_type;
+      break;
   }
 }
 

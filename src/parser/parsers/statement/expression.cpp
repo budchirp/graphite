@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 
+#include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/array.hpp"
 #include "parser/parsers/expression/binary.hpp"
@@ -19,13 +20,11 @@
 #include "parser/parsers/expression/var_ref.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
-#include "token/token_type.hpp"
 
 unique_ptr<ExpressionStatement> ExpressionStatementParser::parse() {
   auto expression = parse_expression(Precedence::LOWEST);
 
   return make_unique<ExpressionStatement>(*expression->get_position(),
-                                          expression->get_type(),
                                           std::move(expression));
 }
 
@@ -171,24 +170,4 @@ unique_ptr<Expression> ExpressionStatementParser::parse_expression(
   }
 
   return expression;
-}
-
-unique_ptr<Expression> ExpressionStatementParser::parse_expression(
-    const shared_ptr<Type> &type, Precedence precedence) {
-  switch (parser->current_token.type) {
-    case TOKEN_INT: {
-      return IntegerExpressionParser(parser).parse_integer(type);
-      break;
-    }
-
-    case TOKEN_LEFT_BRACKET: {
-      return ArrayExpressionParser(parser).parse_array(type);
-      break;
-    }
-
-    default: {
-      return parse_expression(precedence);
-      break;
-    }
-  }
 }

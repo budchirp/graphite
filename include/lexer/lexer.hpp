@@ -4,8 +4,8 @@
 #include <memory>
 #include <string>
 
+#include "lexer/token/token.hpp"
 #include "position.hpp"
-#include "token/token.hpp"
 
 using namespace std;
 

@@ -8,9 +8,16 @@ using namespace llvm;
 
 Value *ExpressionStatement::codegen(const shared_ptr<CodegenContext> &context) const { return expression->codegen(context); }
 
-void ExpressionStatement::analyze(
+void ExpressionStatement::validate(
     const shared_ptr<ProgramContext> &context) {
-  expression->analyze(context);
+  expression->validate(context);
+}
+
+void ExpressionStatement::resolve_types(
+    const shared_ptr<ProgramContext> &context) {
+  expression->resolve_types(context);
+
+  type = expression->get_type();
 }
 
 string ExpressionStatement::to_string() const {

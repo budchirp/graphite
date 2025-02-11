@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "token_type.hpp"
+#include "lexer/token/token_type.hpp"
 
 using namespace std;
 

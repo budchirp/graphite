@@ -29,9 +29,7 @@ unique_ptr<Expression> IndexExpressionParser::parse() {
 
   parser->eat_token();  // eat ]
 
-  auto array_type = dynamic_pointer_cast<ArrayType>(variable_expression->get_type());
 
   return make_unique<IndexExpression>(*variable_expression->get_position(),
-                                      array_type->child_type,
                                       std::move(variable_expression), std::move(index_expression));
 }

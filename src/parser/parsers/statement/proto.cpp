@@ -7,10 +7,9 @@
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/identifier.hpp"
 #include "parser/parsers/expression/type.hpp"
-#include "token/token_type.hpp"
 
 unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
-  if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
+  if (parser->current_token.type != TOKEN_IDENTIFIER) {
     parser->get_logger()->error("Expected identifier as prototype name",
                                 LogTypes::Error::SYNTAX);
     return nullptr;
@@ -27,7 +26,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
-  if (parser->current_token.type != TokenType::TOKEN_LEFT_PARENTHESES) {
+  if (parser->current_token.type != TOKEN_LEFT_PARENTHESES) {
     parser->get_logger()->error(
         "Expected left parentheses after prototype name",
         LogTypes::Error::SYNTAX);
@@ -39,8 +38,8 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   vector<pair<unique_ptr<IdentifierExpression>, unique_ptr<TypeExpression>>>
       parameters;
-  while (parser->current_token.type != TokenType::TOKEN_RIGHT_PARENTHESES) {
-    if (parser->current_token.type != TokenType::TOKEN_IDENTIFIER) {
+  while (parser->current_token.type != TOKEN_RIGHT_PARENTHESES) {
+    if (parser->current_token.type != TOKEN_IDENTIFIER) {
       parser->get_logger()->error("Expected identifier as prototype parameter",
                                   LogTypes::Error::SYNTAX);
       return nullptr;
@@ -54,7 +53,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
       return nullptr;
     }
 
-    if (parser->current_token.type != TokenType::TOKEN_COLON) {
+    if (parser->current_token.type != TOKEN_COLON) {
       parser->get_logger()->error("Expected : after parameter name",
                                   LogTypes::Error::SYNTAX);
       return nullptr;
@@ -62,8 +61,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
     parser->eat_token();  // eat :
 
-    unique_ptr<TypeExpression> type_expression(
-        dynamic_cast<TypeExpression *>(type_expression_parser.parse().release()));
+    auto type_expression = type_expression_parser.parse_type();
     if (!type_expression) {
       parser->get_logger()->error(
           "Failed to parse the parameter type of the proto",
@@ -100,6 +98,7 @@ unique_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
-  return make_unique<ProtoStatement>(
-      position, std::move(name), std::move(parameters), std::move(return_type_expression));
+  return make_unique<ProtoStatement>(position, std::move(name),
+                                     std::move(parameters),
+                                     std::move(return_type_expression));
 }

@@ -8,7 +8,6 @@
 #include "ast/statement.hpp"
 #include "ast/statement/proto.hpp"
 #include "block.hpp"
-#include "env/env.hpp"
 #include "lexer/position.hpp"
 #include "types/void.hpp"
 
@@ -18,18 +17,18 @@ class FunctionStatement : public Statement {
  private:
   Position position;
 
-  shared_ptr<Env> env;
+  shared_ptr<Scope> scope;
 
   unique_ptr<ProtoStatement> proto;
   unique_ptr<BlockStatement> body;
 
  public:
   explicit FunctionStatement(const Position &position,
-                             const shared_ptr<Env> &env,
+                             const shared_ptr<Scope> &scope,
                              unique_ptr<ProtoStatement> proto,
                              unique_ptr<BlockStatement> body)
       : position(position),
-        env(env),
+        scope(scope),
         proto(std::move(proto)),
         body(std::move(body)) {};
 
@@ -38,7 +37,8 @@ class FunctionStatement : public Statement {
   llvm::Function *codegen_function(
       const shared_ptr<CodegenContext> &context) const;
 
-  void analyze(const shared_ptr<ProgramContext> &context) override;
+  void validate(const shared_ptr<ProgramContext> &context) override;
+  void resolve_types(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 
@@ -46,7 +46,8 @@ class FunctionStatement : public Statement {
     return make_shared<VoidType>();
   };
 
-  shared_ptr<Env> get_env() { return env; }
+  void set_scope(const shared_ptr<Scope> &scope) { this->scope = scope; }
+  shared_ptr<Scope> get_scope() { return scope; }
 
   string to_string() const override;
   string to_string_tree() const override;

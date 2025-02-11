@@ -9,10 +9,9 @@
 
 #include "codegen/codegen.hpp"
 #include "logger/logger.hpp"
+#include "types/null.hpp"
 
-using namespace llvm;
-
-Value *ArrayExpression::codegen(
+llvm::Value *ArrayExpression::codegen(
     const shared_ptr<CodegenContext> &context) const {
   auto array_type = type->to_llvm(context->llvm_context);
   auto array = context->builder->CreateAlloca(array_type, nullptr, "array");
@@ -46,7 +45,22 @@ Value *ArrayExpression::codegen(
   return array;
 }
 
-void ArrayExpression::analyze(const shared_ptr<ProgramContext> &context) {}
+void ArrayExpression::validate(const shared_ptr<ProgramContext> &context) {}
+void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
+  return resolve_types(context, nullptr);
+}
+void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context,
+                                    const shared_ptr<Type> &destination_type) {
+  for (const auto &value : values) {
+    value->resolve_types(context);
+  }
+
+  this->type =
+      type ? dynamic_pointer_cast<ArrayType>(destination_type)
+           : make_shared<ArrayType>(values[0] ? values[0]->get_type()
+                                              : make_shared<NullType>(nullptr),
+                                    values.size());
+}
 
 string ArrayExpression::to_string() const {
   ostringstream result;
@@ -74,6 +88,6 @@ string ArrayExpression::to_string_tree() const {
     }
   }
 
-  result <<"])";
+  result << "])";
   return result.str();
 }

@@ -1,4 +1,4 @@
-#include "token/token.hpp"
+#include "lexer/token/token.hpp"
 
 #include <sstream>
 

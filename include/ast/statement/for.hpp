@@ -39,7 +39,8 @@ class ForStatement : public Statement {
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;
 
-  void analyze(const shared_ptr<ProgramContext> &context) override;
+  void validate(const shared_ptr<ProgramContext> &context) override;
+  void resolve_types(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 

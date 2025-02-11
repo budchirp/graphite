@@ -60,8 +60,7 @@ unique_ptr<Expression> IfExpressionParser::parse() {
     }
   }
 
-  return make_unique<IfExpression>(position, consequence_statement->get_type(),
-                                   std::move(condition_expression),
+  return make_unique<IfExpression>(position, std::move(condition_expression),
                                    std::move(consequence_statement),
                                    std::move(alternative_statement));
 }

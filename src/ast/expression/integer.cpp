@@ -2,22 +2,31 @@
 
 #include <llvm/IR/Value.h>
 
+#include <memory>
 #include <string>
 
 #include "codegen/codegen.hpp"
 
-using namespace llvm;
-
-Value *IntegerExpression::codegen(
+llvm::Value *IntegerExpression::codegen(
     const shared_ptr<CodegenContext> &context) const {
-  return ConstantInt::get(type->to_llvm(context->llvm_context), value, true);
+  return llvm::ConstantInt::get(type->to_llvm(context->llvm_context), value,
+                                true);
 }
 
-void IntegerExpression::analyze(const shared_ptr<ProgramContext> &context) {}
+void IntegerExpression::validate(const shared_ptr<ProgramContext> &context) {}
+void IntegerExpression::resolve_types(
+    const shared_ptr<ProgramContext> &context) {
+  return resolve_types(context, nullptr);
+}
+void IntegerExpression::resolve_types(
+    const shared_ptr<ProgramContext> &context,
+    const shared_ptr<IntType> &destination_type) {
+  type = destination_type ? destination_type : make_shared<IntType>(32, false);
+}
 
-string IntegerExpression::to_string() const { return ::to_string(value); }
+string IntegerExpression::to_string() const { return value; }
 
 string IntegerExpression::to_string_tree() const {
   return "IntegerExpression(type: " + type->to_string_tree() + ", value: '" +
-         ::to_string(value) + "')";
+         value + "')";
 }

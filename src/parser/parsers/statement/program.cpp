@@ -1,7 +1,8 @@
+#include "parser/parsers/statement/program.hpp"
+
 #include <memory>
 
 #include "parser/parsers/statement/statement.hpp"
-#include "parser/parsers/statement/program.hpp"
 
 void ProgramParser::parse() {
   auto statement_parser = StatementParser(parser);

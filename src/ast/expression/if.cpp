@@ -6,10 +6,10 @@
 #include <sstream>
 #include <string>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 #include "types/boolean.hpp"
 
 using namespace llvm;
@@ -66,17 +66,26 @@ Value *IfExpression::codegen(const shared_ptr<CodegenContext> &context) const {
   return then_value;
 }
 
-void IfExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  if (!Analyzer::compare(condition->get_type(), make_shared<BooleanType>())) {
+void IfExpression::validate(const shared_ptr<ProgramContext> &context) {
+  if (!TypeHelper::compare(condition->get_type(), make_shared<BooleanType>())) {
     Logger::error("Only booleans are allowed on if condition",
                   LogTypes::Error::TYPE_MISMATCH, condition->get_position());
     return;
   }
 
-  condition->analyze(context);
+  condition->validate(context);
 
-  consequence->analyze(context);
-  if (alternative) alternative->analyze(context);
+  consequence->validate(context);
+  if (alternative) alternative->validate(context);
+}
+
+void IfExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
+  condition->resolve_types(context);
+
+  consequence->resolve_types(context);
+  if (alternative) alternative->resolve_types(context);
+
+  type = consequence->get_type();
 }
 
 string IfExpression::to_string() const {

@@ -7,10 +7,10 @@
 
 #include <memory>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 #include "types/boolean.hpp"
 
 using namespace llvm;
@@ -70,19 +70,27 @@ Value *ForStatement::codegen(const shared_ptr<CodegenContext> &context) const {
   return Constant::getNullValue(llvm::Type::getVoidTy(*context->llvm_context));
 }
 
-void ForStatement::analyze(const shared_ptr<ProgramContext> &context) {
-  init->analyze(context);
+void ForStatement::validate(const shared_ptr<ProgramContext> &context) {
+  init->validate(context);
 
-  condition->analyze(context);
-  if (!Analyzer::compare(condition->get_type(), make_shared<BooleanType>())) {
+  condition->validate(context);
+  if (!TypeHelper::compare(condition->get_type(), make_shared<BooleanType>())) {
     Logger::error("Only booleans are allowed on condition",
                   LogTypes::Error::TYPE_MISMATCH, condition->get_position());
     return;
   }
 
-  increment->analyze(context);
+  increment->validate(context);
 
-  body->analyze(context);
+  body->validate(context);
+}
+
+void ForStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  init->resolve_types(context);
+  condition->resolve_types(context);
+  increment->resolve_types(context);
+
+  body->resolve_types(context);
 }
 
 string ForStatement::to_string() const {

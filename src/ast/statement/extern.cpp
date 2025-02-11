@@ -8,9 +8,7 @@
 #include "ast/statement/proto.hpp"
 #include "codegen/codegen.hpp"
 
-using namespace llvm;
-
-Value *ExternStatement::codegen(
+llvm::Value *ExternStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
   auto function = proto->codegen_function(context);
 
@@ -21,8 +19,25 @@ Value *ExternStatement::codegen(
   return function;
 }
 
-void ExternStatement::analyze(const shared_ptr<ProgramContext> &context) {
-  proto->analyze(context);
+void ExternStatement::validate(const shared_ptr<ProgramContext> &context) {
+  proto->validate(context);
+}
+
+void ExternStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  proto->resolve_types(context);
+
+  vector<pair<string, shared_ptr<Type>>> parameters;
+  for (const auto &[parameter_name, parameter_type_expression] :
+       proto->parameters) {
+    parameters.emplace_back(parameter_name->get_identifier(),
+                            parameter_type_expression->get_type());
+  }
+
+  auto name = proto->name->get_identifier();
+  context->get_env()->add_function(
+      name, make_shared<FunctionSymbol>(
+                name, make_shared<FunctionType>(
+                          parameters, proto->return_type->get_type())));
 }
 
 string ExternStatement::to_string() const {

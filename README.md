@@ -23,7 +23,7 @@
 - [x] If expression
 - [x] For & While statement
 - [x] Object generation
-- [x] Code optimization (idk how well it works)
+- [x] Code optimization (LLVM IR Optimization, no optimization from graphite)
 - [x] Arrays
 - [ ] Structs
 - [ ] Module management
@@ -37,5 +37,6 @@
 - [ ] Multiple codegen backend support
 
 - [ ] Fix bugs with pointers
+- [ ] Move type resolving logic to somewhere else from the parser
 
 - [ ] ~~Add unit tests~~

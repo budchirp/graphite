@@ -1,6 +1,4 @@
-#include "token/grammar.hpp"
-
-#include "token/token_type.hpp"
+#include "lexer/token/keywords.hpp"
 
 const unordered_map<string, TokenType> keywords = {
     {"fn", TOKEN_FUN},      {"extern", TOKEN_EXTERN}, {"if", TOKEN_IF},

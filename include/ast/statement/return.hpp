@@ -21,14 +21,14 @@ class ReturnStatement : public Statement {
 
  public:
   explicit ReturnStatement(const Position &position,
-                           const shared_ptr<Type> &type,
                            unique_ptr<Expression> expression)
-      : position(position), type(type), expression(std::move(expression)) {};
+      : position(position), expression(std::move(expression)) {};
 
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;
 
-  void analyze(const shared_ptr<ProgramContext> &context) override;
+  void validate(const shared_ptr<ProgramContext> &context) override;
+  void resolve_types(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 

@@ -43,8 +43,5 @@ class CodegenContext {
     return program_context;
   }
 
-  void set_env(const shared_ptr<Env> &env) { program_context->set_env(env); }
-  shared_ptr<Env> get_env() const {
-    return program_context->get_env();
-  }
+  shared_ptr<Env> get_env() const { return program_context->get_env(); }
 };

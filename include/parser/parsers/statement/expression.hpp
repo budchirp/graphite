@@ -20,6 +20,4 @@ class ExpressionStatementParser {
 
   unique_ptr<ExpressionStatement> parse();
   unique_ptr<Expression> parse_expression(Precedence precedence);
-  unique_ptr<Expression> parse_expression(const shared_ptr<Type> &type,
-                                          Precedence precedence);
 };

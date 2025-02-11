@@ -5,7 +5,6 @@
 #include "ast/program.hpp"
 #include "lexer/lexer.hpp"
 #include "logger/logger.hpp"
-#include "token/token.hpp"
 
 using namespace std;
 

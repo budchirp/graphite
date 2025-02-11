@@ -34,12 +34,20 @@ Function *ProtoStatement::codegen_function(
   return function;
 }
 
-void ProtoStatement::analyze(const shared_ptr<ProgramContext> &context) {
+void ProtoStatement::validate(const shared_ptr<ProgramContext> &context) {
   for (const auto &parameter : parameters) {
-    parameter.second->analyze(context);
+    parameter.second->validate(context);
   }
 
-  return_type->analyze(context);
+  return_type->validate(context);
+}
+
+void ProtoStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  for (const auto &parameter : parameters) {
+    parameter.second->resolve_types(context);
+  }
+
+  return_type->resolve_types(context);
 }
 
 string ProtoStatement::to_string() const {

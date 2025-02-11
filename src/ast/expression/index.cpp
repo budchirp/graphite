@@ -6,10 +6,10 @@
 #include <memory>
 #include <string>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 #include "types/array.hpp"
 
 llvm::Value *IndexExpression::codegen(
@@ -42,23 +42,40 @@ llvm::Value *IndexExpression::codegen(
   return value;
 }
 
-void IndexExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  variable->analyze(context);
-  index->analyze(context);
+void IndexExpression::validate(const shared_ptr<ProgramContext> &context) {
+  variable->validate(context);
+  index->validate(context);
 
-  if (!Analyzer::is_array(variable->get_type()).first) {
-    Logger::error("Array expected", LogTypes::Error::TYPE_MISMATCH, variable->get_position());
+  if (!TypeHelper::is_array(variable->get_type())) {
+    Logger::error("Array expected", LogTypes::Error::TYPE_MISMATCH,
+                  variable->get_position());
     return;
   }
 
-  if (!Analyzer::is_int(index->get_type()).first) {
-    Logger::error("Expected integer as index", LogTypes::Error::TYPE_MISMATCH, index->get_position());
+  if (!TypeHelper::is_int(index->get_type())) {
+    Logger::error("Expected integer as index", LogTypes::Error::TYPE_MISMATCH,
+                  index->get_position());
     return;
   }
 }
 
-string IndexExpression::to_string() const { return variable->to_string() + "[" + index->to_string() + "]"; }
+void IndexExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
+  variable->resolve_types(context);
+  index->resolve_types(context);
+
+  if (auto array_type = TypeHelper::is_array(variable->get_type())) {
+    type = array_type->child_type;
+  } else {
+    Logger::error("Array expected");
+  }
+}
+
+string IndexExpression::to_string() const {
+  return variable->to_string() + "[" + index->to_string() + "]";
+}
 
 string IndexExpression::to_string_tree() const {
-  return "IndexExpression(type: " + type->to_string_tree() + ", variable: " + variable->to_string_tree() + ", index: " + index->to_string_tree() + ")";
+  return "IndexExpression(type: " + type->to_string_tree() +
+         ", variable: " + variable->to_string_tree() +
+         ", index: " + index->to_string_tree() + ")";
 }

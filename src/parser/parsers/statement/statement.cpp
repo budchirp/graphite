@@ -9,7 +9,6 @@
 #include "parser/parsers/statement/return.hpp"
 #include "parser/parsers/statement/var.hpp"
 #include "parser/parsers/statement/while.hpp"
-#include "token/token_type.hpp"
 
 unique_ptr<Statement> StatementParser::parse() {
   switch (parser->current_token.type) {

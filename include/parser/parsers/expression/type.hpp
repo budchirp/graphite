@@ -2,9 +2,9 @@
 
 #include <memory>
 
+#include "ast/expression/type.hpp"
 #include "parser.hpp"
 #include "parser/parser.hpp"
-#include "types/type.hpp"
 
 using namespace std;
 
@@ -17,5 +17,7 @@ class TypeExpressionParser : public ExpressionParser {
       : parser(parser) {};
 
   unique_ptr<Expression> parse() override;
-  shared_ptr<Type> parse_type();
+  unique_ptr<TypeExpression> parse_type();
+
+  shared_ptr<Type> get_type();
 };

@@ -9,16 +9,23 @@
 
 using namespace llvm;
 
-Value *StringExpression::codegen(const shared_ptr<CodegenContext> &context) const {
+Value *StringExpression::codegen(
+    const shared_ptr<CodegenContext> &context) const {
   return context->builder->CreateGlobalStringPtr(StringRef(value), "str", 0,
                                                  context->module.get());
 }
 
-void StringExpression::analyze(
-    const shared_ptr<ProgramContext> &context) {}
+void StringExpression::validate(const shared_ptr<ProgramContext> &context) {}
+void StringExpression::resolve_types(
+    const shared_ptr<ProgramContext> &context) {
+  type = make_shared<StringType>();
+}
 
-string StringExpression::to_string() const { return "\"" + regex_replace(value, regex("\n"), "\\n") + "\""; }
+string StringExpression::to_string() const {
+  return "\"" + regex_replace(value, regex("\n"), "\\n") + "\"";
+}
 
 string StringExpression::to_string_tree() const {
-  return "StringExpression(type: " + type->to_string_tree() + ", value: '" + value + "')";
+  return "StringExpression(type: " + type->to_string_tree() + ", value: '" +
+         value + "')";
 }

@@ -39,7 +39,8 @@ class ProtoStatement : public Statement {
   llvm::Function *codegen_function(
       const shared_ptr<CodegenContext> &context) const;
 
-  void analyze(const shared_ptr<ProgramContext> &context) override;
+  void validate(const shared_ptr<ProgramContext> &context) override;
+  void resolve_types(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };
 

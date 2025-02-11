@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "token_type.hpp"
+#include "lexer/token/token_type.hpp"
 
 using namespace std;
 

@@ -31,8 +31,14 @@ Value *ReturnStatement::codegen(
   return nullptr;
 }
 
-void ReturnStatement::analyze(const shared_ptr<ProgramContext> &context) {
-  expression->analyze(context);
+void ReturnStatement::validate(const shared_ptr<ProgramContext> &context) {
+  expression->validate(context);
+}
+
+void ReturnStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  expression->resolve_types(context);
+
+  type = expression->get_type();
 }
 
 string ReturnStatement::to_string() const {

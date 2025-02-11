@@ -17,8 +17,8 @@ fn main(argc: i32, argv: string[]) -> i32 {
   }
 
   printf("\nAdding numbers\n")
-  var x: i32? = add(32, 32)
-  var y: i32 = (x!! * 1)
+  var x: i32 = add(32, 32)
+  var y: i32 = (x * 1)
   print_number(y)
 
   printf("\nFor loop\n")
@@ -32,7 +32,7 @@ fn main(argc: i32, argv: string[]) -> i32 {
   print_number(j)
 
   printf("\nVar without initializer - pointer\n")
-  var k: *i32?
+  var k: *i32
   k = &y
   print_number(*k)
 

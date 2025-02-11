@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "token/token_type.hpp"
+#include "lexer/token/token_type.hpp"
 
 enum class Precedence {
   LOWEST,

@@ -28,12 +28,12 @@ void Codegen::init() {
 }
 
 void Codegen::codegen(const shared_ptr<Program> &program) const {
-  program->get_env()->get_variable("null")->add_llvm_value(
-      llvm::ConstantInt::getSigned(
+  context
+      ->get_env()
+      ->get_current_scope()
+      ->get_variable("null")
+      ->add_llvm_value(llvm::ConstantInt::getSigned(
           llvm::Type::getInt32Ty(*context->llvm_context), -1));
-
-  program->get_env()->get_variable("nullptr")->add_llvm_value(
-      ConstantPointerNull::get(PointerType::get(*context->llvm_context, 0)));
 
   program->codegen(context);
 

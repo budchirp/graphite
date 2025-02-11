@@ -2,11 +2,9 @@
 
 #include <memory>
 
-#include "env/env.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/statement/block.hpp"
 #include "parser/parsers/statement/proto.hpp"
-#include "types/function.hpp"
 
 unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   const auto position = *parser->get_lexer()->position;
@@ -18,9 +16,6 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
                                 LogTypes::Error::SYNTAX);
     return nullptr;
   }
-
-  auto env = make_shared<Env>(parser->get_program()->get_env());
-  parser->get_program()->set_env(env);
 
   auto proto_statement = ProtoStatementParser(parser).parse();
   if (!proto_statement) {
@@ -35,16 +30,11 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
     return nullptr;
   }
 
-  vector<pair<string, shared_ptr<Type>>> parameters;
-  for (const auto &[parameter_name, parameter_type_expression] :
-       proto_statement->parameters) {
-    env->add_variable(parameter_name->get_identifier(),
-                      make_shared<EnvVariable>(
-                          parameter_type_expression->get_type(), parameter_type_expression->get_type(), false, true));
-
-    parameters.emplace_back(parameter_name->get_identifier(),
-                            parameter_type_expression->get_type());
-  }
+  auto name = proto_statement->name->get_identifier();
+  auto scope = make_shared<Scope>(name,
+      parser->get_program()->get_context()->get_env()->get_current_scope());
+  parser->get_program()->get_context()->get_env()->add_scope(
+      name, scope);
 
   auto body_statement = BlockStatementParser(parser).parse();
   if (!body_statement) {
@@ -53,14 +43,6 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
     return nullptr;
   }
 
-  auto parent_env = env->get_parent();
-  parent_env->add_function(
-      proto_statement->name->get_identifier(),
-      make_shared<EnvFunction>(make_shared<FunctionType>(
-          parameters, proto_statement->return_type->get_type())));
-
-  parser->get_program()->set_env(parent_env);
-
   return make_unique<FunctionStatement>(
-      position, env, std::move(proto_statement), std::move(body_statement));
+      position, scope, std::move(proto_statement), std::move(body_statement));
 }

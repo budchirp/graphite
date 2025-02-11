@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "ast/expression/boolean.hpp"
 #include "parser.hpp"
 #include "parser/parser.hpp"
 
@@ -16,4 +17,5 @@ public:
       : parser(parser) {};
 
   unique_ptr<Expression> parse() override;
+  unique_ptr<BooleanExpression> parse_boolean();
 };

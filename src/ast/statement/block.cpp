@@ -33,9 +33,17 @@ BasicBlock *BlockStatement::codegen_block(
   return block;
 }
 
-void BlockStatement::analyze(const shared_ptr<ProgramContext> &context) {
+void BlockStatement::validate(const shared_ptr<ProgramContext> &context) {
   for (const auto &statement : statements) {
-    statement->analyze(context);
+    statement->validate(context);
+  }
+}
+
+void BlockStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  for (const auto &statement : statements) {
+    statement->resolve_types(context);
+
+    type = statement->get_type();
   }
 }
 

@@ -17,9 +17,15 @@ Value *Program::codegen(const shared_ptr<CodegenContext> &context) const {
   return nullptr;
 }
 
-void Program::analyze() {
+void Program::validate() {
   for (const auto &statement : statements) {
-    statement->analyze(context);
+    statement->validate(context);
+  }
+}
+
+void Program::resolve_types() {
+  for (const auto &statement : statements) {
+    statement->resolve_types(context);
   }
 }
 

@@ -20,6 +20,5 @@ unique_ptr<ReturnStatement> ReturnStatementParser::parse() {
     return nullptr;
   }
 
-  return make_unique<ReturnStatement>(position, expression->get_type(),
-                                      std::move(expression));
+  return make_unique<ReturnStatement>(position, std::move(expression));
 }

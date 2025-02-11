@@ -6,6 +6,7 @@
 #include <string>
 
 #include "codegen/codegen.hpp"
+#include "types/boolean.hpp"
 
 using namespace llvm;
 
@@ -14,7 +15,11 @@ Value *BooleanExpression::codegen(
   return context->builder->getInt1(value);
 }
 
-void BooleanExpression::analyze(const shared_ptr<ProgramContext> &context) {}
+void BooleanExpression::validate(const shared_ptr<ProgramContext> &context) {}
+void BooleanExpression::resolve_types(
+    const shared_ptr<ProgramContext> &context) {
+  type = make_shared<BooleanType>();
+}
 
 string BooleanExpression::to_string() const { return ::to_string(value); }
 

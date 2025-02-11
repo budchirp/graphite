@@ -7,20 +7,16 @@
 #include <memory>
 #include <sstream>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
-#include "env/env.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
-#include "types/void.hpp"
+#include "semantic/type_helper.hpp"
 
-using namespace llvm;
-
-Value *FunctionStatement::codegen(
+llvm::Value *FunctionStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
   return codegen_function(context);
 }
-Function *FunctionStatement::codegen_function(
+llvm::Function *FunctionStatement::codegen_function(
     const shared_ptr<CodegenContext> &context) const {
   auto function = context->module->getFunction(proto->name->get_identifier());
   if (function) {
@@ -36,10 +32,13 @@ Function *FunctionStatement::codegen_function(
     }
   }
 
-  context->set_env(env);
+  context->get_env()->set_current_scope(scope->get_name());
 
   for (auto &argument : function->args()) {
-    context->get_env()->get_variable(argument.getName().str())->add_llvm_value(&argument);
+    context->get_env()
+        ->get_current_scope()
+        ->get_variable(argument.getName().str())
+        ->add_llvm_value(&argument);
   }
 
   auto body_block = body->codegen_block(context, function, "entry");
@@ -62,7 +61,7 @@ Function *FunctionStatement::codegen_function(
     }
   }
 
-  context->set_env(env->get_parent());
+  context->get_env()->set_current_scope(scope->get_parent()->get_name());
 
   context->get_env()
       ->get_function(proto->name->get_identifier())
@@ -71,23 +70,51 @@ Function *FunctionStatement::codegen_function(
   return function;
 }
 
-void FunctionStatement::analyze(const shared_ptr<ProgramContext> &context) {
-  context->set_env(env);
+void FunctionStatement::validate(const shared_ptr<ProgramContext> &context) {
+  context->get_env()->set_current_scope(scope->get_name());
 
-  proto->analyze(context);
-  body->analyze(context);
+  proto->validate(context);
+  body->validate(context);
 
   auto return_type = proto->return_type->get_type();
-  if (!Analyzer::compare(return_type, make_shared<VoidType>()) &&
-      !Analyzer::compare(return_type, body->get_type())) {
-    Logger::error("Function `" + proto->name->get_identifier() + "` \nexpected `" +
-                      return_type->to_string() + "` as return type but received `" +
-                      body->get_type()->to_string() + "`",
-                  LogTypes::Error::TYPE_MISMATCH,
-                  proto->return_type->get_position());
+  if (!TypeHelper::compare(return_type, make_shared<VoidType>()) &&
+      !TypeHelper::compare(return_type, body->get_type())) {
+    Logger::error(
+        "Function `" + proto->name->get_identifier() + "` \nexpected `" +
+            return_type->to_string() + "` as return type but received `" +
+            body->get_type()->to_string() + "`",
+        LogTypes::Error::TYPE_MISMATCH, proto->return_type->get_position());
   }
 
-  context->set_env(env->get_parent());
+  context->get_env()->set_current_scope(scope->get_parent()->get_name());
+}
+
+void FunctionStatement::resolve_types(
+    const shared_ptr<ProgramContext> &context) {
+  context->get_env()->set_current_scope(scope->get_name());
+
+  proto->resolve_types(context);
+
+  vector<pair<string, shared_ptr<Type>>> parameters;
+  for (const auto &[parameter_name_expression, parameter_type_expression] :
+       proto->parameters) {
+    auto name = parameter_name_expression->get_identifier();
+    auto type = parameter_type_expression->get_type();
+    scope->add_variable(
+        name, make_shared<VariableSymbol>(name, type, type, false, true));
+
+    parameters.emplace_back(name, type);
+  }
+
+  body->resolve_types(context);
+
+  auto name = proto->name->get_identifier();
+  context->get_env()->add_function(
+      name, make_shared<FunctionSymbol>(
+                name, make_shared<FunctionType>(
+                          parameters, proto->return_type->get_type())));
+
+  context->get_env()->set_current_scope(scope->get_parent()->get_name());
 }
 
 string FunctionStatement::to_string() const {

@@ -9,23 +9,23 @@
 #include <memory>
 #include <sstream>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 
-using namespace llvm;
-
-Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
-  Value *value;
+llvm::Value *VarStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
+  llvm::Value *value;
   if (is_initialized) {
     value = expression->codegen(context);
-  } else if (Analyzer::is_pointer(variable_type->get_type()).first) {
-    value = context->get_env()->get_variable("nullptr")->value;
-  } else if (Analyzer::is_array(variable_type->get_type()).first) {
-    value = context->builder->CreateAlloca(variable_type->get_type()->to_llvm(context->llvm_context), nullptr, "array");
+  } else if (TypeHelper::is_array(variable_type->get_type())) {
+    value = context->builder->CreateAlloca(
+        variable_type->get_type()->to_llvm(context->llvm_context), nullptr,
+        "array");
   } else {
-    value = context->get_env()->get_variable("null")->value;
+    value =
+        context->get_env()->get_current_scope()->get_variable("null")->value;
   }
 
   if (!value) {
@@ -35,8 +35,8 @@ Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
     return nullptr;
   }
 
-  auto type = variable_type->get_type()->to_llvm(context->llvm_context);
-  value = Codegen::cast_type(context, value, type);
+  auto llvm_type = type->to_llvm(context->llvm_context);
+  value = Codegen::cast_type(context, value, llvm_type);
   if (!value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                   variable_type->get_position());
@@ -44,33 +44,59 @@ Value *VarStatement::codegen(const shared_ptr<CodegenContext> &context) const {
   }
 
   if (!is_initialized || is_mutable) {
-    auto ptr = context->builder->CreateAlloca(type, nullptr, "addr");
+    auto ptr = context->builder->CreateAlloca(llvm_type, nullptr, "addr");
     context->builder->CreateStore(value, ptr);
 
     value = ptr;
   }
 
   context->get_env()
+      ->get_current_scope()
       ->get_variable(name->get_identifier())
       ->add_llvm_value(value);
 
   return value;
 }
 
-void VarStatement::analyze(const shared_ptr<ProgramContext> &context) {
-  variable_type->analyze(context);
+void VarStatement::validate(const shared_ptr<ProgramContext> &context) {
+  if (variable_type) variable_type->validate(context);
   if (expression) {
-    expression->analyze(context);
+    expression->validate(context);
 
-    if (!Analyzer::compare(variable_type->get_type(), expression->get_type(),
-                           true)) {
-      Logger::error(
-          "Type mismatch\nExpected `" + variable_type->get_type()->to_string() +
-              "` Received `" + expression->get_type()->to_string() + "`",
-          LogTypes::Error::TYPE_MISMATCH, variable_type->get_position());
-      return;
+    if (variable_type) {
+      if (!TypeHelper::compare(variable_type->get_type(),
+                               expression->get_type(), true)) {
+        Logger::error(
+            "Type mismatch\nExpected `" +
+                variable_type->get_type()->to_string() + "` Received `" +
+                expression->get_type()->to_string() + "`",
+            LogTypes::Error::TYPE_MISMATCH, variable_type->get_position());
+        return;
+      }
     }
   }
+}
+
+void VarStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  if (variable_type) variable_type->resolve_types(context);
+  if (expression) expression->resolve_types(context);
+
+  shared_ptr<Type> actual_type;
+  if (!expression) {
+    actual_type = variable_type->get_type();
+  } else {
+    actual_type = expression->get_type();
+  }
+
+  type = actual_type;
+  if (!is_initialized) {
+    type = make_shared<NullType>(actual_type);
+  }
+
+  context->get_env()->get_current_scope()->add_variable(
+      name->get_identifier(),
+      make_shared<VariableSymbol>(name->get_identifier(), type, actual_type,
+                                  is_mutable, is_initialized));
 }
 
 string VarStatement::to_string() const {

@@ -5,19 +5,10 @@
 #include "ast/expression.hpp"
 #include "ast/expression/array.hpp"
 #include "parser/parsers/statement/expression.hpp"
-#include "token/token_type.hpp"
-#include "types/array.hpp"
-#include "types/null.hpp"
 
-unique_ptr<Expression> ArrayExpressionParser::parse() {
-  return parse_array();
-}
+unique_ptr<Expression> ArrayExpressionParser::parse() { return parse_array(); }
 
 unique_ptr<ArrayExpression> ArrayExpressionParser::parse_array() {
-  return parse_array(nullptr);
-}
-unique_ptr<ArrayExpression> ArrayExpressionParser::parse_array(
-    const shared_ptr<Type> &type) {
   const auto position = *parser->get_lexer()->position;
 
   parser->eat_token();  // eat [
@@ -38,13 +29,7 @@ unique_ptr<ArrayExpression> ArrayExpressionParser::parse_array(
     }
   }
 
-  parser->eat_token(); // eat ]
+  parser->eat_token();  // eat ]
 
-  return make_unique<ArrayExpression>(
-      position,
-      type ? dynamic_pointer_cast<ArrayType>(type)
-           : make_shared<ArrayType>(values[0] ? values[0]->get_type()
-                                              : make_shared<NullType>(nullptr),
-                                    values.size()),
-      std::move(values));
+  return make_unique<ArrayExpression>(position, std::move(values));
 }

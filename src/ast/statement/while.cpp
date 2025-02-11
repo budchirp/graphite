@@ -7,11 +7,10 @@
 
 #include <memory>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
-#include "types/boolean.hpp"
+#include "semantic/type_helper.hpp"
 
 using namespace llvm;
 
@@ -51,15 +50,21 @@ Value *WhileStatement::codegen(
   return Constant::getNullValue(llvm::Type::getVoidTy(*context->llvm_context));
 }
 
-void WhileStatement::analyze(const shared_ptr<ProgramContext> &context) {
-  condition->analyze(context);
-  if (!Analyzer::compare(condition->get_type(), make_shared<BooleanType>())) {
+void WhileStatement::validate(const shared_ptr<ProgramContext> &context) {
+  condition->validate(context);
+  if (!TypeHelper::compare(condition->get_type(), make_shared<BooleanType>())) {
     Logger::error("Only booleans are allowed on condition",
                   LogTypes::Error::TYPE_MISMATCH, condition->get_position());
     return;
   }
 
-  body->analyze(context);
+  body->validate(context);
+}
+
+void WhileStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
+  condition->resolve_types(context);
+
+  body->resolve_types(context);
 }
 
 string WhileStatement::to_string() const {

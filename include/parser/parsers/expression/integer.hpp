@@ -18,5 +18,4 @@ class IntegerExpressionParser : public ExpressionParser {
 
   unique_ptr<Expression> parse() override;
   unique_ptr<IntegerExpression> parse_integer();
-  unique_ptr<IntegerExpression> parse_integer(const shared_ptr<Type> &type);
 };

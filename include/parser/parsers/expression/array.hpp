@@ -18,5 +18,4 @@ class ArrayExpressionParser : public ExpressionParser {
 
   unique_ptr<Expression> parse() override;
   unique_ptr<ArrayExpression> parse_array();
-  unique_ptr<ArrayExpression> parse_array(const shared_ptr<Type> &type);
 };

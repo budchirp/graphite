@@ -9,10 +9,10 @@
 #include <string>
 #include <vector>
 
-#include "analyzer/analyzer.hpp"
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 
 using namespace std;
 
@@ -41,11 +41,12 @@ llvm::Value *CallExpression::codegen(
     argument_value =
         Codegen::cast_type(context, argument_value,
                            context->get_env()
-                              ->get_function(name->get_identifier())
-                              ->type->parameters[idx++]
-                              .second->to_llvm(context->llvm_context));
+                               ->get_function(name->get_identifier())
+                               ->type->parameters[idx++]
+                               .second->to_llvm(context->llvm_context));
     if (!argument_value) {
-      Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, argument->get_position());
+      Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
+                    argument->get_position());
       return nullptr;
     }
 
@@ -61,8 +62,9 @@ llvm::Value *CallExpression::codegen(
   }
 }
 
-void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  auto function = context->get_env()->get_function(name->get_identifier())->type;
+void CallExpression::validate(const shared_ptr<ProgramContext> &context) {
+  auto function =
+      context->get_env()->get_function(name->get_identifier())->type;
   if (!function) {
     Logger::error("Undefined function `" + name->get_identifier() + "` called",
                   LogTypes::Error::UNDEFINED, name->get_position());
@@ -78,10 +80,10 @@ void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
 
   size_t idx = 0;
   for (const auto &argument : arguments) {
-    argument->analyze(context);
+    argument->validate(context);
 
     auto parameter = function->parameters[idx++];
-    if (!Analyzer::compare(parameter.second, argument->get_type(), true)) {
+    if (!TypeHelper::compare(parameter.second, argument->get_type(), true)) {
       Logger::error("Type mismatch in argument `" + parameter.first +
                         "`\nExpected `" + parameter.second->to_string() +
                         "` Received `" + argument->get_type()->to_string() +
@@ -89,6 +91,21 @@ void CallExpression::analyze(const shared_ptr<ProgramContext> &context) {
                     LogTypes::Error::TYPE_MISMATCH, argument->get_position());
       return;
     }
+  }
+}
+
+void CallExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
+  for (const auto &argument : arguments) {
+    argument->resolve_types(context);
+  }
+
+  type = context->get_env()
+             ->get_function(name->get_identifier())
+             ->type->return_type;
+  if (!type) {
+    Logger::error("Undefined function `" + name->get_identifier() + "` called",
+                  LogTypes::Error::UNDEFINED, name->get_position());
+    return;
   }
 }
 

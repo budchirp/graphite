@@ -5,16 +5,18 @@
 #include <llvm/IR/Value.h>
 
 #include <ios>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
-#include "analyzer/analyzer.hpp"
+#include "ast/expression/type.hpp"
 #include "ast/expression/var_ref.hpp"
 #include "codegen/codegen.hpp"
+#include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
-#include "token/token_type.hpp"
+#include "semantic/type_helper.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
 #include "types/int.hpp"
@@ -55,8 +57,8 @@ llvm::Value *BinaryExpression::codegen(
     case TOKEN_ASSIGN: {
       if (auto *variable_expression =
               dynamic_cast<VarRefExpression *>(left.get())) {
-        auto variable =
-            context->get_env()->get_variable(variable_expression->get_name());
+        auto variable = context->get_env()->get_current_scope()->get_variable(
+            variable_expression->get_name());
         context->builder->CreateStore(right_value, variable->value);
         return variable->value;
       }
@@ -65,7 +67,7 @@ llvm::Value *BinaryExpression::codegen(
     }
 
     default: {
-      if (Analyzer::is_boolean(type).first) {
+      if (TypeHelper::is_boolean(type)) {
         switch (op.type) {
           case TokenType::TOKEN_AND:
             return context->builder->CreateAnd(left_value, right_value, "and");
@@ -80,7 +82,7 @@ llvm::Value *BinaryExpression::codegen(
           default:
             return nullptr;
         }
-      } else if (Analyzer::is_int(type).first) {
+      } else if (TypeHelper::is_int(type)) {
         switch (op.type) {
           case TokenType::TOKEN_PLUS:
             return context->builder->CreateAdd(left_value, right_value, "add");
@@ -105,7 +107,7 @@ llvm::Value *BinaryExpression::codegen(
           default:
             return nullptr;
         }
-      } else if (Analyzer::is_float(type).first) {
+      } else if (TypeHelper::is_float(type)) {
         switch (op.type) {
           case TokenType::TOKEN_PLUS:
             return context->builder->CreateFAdd(left_value, right_value,
@@ -134,7 +136,7 @@ llvm::Value *BinaryExpression::codegen(
           default:
             return nullptr;
         }
-      } else if (Analyzer::is_string(type).first) {
+      } else if (TypeHelper::is_string(type)) {
         switch (op.type) {
           case TokenType::TOKEN_EQUAL:
             return context->builder->CreateICmpEQ(left_value, right_value,
@@ -145,8 +147,7 @@ llvm::Value *BinaryExpression::codegen(
           default:
             return nullptr;
         }
-      } else if (Analyzer::is_null(type).first ||
-                 Analyzer::is_pointer(type).first) {
+      } else if (TypeHelper::is_null(type) || TypeHelper::is_pointer(type)) {
         switch (op.type) {
           case TokenType::TOKEN_EQUAL:
             return context->builder->CreateICmpEQ(left_value, right_value,
@@ -164,18 +165,18 @@ llvm::Value *BinaryExpression::codegen(
   return nullptr;
 }
 
-void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
-  left->analyze(context);
-  right->analyze(context);
+void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
+  left->validate(context);
+  right->validate(context);
 
   if (op.type == TOKEN_AS) return;
 
   auto left_type = left->get_type();
   auto right_type = right->get_type();
 
-  if (!Analyzer::compare(left_type, right_type,
-                         op.type == TOKEN_ASSIGN || op.type == TOKEN_EQUAL ||
-                             op.type == TOKEN_NOT_EQUAL)) {
+  if (!TypeHelper::compare(left_type, right_type,
+                           op.type == TOKEN_ASSIGN || op.type == TOKEN_EQUAL ||
+                               op.type == TOKEN_NOT_EQUAL)) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
     return;
   }
@@ -215,6 +216,75 @@ void BinaryExpression::analyze(const shared_ptr<ProgramContext> &context) {
             "Unsupported operation for type `" + left_type->to_string() + "`",
             LogTypes::Error::SYNTAX, &position);
         return;
+      }
+    }
+  }
+}
+
+void BinaryExpression::resolve_types(
+    const shared_ptr<ProgramContext> &context) {
+  left->resolve_types(context);
+  right->resolve_types(context);
+
+  switch (op.type) {
+    case TOKEN_LESS_THAN:
+    case TOKEN_GREATER_THAN:
+    case TOKEN_EQUAL:
+    case TOKEN_NOT_EQUAL:
+      type = make_shared<BooleanType>();
+      break;
+
+    case TOKEN_ASSIGN: {
+      if (auto variable_expression =
+              dynamic_cast<VarRefExpression *>(left.get())) {
+        auto variable = context->get_env()->get_current_scope()->get_variable(
+            variable_expression->get_name());
+        if (!variable->is_initialized /* && !TypeHelper::is_null(variable->actual_type) */) {
+          type = dynamic_pointer_cast<NullType>(variable->type)->child_type;
+        } else {
+          type = variable->type;
+        }
+
+        variable->set_type(type);
+      } else {
+        Logger::error(
+            "Expected variable reference as left hand side expression",
+            LogTypes::Error::SYNTAX, left->get_position());
+      }
+
+      break;
+    }
+
+    case TOKEN_AS: {
+      if (auto variable_expression =
+              dynamic_cast<VarRefExpression *>(left.get())) {
+        auto variable = context->get_env()->get_current_scope()->get_variable(
+            variable_expression->get_name());
+        if (auto type_expression = dynamic_cast<TypeExpression *>(right.get())) {
+          type = type_expression->get_type();
+        } else {
+          Logger::error("Expected type expression as right hand side expression");
+          return;
+        }
+      } else {
+        Logger::error(
+            "Expected variable reference as left hand side expression",
+            LogTypes::Error::SYNTAX, left->get_position());
+        return;
+      }
+
+      break;
+    }
+
+    default: {
+      auto left_type = left->get_type();
+      auto right_type = right->get_type();
+      if (TypeHelper::is_float(left_type)) {
+        type = left_type;
+      } else if (TypeHelper::is_float(right_type)) {
+        type = right_type;
+      } else {
+        type = left_type;
       }
     }
   }

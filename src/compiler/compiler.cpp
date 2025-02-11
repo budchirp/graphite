@@ -2,6 +2,7 @@
 
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/CodeGen.h>
+#include <llvm/Support/CommandLine.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
@@ -12,15 +13,15 @@
 #include <numeric>
 #include <string>
 
-#include "analyzer/analyzer.hpp"
 #include "ast/program.hpp"
 #include "ast/program_context.hpp"
 #include "codegen/codegen.hpp"
-#include "env/env.hpp"
 #include "lexer/lexer.hpp"
 #include "logger/logger.hpp"
 #include "parser/parser.hpp"
 #include "parser/parsers/statement/program.hpp"
+#include "semantic/type_resolver/type_resolver.hpp"
+#include "semantic/validator/validator.hpp"
 
 string join_strings(const vector<string> &strings, const string &delimiter) {
   return accumulate(strings.begin(), strings.end(), std::string(),
@@ -33,19 +34,19 @@ void Compiler::compile(const filesystem::path &source_file_path,
                        const vector<string> &libs, const vector<string> &objs) {
   auto filename = source_file_path.filename().stem().string();
 
-  vector<string> _objs = {source_file_path.stem().string() + ".o"};
+  vector<string> initial_objs = {source_file_path.stem().string() + ".o"};
   for (const auto &lib_file : libs) {
     filesystem::path lib_file_path(lib_file);
 
     compile_gph(lib_file_path);
 
-    _objs.push_back(lib_file_path.filename().stem().string() + ".o");
+    initial_objs.push_back(lib_file_path.filename().stem().string() + ".o");
   }
 
   compile_gph(source_file_path);
 
-  _objs.insert(_objs.end(), objs.begin(), objs.end());
-  compile_objects(_objs, filename);
+  initial_objs.insert(initial_objs.end(), objs.begin(), objs.end());
+  compile_objects(initial_objs, filename);
 }
 
 void Compiler::compile_gph(const filesystem::path &source_file_path) {
@@ -64,8 +65,7 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
 
   auto lexer = make_shared<Lexer>(content);
 
-  auto env = make_shared<Env>(nullptr);
-  env->init();
+  auto env = make_shared<Env>();
 
   auto program_context = make_shared<ProgramContext>(filename, env);
   auto program = make_shared<Program>(program_context);
@@ -74,15 +74,18 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   auto program_parser = make_shared<ProgramParser>(parser);
   program_parser->parse();
 
-  auto analyzer = make_shared<Analyzer>(program);
-  analyzer->analyze();
+  auto type_resolver = make_shared<TypeResolver>(program);
+  type_resolver->resolve();
+
+  auto validator = make_shared<Validator>(program);
+  validator->validate();
 
   Codegen::init();
 
   auto codegen_context = make_shared<CodegenContext>(program_context);
   auto codegen = make_shared<Codegen>(codegen_context);
   codegen->codegen(program);
-  codegen_context->module->print(llvm::errs(), nullptr);
+  codegen_context->module->print(llvm::outs(), nullptr);
   codegen->optimize();
 
   error_code err_code;
