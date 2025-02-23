@@ -3,6 +3,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Value.h>
 
+#include <iostream>
 #include <memory>
 #include <unordered_map>
 

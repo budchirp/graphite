@@ -4,8 +4,6 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
 
-#include <ios>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -42,12 +40,12 @@ llvm::Value *BinaryExpression::codegen(
     return nullptr;
   }
 
-  auto type = left->get_type();
+  auto type = right->get_type();
   auto llvm_type = type->to_llvm(context->llvm_context);
-  right_value = Codegen::cast_type(
-      context, right_value, llvm_type,
+  left_value = Codegen::cast_type(
+      context, left_value, llvm_type,
       !(op.type == TOKEN_EQUAL || op.type == TOKEN_NOT_EQUAL));
-  if (!right_value) {
+  if (!left_value) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                   right->get_position());
     return nullptr;
@@ -59,8 +57,24 @@ llvm::Value *BinaryExpression::codegen(
               dynamic_cast<VarRefExpression *>(left.get())) {
         auto variable = context->get_env()->get_current_scope()->get_variable(
             variable_expression->get_name());
-        context->builder->CreateStore(right_value, variable->value);
-        return variable->value;
+
+        if (!variable->is_initialized) {
+          llvm::Value *value = right_value;
+          if (variable->is_mutable) {
+            value = context->builder->CreateAlloca(
+                variable->type->to_llvm(context->llvm_context), nullptr,
+                "addr");
+            context->builder->CreateStore(right_value, value);
+          }
+
+          variable->is_initialized = true;
+          variable->add_llvm_value(value);
+        } else {
+          context->builder->CreateStore(right_value, variable->value);
+        }
+
+        return llvm::Constant::getNullValue(
+            llvm::Type::getVoidTy(*context->llvm_context));
       }
 
       return nullptr;
@@ -226,6 +240,7 @@ void BinaryExpression::resolve_types(
   left->resolve_types(context);
   right->resolve_types(context);
 
+  shared_ptr<Type> type;
   switch (op.type) {
     case TOKEN_LESS_THAN:
     case TOKEN_GREATER_THAN:
@@ -235,41 +250,16 @@ void BinaryExpression::resolve_types(
       break;
 
     case TOKEN_ASSIGN: {
-      if (auto variable_expression =
-              dynamic_cast<VarRefExpression *>(left.get())) {
-        auto variable = context->get_env()->get_current_scope()->get_variable(
-            variable_expression->get_name());
-        if (!variable->is_initialized /* && !TypeHelper::is_null(variable->actual_type) */) {
-          type = dynamic_pointer_cast<NullType>(variable->type)->child_type;
-        } else {
-          type = variable->type;
-        }
-
-        variable->set_type(type);
-      } else {
-        Logger::error(
-            "Expected variable reference as left hand side expression",
-            LogTypes::Error::SYNTAX, left->get_position());
-      }
-
+      type = make_shared<VoidType>();
       break;
     }
 
     case TOKEN_AS: {
-      if (auto variable_expression =
-              dynamic_cast<VarRefExpression *>(left.get())) {
-        auto variable = context->get_env()->get_current_scope()->get_variable(
-            variable_expression->get_name());
-        if (auto type_expression = dynamic_cast<TypeExpression *>(right.get())) {
-          type = type_expression->get_type();
-        } else {
-          Logger::error("Expected type expression as right hand side expression");
-          return;
-        }
+      if (auto type_expression = dynamic_cast<TypeExpression *>(right.get())) {
+        type = type_expression->get_type();
+        left->set_type(type);
       } else {
-        Logger::error(
-            "Expected variable reference as left hand side expression",
-            LogTypes::Error::SYNTAX, left->get_position());
+        Logger::error("Expected type expression as right hand side expression");
         return;
       }
 
@@ -281,13 +271,13 @@ void BinaryExpression::resolve_types(
       auto right_type = right->get_type();
       if (TypeHelper::is_float(left_type)) {
         type = left_type;
-      } else if (TypeHelper::is_float(right_type)) {
-        type = right_type;
       } else {
-        type = left_type;
+        type = right_type;
       }
     }
   }
+
+  set_type(type);
 }
 
 string BinaryExpression::to_string() const {

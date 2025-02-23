@@ -18,7 +18,7 @@ Value *BooleanExpression::codegen(
 void BooleanExpression::validate(const shared_ptr<ProgramContext> &context) {}
 void BooleanExpression::resolve_types(
     const shared_ptr<ProgramContext> &context) {
-  type = make_shared<BooleanType>();
+  set_type(make_shared<BooleanType>());
 }
 
 string BooleanExpression::to_string() const { return ::to_string(value); }

@@ -7,6 +7,7 @@ void Scope::add_variable(const string &name,
                          const shared_ptr<VariableSymbol> &variable) {
   variables.emplace(name, variable);
 }
+
 shared_ptr<VariableSymbol> Scope::get_variable(const string &name) const {
   auto it = variables.find(name);
   if (it != variables.end()) {

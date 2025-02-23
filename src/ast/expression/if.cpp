@@ -85,7 +85,7 @@ void IfExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   consequence->resolve_types(context);
   if (alternative) alternative->resolve_types(context);
 
-  type = consequence->get_type();
+  set_type(consequence->get_type());
 }
 
 string IfExpression::to_string() const {

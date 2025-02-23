@@ -18,7 +18,7 @@ Value *StringExpression::codegen(
 void StringExpression::validate(const shared_ptr<ProgramContext> &context) {}
 void StringExpression::resolve_types(
     const shared_ptr<ProgramContext> &context) {
-  type = make_shared<StringType>();
+  set_type(make_shared<StringType>());
 }
 
 string StringExpression::to_string() const {

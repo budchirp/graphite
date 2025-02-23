@@ -87,6 +87,7 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   codegen->codegen(program);
   codegen_context->module->print(llvm::outs(), nullptr);
   codegen->optimize();
+  codegen_context->module->print(llvm::outs(), nullptr);
 
   error_code err_code;
   llvm::raw_fd_ostream output_file(source_file_path.stem().string() + ".o",

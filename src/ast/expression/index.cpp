@@ -30,7 +30,7 @@ llvm::Value *IndexExpression::codegen(
     return nullptr;
   }
 
-  auto array_type = dynamic_pointer_cast<ArrayType>(variable->get_type());
+  auto array_type = TypeHelper::is_array(variable->get_type());
 
   auto index_ptr = context->builder->CreateGEP(
       array_type->to_llvm(context->llvm_context), name_value,
@@ -46,12 +46,6 @@ void IndexExpression::validate(const shared_ptr<ProgramContext> &context) {
   variable->validate(context);
   index->validate(context);
 
-  if (!TypeHelper::is_array(variable->get_type())) {
-    Logger::error("Array expected", LogTypes::Error::TYPE_MISMATCH,
-                  variable->get_position());
-    return;
-  }
-
   if (!TypeHelper::is_int(index->get_type())) {
     Logger::error("Expected integer as index", LogTypes::Error::TYPE_MISMATCH,
                   index->get_position());
@@ -64,9 +58,10 @@ void IndexExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   index->resolve_types(context);
 
   if (auto array_type = TypeHelper::is_array(variable->get_type())) {
-    type = array_type->child_type;
+    set_type(array_type->child_type);
   } else {
-    Logger::error("Array expected");
+    Logger::error("Array expected", LogTypes::Error::TYPE_MISMATCH,
+                  variable->get_position());
   }
 }
 

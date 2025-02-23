@@ -55,11 +55,11 @@ void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context,
     value->resolve_types(context);
   }
 
-  this->type =
-      type ? dynamic_pointer_cast<ArrayType>(destination_type)
-           : make_shared<ArrayType>(values[0] ? values[0]->get_type()
-                                              : make_shared<NullType>(nullptr),
-                                    values.size());
+  set_type(destination_type ? dynamic_pointer_cast<ArrayType>(destination_type)
+                            : make_shared<ArrayType>(
+                                  values[0] ? values[0]->get_type()
+                                            : make_shared<NullType>(nullptr),
+                                  values.size()));
 }
 
 string ArrayExpression::to_string() const {

@@ -21,7 +21,7 @@ void TypeExpression::validate(const shared_ptr<ProgramContext> &context) {
 }
 
 void TypeExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
-  type = resolve_types(context, type);
+  set_type(resolve_types(context, type));
 }
 
 shared_ptr<Type> TypeExpression::resolve_types(const shared_ptr<ProgramContext> &context, const shared_ptr<Type> &type) const {

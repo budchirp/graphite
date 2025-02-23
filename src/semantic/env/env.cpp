@@ -9,7 +9,6 @@
 #include "types/float.hpp"
 #include "types/int.hpp"
 #include "types/null.hpp"
-#include "types/pointer.hpp"
 #include "types/string.hpp"
 #include "types/type.hpp"
 #include "types/void.hpp"
@@ -35,10 +34,9 @@ Env::Env() {
   add_scope("global", global_scope);
   set_current_scope("global");
 
-  auto null_type = make_shared<NullType>(nullptr);
   current_scope->add_variable(
       "null",
-      make_shared<VariableSymbol>("null", null_type, null_type, false, true));
+      make_shared<VariableSymbol>("null", make_shared<NullType>(nullptr), false, true));
 }
 
 void Env::add_type(const string &name, const shared_ptr<Type> &type) {

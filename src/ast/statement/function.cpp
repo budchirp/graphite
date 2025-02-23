@@ -35,10 +35,7 @@ llvm::Function *FunctionStatement::codegen_function(
   context->get_env()->set_current_scope(scope->get_name());
 
   for (auto &argument : function->args()) {
-    context->get_env()
-        ->get_current_scope()
-        ->get_variable(argument.getName().str())
-        ->add_llvm_value(&argument);
+    scope->get_variable(argument.getName().str())->add_llvm_value(&argument);
   }
 
   auto body_block = body->codegen_block(context, function, "entry");
@@ -91,9 +88,9 @@ void FunctionStatement::validate(const shared_ptr<ProgramContext> &context) {
 
 void FunctionStatement::resolve_types(
     const shared_ptr<ProgramContext> &context) {
-  context->get_env()->set_current_scope(scope->get_name());
-
   proto->resolve_types(context);
+
+  context->get_env()->set_current_scope(scope->get_name());
 
   vector<pair<string, shared_ptr<Type>>> parameters;
   for (const auto &[parameter_name_expression, parameter_type_expression] :
@@ -101,20 +98,20 @@ void FunctionStatement::resolve_types(
     auto name = parameter_name_expression->get_identifier();
     auto type = parameter_type_expression->get_type();
     scope->add_variable(
-        name, make_shared<VariableSymbol>(name, type, type, false, true));
+        name, make_shared<VariableSymbol>(name, type, false, true));
 
     parameters.emplace_back(name, type);
   }
 
   body->resolve_types(context);
 
+  context->get_env()->set_current_scope(scope->get_parent()->get_name());
+
   auto name = proto->name->get_identifier();
   context->get_env()->add_function(
       name, make_shared<FunctionSymbol>(
                 name, make_shared<FunctionType>(
                           parameters, proto->return_type->get_type())));
-
-  context->get_env()->set_current_scope(scope->get_parent()->get_name());
 }
 
 string FunctionStatement::to_string() const {

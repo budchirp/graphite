@@ -27,9 +27,9 @@ void ExternStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   proto->resolve_types(context);
 
   vector<pair<string, shared_ptr<Type>>> parameters;
-  for (const auto &[parameter_name, parameter_type_expression] :
+  for (const auto &[parameter_name_expression, parameter_type_expression] :
        proto->parameters) {
-    parameters.emplace_back(parameter_name->get_identifier(),
+    parameters.emplace_back(parameter_name_expression->get_identifier(),
                             parameter_type_expression->get_type());
   }
 

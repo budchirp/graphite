@@ -26,6 +26,7 @@ class NullType : public Type {
 
   string to_string() const override { return child_type->to_string() + "?"; };
   string to_string_tree() const override {
-    return "NullType(child_type: " + child_type->to_string_tree() + ")";
+    return "NullType(child_type: " +
+           (child_type ? child_type->to_string_tree() : "nullptr") + ")";
   };
 };

@@ -27,7 +27,9 @@ fn main(argc: i32, argv: string[]) -> i32 {
   }
 
   printf("\nVar without initializer\n")
-  var j: i32
+  var mut j: i32
+  j = y
+  j = 32
   j = y
   print_number(j)
 
@@ -45,8 +47,6 @@ fn main(argc: i32, argv: string[]) -> i32 {
 
   printf("\nBoolean check\n")
   var z: boolean = if (x == y) { true } else { false }
-  print_number(z as i32)
-
   if (z) {
     printf("x and y is 64\n")
   } else {

@@ -24,8 +24,7 @@ llvm::Value *VarStatement::codegen(
         variable_type->get_type()->to_llvm(context->llvm_context), nullptr,
         "array");
   } else {
-    value =
-        context->get_env()->get_current_scope()->get_variable("null")->value;
+    value = llvm::Constant::getNullValue(variable_type->get_type()->to_llvm(context->llvm_context));
   }
 
   if (!value) {
@@ -43,7 +42,7 @@ llvm::Value *VarStatement::codegen(
     return nullptr;
   }
 
-  if (!is_initialized || is_mutable) {
+  if (is_mutable) {
     auto ptr = context->builder->CreateAlloca(llvm_type, nullptr, "addr");
     context->builder->CreateStore(value, ptr);
 
@@ -81,21 +80,15 @@ void VarStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   if (variable_type) variable_type->resolve_types(context);
   if (expression) expression->resolve_types(context);
 
-  shared_ptr<Type> actual_type;
   if (!expression) {
-    actual_type = variable_type->get_type();
+    type = variable_type->get_type();
   } else {
-    actual_type = expression->get_type();
-  }
-
-  type = actual_type;
-  if (!is_initialized) {
-    type = make_shared<NullType>(actual_type);
+    type = expression->get_type();
   }
 
   context->get_env()->get_current_scope()->add_variable(
       name->get_identifier(),
-      make_shared<VariableSymbol>(name->get_identifier(), type, actual_type,
+      make_shared<VariableSymbol>(name->get_identifier(), type,
                                   is_mutable, is_initialized));
 }
 
@@ -112,6 +105,6 @@ string VarStatement::to_string_tree() const {
   ostringstream oss;
   oss << "VarStatement(name: " + name->to_string_tree() + ", expression: "
       << (expression ? expression->to_string_tree() : "empty")
-      << ", type: " << variable_type->to_string_tree() << ")";
+      << ", type: " << (variable_type ? variable_type->to_string_tree() : "empty") << ")";
   return oss.str();
 }

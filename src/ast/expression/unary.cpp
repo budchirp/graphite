@@ -156,6 +156,8 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   expression->resolve_types(context);
 
   auto expression_type = expression->get_type();
+
+  shared_ptr<Type> type;
   switch (op.type) {
     case TOKEN_BANG_BANG: {
       if (auto null_type = TypeHelper::is_null(expression_type)) {
@@ -188,6 +190,8 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
       type = expression_type;
       break;
   }
+
+  set_type(type);
 }
 
 string UnaryExpression::to_string() const {
