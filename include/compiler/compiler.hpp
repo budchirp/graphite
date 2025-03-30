@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "ast/program.hpp"
+#include "program/program.hpp"
 
 using namespace std;
 
@@ -19,13 +19,13 @@ class Compiler {
   static shared_ptr<Program> parse_program(const filesystem::path &root,
                                            const filesystem::path &filename);
 
-  void compile(const filesystem::path &main, const vector<string> &objs);
+  void compile(const filesystem::path &main, const vector<string> &objs) const;
 
   vector<string> compile_project(const filesystem::path &root,
-                                 const filesystem::path &filename);
+                                 const filesystem::path &filename) const;
 
   void compile_gph(const filesystem::path &root,
-                   const filesystem::path &filename);
+                   const filesystem::path &filename) const;
 
-  void link(const vector<string> &objs, const filesystem::path &output);
+  void link(const vector<string> &objs, const filesystem::path &output) const;
 };

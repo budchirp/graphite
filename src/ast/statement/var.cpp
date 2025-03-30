@@ -1,9 +1,6 @@
 #include "ast/statement/var.hpp"
 
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalVariable.h>
-#include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/Value.h>
 #include <llvm/Support/Casting.h>
 
@@ -108,7 +105,7 @@ void VarStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   scope->add_variable(
       name->get_identifier(),
       make_shared<VariableSymbol>(name->get_identifier(),
-                                  SymbolLinkageType::Value::Internal, visibilty,
+                                  SymbolLinkageType::Value::Internal, visibility,
                                   type, is_global, is_mutable, is_initialized));
 }
 

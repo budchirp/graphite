@@ -15,8 +15,7 @@ shared_ptr<VariableSymbol> Scope::get_variable(const string &name) const {
   }
 
   if (parent) {
-    auto var = parent->get_variable(name);
-    if (var) {
+    if (auto var = parent->get_variable(name)) {
       return var;
     }
   }

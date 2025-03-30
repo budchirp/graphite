@@ -1,4 +1,3 @@
-
 #include "ast/expression/index.hpp"
 
 #include <llvm/IR/Value.h>

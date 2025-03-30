@@ -19,14 +19,13 @@ Value *ProtoStatement::codegen(
 Function *ProtoStatement::codegen_function(
     const shared_ptr<CodegenContext> &context) const {
   auto function = Function::Create(
-      static_cast<llvm::FunctionType *>(
-          context->get_env()
-              ->get_function(name->get_identifier())
-              ->type->to_llvm(context->llvm_context)),
+      context->get_env()
+      ->get_function(name->get_identifier())
+      ->type->to_llvm(context->llvm_context),
       context->get_env()->get_function(name->get_identifier())->visibility ==
               SymbolVisibility::Value::PUBLIC
-          ? llvm::Function::ExternalLinkage
-          : llvm::Function::InternalLinkage,
+          ? Function::ExternalLinkage
+          : Function::InternalLinkage,
       name->get_identifier(), context->module.get());
 
   size_t idx = 0;

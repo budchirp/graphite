@@ -4,41 +4,41 @@
 
 #include "lexer/token/token_type.hpp"
 
-enum class Precedence {
-  LOWEST,
-  EQUALS,
-  LESSGREATER,
-  SUM,
-  PRODUCT,
-  PREFIX,
-  CALL
-};
+class Precedence {
+public:
+  enum Value {
+    LOWEST,
+    EQUALS,
+    LESSGREATER,
+    SUM,
+    PRODUCT,
+    PREFIX,
+    CALL
+  };
 
-class PrecedenceHelper {
- public:
-  static Precedence precedence_for(const TokenType &tokenType) {
-    static const std::unordered_map<TokenType, Precedence> precedence_map = {
-        {TOKEN_LEFT_BRACKET, Precedence::CALL},
-        {TOKEN_AS, Precedence::CALL},
-        {TOKEN_ASSIGN, Precedence::CALL},
-        {TOKEN_BANG_BANG, Precedence::CALL},
-        {TOKEN_EQUAL, Precedence::EQUALS},
-        {TOKEN_NOT_EQUAL, Precedence::EQUALS},
-        {TOKEN_LESS_THAN, Precedence::LESSGREATER},
-        {TOKEN_GREATER_THAN, Precedence::LESSGREATER},
-        {TOKEN_PLUS, Precedence::SUM},
-        {TOKEN_MINUS, Precedence::SUM},
-        {TOKEN_PLUSPLUS, Precedence::SUM},
-        {TOKEN_MINUSMINUS, Precedence::SUM},
-        {TOKEN_SLASH, Precedence::PRODUCT},
-        {TOKEN_ASTERISK, Precedence::PRODUCT},
-        {TOKEN_LEFT_PARENTHESES, Precedence::CALL}};
+    static Value precedence_for(const TokenType &tokenType) {
+        static const std::unordered_map<TokenType, Value> precedence_map = {
+            {TOKEN_LEFT_BRACKET, CALL},
+            {TOKEN_AS, CALL},
+            {TOKEN_ASSIGN, CALL},
+            {TOKEN_BANG_BANG, CALL},
+            {TOKEN_EQUAL, EQUALS},
+            {TOKEN_NOT_EQUAL, EQUALS},
+            {TOKEN_LESS_THAN, LESSGREATER},
+            {TOKEN_GREATER_THAN, LESSGREATER},
+            {TOKEN_PLUS, SUM},
+            {TOKEN_MINUS, SUM},
+            {TOKEN_PLUSPLUS, SUM},
+            {TOKEN_MINUSMINUS, SUM},
+            {TOKEN_SLASH, PRODUCT},
+            {TOKEN_ASTERISK, PRODUCT},
+            {TOKEN_LEFT_PARENTHESES, CALL}};
 
-    if (const auto it = precedence_map.find(tokenType);
-        it != precedence_map.end()) {
-      return it->second;
+        if (const auto it = precedence_map.find(tokenType);
+            it != precedence_map.end()) {
+            return it->second;
+            }
+
+        return LOWEST;
     }
-
-    return Precedence::LOWEST;
-  }
 };

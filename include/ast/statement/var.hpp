@@ -20,7 +20,7 @@ class VarStatement : public Statement {
 
   shared_ptr<Type> type;
 
-  SymbolVisibility::Value visibilty;
+  SymbolVisibility::Value visibility;
 
   bool is_mutable;
   bool is_initialized;
@@ -31,13 +31,13 @@ class VarStatement : public Statement {
 
  public:
   explicit VarStatement(const Position &position,
-                        const SymbolVisibility::Value &visibilty,
+                        const SymbolVisibility::Value &visibility,
                         const bool &is_mutable, const bool &is_initialized,
                         unique_ptr<IdentifierExpression> name,
                         unique_ptr<TypeExpression> variable_type,
                         unique_ptr<Expression> expression)
       : position(position),
-        visibilty(visibilty),
+        visibility(visibility),
         is_mutable(is_mutable),
         is_initialized(is_initialized),
         name(std::move(name)),

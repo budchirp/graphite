@@ -1,11 +1,10 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/Module.h>
 #include <llvm/Support/ManagedStatic.h>
 
 #include <memory>
 
-#include "ast/program.hpp"
+#include "program/program.hpp"
 #include "codegen/context.hpp"
 
 using namespace std;

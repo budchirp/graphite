@@ -1,6 +1,5 @@
 #include "ast/statement/return.hpp"
 
-#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
 
 #include <memory>

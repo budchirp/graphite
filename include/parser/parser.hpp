@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "ast/program.hpp"
 #include "lexer/lexer.hpp"
 #include "logger/logger.hpp"
+#include "program/program.hpp"
 
 using namespace std;
 

@@ -46,7 +46,8 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
   add_link_options(-flto)
 endif()
 
-add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES}
+        src/cli/colors.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} PRIVATE argman)

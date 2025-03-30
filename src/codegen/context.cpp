@@ -18,8 +18,6 @@
 #include "llvm/Target/TargetOptions.h"
 #include "logger/logger.hpp"
 
-static llvm::ExitOnError ExitOnErr;
-
 CodegenContext::CodegenContext(
     const shared_ptr<ProgramContext>& program_context)
     : program_context(program_context) {

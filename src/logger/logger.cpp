@@ -10,7 +10,7 @@
 #include "lexer/position.hpp"
 #include "logger/log_types.hpp"
 
-void Logger::log(const string &message, LogTypes::Log type,
+void Logger::log(const string &message, LogTypes::Log::Value type,
                  const Position *position) {
   string log_type;
   switch (type) {
@@ -28,7 +28,7 @@ void Logger::log(const string &message, LogTypes::Log type,
   cout << str.str();
 };
 
-void Logger::warn(const string &message, LogTypes::Warn type,
+void Logger::warn(const string &message, LogTypes::Warn::Value type,
                   const Position *position) {
   string warn_type;
   switch (type) {
@@ -46,7 +46,7 @@ void Logger::warn(const string &message, LogTypes::Warn type,
   cout << str.str();
 };
 
-void Logger::error(const string &message, LogTypes::Error type,
+void Logger::error(const string &message, LogTypes::Error::Value type,
                    const Position *position) {
   string error_type;
   switch (type) {
@@ -77,18 +77,17 @@ void Logger::error(const string &message, LogTypes::Error type,
       << (position ? position->line : 0) << " " << Colors::WHITE << message
       << endl;
 
-  // cerr << str.str();
   throw runtime_error(str.str());
 }
 
-void Logger::log(const string &message, LogTypes::Log type) {
-  Logger::log(message, type, position.get());
+void Logger::log(const string &message, LogTypes::Log::Value type) const {
+  log(message, type, position.get());
 }
-void Logger::warn(const string &message, LogTypes::Warn type) {
-  Logger::warn(message, type, position.get());
+void Logger::warn(const string &message, LogTypes::Warn::Value type) const {
+  warn(message, type, position.get());
 }
-void Logger::error(const string &message, LogTypes::Error type) {
-  Logger::error(message, type, position.get());
+void Logger::error(const string &message, LogTypes::Error::Value type) const {
+  error(message, type, position.get());
 }
 
 void Logger::log(const string &message) {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <llvm/IR/Value.h>
-
 #include <memory>
 #include <string>
 #include <utility>
@@ -9,7 +7,6 @@
 #include "ast/expression.hpp"
 #include "ast/statement.hpp"
 #include "ast/statement/block.hpp"
-#include "ast/statement/var.hpp"
 #include "lexer/position.hpp"
 #include "types/void.hpp"
 

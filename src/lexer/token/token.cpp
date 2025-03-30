@@ -3,7 +3,7 @@
 #include <sstream>
 
 Token::Token() {
-  this->type = TokenType::TOKEN_EOF;
+  this->type = TOKEN_EOF;
   this->literal = "";
 }
 

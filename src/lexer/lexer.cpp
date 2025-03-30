@@ -9,7 +9,7 @@
 using namespace std;
 
 char Lexer::get_current_char() const {
-  return (read_position < source.size()) ? source[read_position] : '\0';
+  return read_position < source.size() ? source[read_position] : '\0';
 }
 
 void Lexer::eat_char() {

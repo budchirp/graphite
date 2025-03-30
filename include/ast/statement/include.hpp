@@ -1,15 +1,12 @@
 #pragma once
 
-#include <llvm/IR/Function.h>
-
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "ast/expression/string.hpp"
-#include "ast/program.hpp"
 #include "ast/statement.hpp"
 #include "lexer/position.hpp"
+#include "program/program.hpp"
 
 using namespace std;
 

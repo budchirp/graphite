@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "program/program.hpp"
+
 Parser::Parser(const shared_ptr<Lexer> &lexer,
                const shared_ptr<Program> &program)
     : lexer(lexer), program(program) {

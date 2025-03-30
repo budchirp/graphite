@@ -19,12 +19,11 @@
 #include "logger/logger.hpp"
 
 using namespace std;
-using namespace llvm;
 
 void Codegen::init() {
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
-  InitializeNativeTargetAsmParser();
+  llvm::InitializeNativeTarget();
+  llvm::InitializeNativeTargetAsmPrinter();
+  llvm::InitializeNativeTargetAsmParser();
 }
 
 void Codegen::codegen(const shared_ptr<Program> &program) const {
@@ -49,14 +48,14 @@ void Codegen::optimize() {
                           *context->mam);
 
   llvm::ModulePassManager mpm = pb.buildModuleOptimizationPipeline(
-      llvm::OptimizationLevel::O3, ThinOrFullLTOPhase::None);
+      llvm::OptimizationLevel::O3, llvm::ThinOrFullLTOPhase::None);
 
   Logger::log("Optimizing your garbage");
   mpm.run(*context->module, *context->mam);
 }
 
-Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
-                          Value *value, llvm::Type *expectedType, bool strict) {
+llvm::Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
+                                llvm::Value *value, llvm::Type *expectedType, bool strict) {
   if (value->getType()->isPointerTy() || expectedType->isPointerTy())
     return value;
 
@@ -68,9 +67,9 @@ Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
     if (value->getType()->getIntegerBitWidth() >
         expectedType->getIntegerBitWidth()) {
       return context->builder->CreateTrunc(value, expectedType);
-    } else {
-      return context->builder->CreateSExt(value, expectedType);
     }
+
+    return context->builder->CreateSExt(value, expectedType);
   }
 
   if (value->getType()->isFloatingPointTy() &&
@@ -78,9 +77,9 @@ Value *Codegen::cast_type(const shared_ptr<CodegenContext> &context,
     if (value->getType()->getPrimitiveSizeInBits() >
         expectedType->getPrimitiveSizeInBits()) {
       return context->builder->CreateFPTrunc(value, expectedType);
-    } else {
-      return context->builder->CreateFPExt(value, expectedType);
     }
+
+    return context->builder->CreateFPExt(value, expectedType);
   }
 
   if (value->getType()->isIntegerTy() && expectedType->isFloatingPointTy()) {

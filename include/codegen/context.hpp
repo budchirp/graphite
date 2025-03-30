@@ -8,12 +8,10 @@
 #include <llvm/IR/PassManager.h>
 #include <llvm/Passes/StandardInstrumentations.h>
 #include <llvm/Target/TargetMachine.h>
-#include <llvm/Transforms/Scalar/GVN.h>
-#include <llvm/Transforms/Scalar/Reassociate.h>
 
 #include <memory>
 
-#include "ast/program_context.hpp"
+#include "program/context.hpp"
 
 using namespace std;
 

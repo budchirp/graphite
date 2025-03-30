@@ -2,7 +2,6 @@
 
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/CodeGen.h>
-#include <llvm/Support/CommandLine.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
@@ -13,13 +12,11 @@
 #include <numeric>
 #include <string>
 
-#include "ast/program.hpp"
-#include "ast/program_context.hpp"
 #include "codegen/codegen.hpp"
 #include "lexer/lexer.hpp"
 #include "logger/logger.hpp"
 #include "parser/parser.hpp"
-#include "parser/parsers/statement/program.hpp"
+#include "program/parser.hpp"
 #include "semantic/type_resolver/type_resolver.hpp"
 #include "semantic/validator/validator.hpp"
 
@@ -63,7 +60,7 @@ shared_ptr<Program> Compiler::parse_program(const filesystem::path &root,
 }
 
 void Compiler::compile(const filesystem::path &main,
-                       const vector<string> &objs) {
+                       const vector<string> &objs) const {
   auto root = main.parent_path();
   auto filename = main.filename().stem().string();
 
@@ -74,12 +71,12 @@ void Compiler::compile(const filesystem::path &main,
 }
 
 vector<string> Compiler::compile_project(const filesystem::path &root,
-                                         const filesystem::path &filename) {
+                                         const filesystem::path &filename) const {
   auto program = parse_program(root, filename);
 
   vector<string> modules;
 
-  filesystem::create_directory(root / "build");
+  create_directory(root / "build");
 
   compile_gph(root, filename);
   modules.push_back((root / "build" / filename.stem()).string() + ".o");
@@ -93,7 +90,7 @@ vector<string> Compiler::compile_project(const filesystem::path &root,
 }
 
 void Compiler::compile_gph(const filesystem::path &root,
-                           const filesystem::path &filename) {
+                           const filesystem::path &filename) const {
   Logger::log("Compiling `" + filename.string() + "`");
 
   auto program = parse_program(root, filename);
@@ -133,7 +130,7 @@ void Compiler::compile_gph(const filesystem::path &root,
 };
 
 void Compiler::link(const vector<string> &objs,
-                    const filesystem::path &output) {
+                    const filesystem::path &output) const {
   auto filename = output.filename().stem().string();
   Logger::log("Creating executable `" + filename + "`");
 

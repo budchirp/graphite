@@ -11,7 +11,7 @@ using namespace llvm;
 
 Value *BlockStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
-  Value *last_statement;
+  Value *last_statement = nullptr;
   for (const auto &statement : statements) {
     last_statement = statement->codegen(context);
     if (context->builder->GetInsertBlock()->getTerminator()) {

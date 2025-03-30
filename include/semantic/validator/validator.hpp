@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "ast/program.hpp"
+#include "program/program.hpp"
 
 using namespace std;
 
@@ -13,5 +13,5 @@ class Validator {
  public:
   explicit Validator(const shared_ptr<Program> &program) : program(program) {}
 
-  void validate() { program->validate(); };
+  void validate() const { program->validate(); };
 };

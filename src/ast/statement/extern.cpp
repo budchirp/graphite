@@ -38,7 +38,7 @@ void ExternStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   auto name = proto->name->get_identifier();
   context->get_env()->add_function(
       name, make_shared<FunctionSymbol>(
-                name, SymbolLinkageType::Internal, visibilty,
+                name, SymbolLinkageType::Internal, visibility,
                 make_shared<FunctionType>(parameters,
                                           proto->return_type->get_type())));
 }

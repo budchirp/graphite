@@ -44,7 +44,9 @@ llvm::Value *UnaryExpression::codegen(
     case TOKEN_MINUS: {
       if (TypeHelper::is_int(type)) {
         return context->builder->CreateNeg(value, "neg");
-      } else if (TypeHelper::is_float(type)) {
+      }
+
+      if (TypeHelper::is_float(type)) {
         return context->builder->CreateFNeg(value, "neg");
       }
 
@@ -73,7 +75,6 @@ llvm::Value *UnaryExpression::codegen(
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;
-      break;
     }
 
     case TOKEN_PLUSPLUS: {
@@ -113,7 +114,6 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
                                make_shared<BooleanType>())) {
         Logger::error("Bang operator only supported with booleans",
                       LogTypes::Error::TYPE_MISMATCH, &position);
-        return;
       }
 
       break;
@@ -135,7 +135,6 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
         Logger::error(
             op.literal + " operator only supported with integer or floats",
             LogTypes::Error::TYPE_MISMATCH, &position);
-        return;
       }
 
       break;
@@ -144,7 +143,6 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     default: {
       Logger::error("Unsupported operator in unary expression",
                     LogTypes::Error::SYNTAX, &position);
-      return;
     }
   }
 }

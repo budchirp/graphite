@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "ast/program.hpp"
+#include "program/program.hpp"
 
 using namespace std;
 
@@ -14,5 +14,5 @@ class TypeResolver {
   explicit TypeResolver(const shared_ptr<Program> &program)
       : program(program) {};
 
-  void resolve() { program->resolve_types(); };
+  void resolve() const { program->resolve_types(); };
 };
