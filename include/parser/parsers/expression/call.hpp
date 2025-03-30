@@ -8,12 +8,12 @@
 using namespace std;
 
 class CallExpressionParser : public ExpressionParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
   unique_ptr<Expression> left;
 
-public:
+ public:
   explicit CallExpressionParser(const shared_ptr<Parser> &parser,
                                 unique_ptr<Expression> left)
       : parser(parser), left(std::move(left)) {};

@@ -38,8 +38,8 @@ CodegenContext::CodegenContext(
                                                llvm::Reloc::PIC_);
 
   llvm_context = make_shared<llvm::LLVMContext>();
-  module =
-      make_shared<llvm::Module>(program_context->get_name(), *llvm_context);
+  module = make_shared<llvm::Module>(program_context->get_module_name(),
+                                     *llvm_context);
   module->setDataLayout(target_machine->createDataLayout());
   module->setTargetTriple(triple);
   builder = make_shared<llvm::IRBuilder<>>(*llvm_context);

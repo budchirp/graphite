@@ -23,7 +23,11 @@ Function *ProtoStatement::codegen_function(
           context->get_env()
               ->get_function(name->get_identifier())
               ->type->to_llvm(context->llvm_context)),
-      Function::ExternalLinkage, name->get_identifier(), context->module.get());
+      context->get_env()->get_function(name->get_identifier())->visibility ==
+              SymbolVisibility::Value::PUBLIC
+          ? llvm::Function::ExternalLinkage
+          : llvm::Function::InternalLinkage,
+      name->get_identifier(), context->module.get());
 
   size_t idx = 0;
   for (auto &argument : function->args())

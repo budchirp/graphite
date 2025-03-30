@@ -7,12 +7,12 @@
 
 using namespace std;
 
-class StatementParser {
+class VisibilityStatementParser {
  private:
   shared_ptr<Parser> parser;
 
  public:
-  explicit StatementParser(const shared_ptr<Parser> &parser)
+  explicit VisibilityStatementParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 
   unique_ptr<Statement> parse();

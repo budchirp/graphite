@@ -8,10 +8,10 @@
 using namespace std;
 
 class ReturnStatementParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit ReturnStatementParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 

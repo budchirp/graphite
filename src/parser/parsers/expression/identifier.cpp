@@ -9,7 +9,8 @@ unique_ptr<Expression> IdentifierExpressionParser::parse() {
   return parse_identifier();
 }
 
-unique_ptr<IdentifierExpression> IdentifierExpressionParser::parse_identifier() {
+unique_ptr<IdentifierExpression>
+IdentifierExpressionParser::parse_identifier() {
   const auto position = *parser->get_lexer()->position;
 
   const auto identifier_token = parser->current_token;

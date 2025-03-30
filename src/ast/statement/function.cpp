@@ -1,5 +1,6 @@
 #include "ast/statement/function.hpp"
 
+#include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
@@ -10,7 +11,10 @@
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
+#include "semantic/linkage_type.hpp"
+#include "semantic/symbols/variable.hpp"
 #include "semantic/type_helper.hpp"
+#include "semantic/visibilty.hpp"
 
 llvm::Value *FunctionStatement::codegen(
     const shared_ptr<CodegenContext> &context) const {
@@ -18,13 +22,17 @@ llvm::Value *FunctionStatement::codegen(
 }
 llvm::Function *FunctionStatement::codegen_function(
     const shared_ptr<CodegenContext> &context) const {
-  auto function = context->module->getFunction(proto->name->get_identifier());
-  if (function) {
+  auto name = proto->name->get_identifier();
+  auto function = context->get_env()->get_function(name);
+
+  auto llvm_function =
+      context->module->getFunction(proto->name->get_identifier());
+  if (llvm_function) {
     Logger::warn("Function `" + proto->name->get_identifier() + "` exists",
                  LogTypes::Warn::SUGGESTION, proto->name->get_position());
   } else {
-    function = proto->codegen_function(context);
-    if (!function) {
+    llvm_function = proto->codegen_function(context);
+    if (!llvm_function) {
       Logger::error("Failed to generate low level code for function `" +
                         proto->name->get_identifier() + "`",
                     LogTypes::Error::INTERNAL, proto->get_position());
@@ -34,26 +42,26 @@ llvm::Function *FunctionStatement::codegen_function(
 
   context->get_env()->set_current_scope(scope->get_name());
 
-  for (auto &argument : function->args()) {
+  for (auto &argument : llvm_function->args()) {
     scope->get_variable(argument.getName().str())->add_llvm_value(&argument);
   }
 
-  auto body_block = body->codegen_block(context, function, "entry");
+  auto body_block = body->codegen_block(context, llvm_function, "entry");
   if (!body_block) {
     Logger::error("Failed to generate low level code for function body",
                   LogTypes::Error::INTERNAL, body->get_position());
-    function->eraseFromParent();
+    llvm_function->eraseFromParent();
     return nullptr;
   }
 
   if (!body_block->getTerminator()) {
-    if (function->getReturnType()->isVoidTy()) {
+    if (llvm_function->getReturnType()->isVoidTy()) {
       context->builder->CreateRetVoid();
     } else {
       Logger::error("Non-void function missing return statement",
                     LogTypes::Error::UNKNOWN,
                     proto->return_type->get_position());
-      function->eraseFromParent();
+      llvm_function->eraseFromParent();
       return nullptr;
     }
   }
@@ -62,9 +70,9 @@ llvm::Function *FunctionStatement::codegen_function(
 
   context->get_env()
       ->get_function(proto->name->get_identifier())
-      ->add_llvm_value(function);
+      ->add_llvm_value(llvm_function);
 
-  return function;
+  return llvm_function;
 }
 
 void FunctionStatement::validate(const shared_ptr<ProgramContext> &context) {
@@ -98,7 +106,9 @@ void FunctionStatement::resolve_types(
     auto name = parameter_name_expression->get_identifier();
     auto type = parameter_type_expression->get_type();
     scope->add_variable(
-        name, make_shared<VariableSymbol>(name, type, false, true));
+        name, make_shared<VariableSymbol>(
+                  name, SymbolLinkageType::Value::Internal,
+                  SymbolVisibility::Value::PRIVATE, type, false, false, true));
 
     parameters.emplace_back(name, type);
   }
@@ -110,8 +120,9 @@ void FunctionStatement::resolve_types(
   auto name = proto->name->get_identifier();
   context->get_env()->add_function(
       name, make_shared<FunctionSymbol>(
-                name, make_shared<FunctionType>(
-                          parameters, proto->return_type->get_type())));
+                name, SymbolLinkageType::Value::Internal, visibilty,
+                make_shared<FunctionType>(parameters,
+                                          proto->return_type->get_type())));
 }
 
 string FunctionStatement::to_string() const {

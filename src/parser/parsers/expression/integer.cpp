@@ -28,10 +28,12 @@ unique_ptr<IntegerExpression> IntegerExpressionParser::parse_integer() {
   //         return nullptr;
   //       }
   //
-  //       if ((int_type->size == 8 && value > numeric_limits<uint8_t>::max()) ||
-  //           (int_type->size == 16 && value > numeric_limits<uint16_t>::max()) ||
-  //           (int_type->size == 32 && value > numeric_limits<uint32_t>::max()) ||
-  //           (int_type->size == 64 && value > numeric_limits<uint64_t>::max())) {
+  //       if ((int_type->size == 8 && value > numeric_limits<uint8_t>::max())
+  //       ||
+  //           (int_type->size == 16 && value > numeric_limits<uint16_t>::max())
+  //           || (int_type->size == 32 && value >
+  //           numeric_limits<uint32_t>::max()) || (int_type->size == 64 &&
+  //           value > numeric_limits<uint64_t>::max())) {
   //         parser->get_logger()->error("Unsigned integer too big",
   //                                     LogTypes::Error::SYNTAX);
   //         return nullptr;
@@ -40,7 +42,8 @@ unique_ptr<IntegerExpression> IntegerExpressionParser::parse_integer() {
   //       if (value > numeric_limits<int>::max() ||
   //           value < numeric_limits<int>::min() ||
   //           (int_type->size == 8 && (value < numeric_limits<int8_t>::min() ||
-  //                                    value > numeric_limits<int8_t>::max())) ||
+  //                                    value > numeric_limits<int8_t>::max()))
+  //                                    ||
   //           (int_type->size == 16 &&
   //            (value < numeric_limits<int16_t>::min() ||
   //             value > numeric_limits<int16_t>::max())) ||
@@ -50,7 +53,8 @@ unique_ptr<IntegerExpression> IntegerExpressionParser::parse_integer() {
   //           (int_type->size == 64 &&
   //            (value < numeric_limits<int64_t>::min() ||
   //             value > numeric_limits<int64_t>::max()))) {
-  //         parser->get_logger()->error("Signed integer too big or out of range",
+  //         parser->get_logger()->error("Signed integer too big or out of
+  //         range",
   //                                     LogTypes::Error::SYNTAX);
   //         return nullptr;
   //       }

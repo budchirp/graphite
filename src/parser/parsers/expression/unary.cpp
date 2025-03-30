@@ -39,6 +39,6 @@ unique_ptr<Expression> UnaryExpressionParser::parse() {
     }
   }
 
-  return make_unique<UnaryExpression>(*expression->get_position(), 
-                                      op_token, std::move(expression));
+  return make_unique<UnaryExpression>(*expression->get_position(), op_token,
+                                      std::move(expression));
 }

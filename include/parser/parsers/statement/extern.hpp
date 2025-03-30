@@ -8,12 +8,13 @@
 using namespace std;
 
 class ExternStatementParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit ExternStatementParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 
   unique_ptr<ExternStatement> parse();
+  unique_ptr<ExternStatement> parse(const TokenType &visibility);
 };

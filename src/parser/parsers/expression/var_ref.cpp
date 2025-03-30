@@ -18,6 +18,5 @@ unique_ptr<VarRefExpression> VarRefExpressionParser::parse_var_ref() {
   const auto identifier_token = parser->current_token;
   parser->eat_token();  // eat identifier
 
-  return make_unique<VarRefExpression>(position, 
-                                       identifier_token.literal);
+  return make_unique<VarRefExpression>(position, identifier_token.literal);
 }

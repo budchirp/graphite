@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -23,6 +22,10 @@ class Scope {
   string get_name() const { return name; }
 
   shared_ptr<Scope> get_parent() const { return parent; }
+
+  unordered_map<string, shared_ptr<VariableSymbol>> get_variables() {
+    return variables;
+  }
 
   void add_variable(const string &name,
                     const shared_ptr<VariableSymbol> &variable);

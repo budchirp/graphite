@@ -18,7 +18,8 @@ class Parser {
   Token current_token;
   Token next_token;
 
-  explicit Parser(const shared_ptr<Lexer> &lexer, const shared_ptr<Program> &program);
+  explicit Parser(const shared_ptr<Lexer> &lexer,
+                  const shared_ptr<Program> &program);
 
   void eat_token();
 

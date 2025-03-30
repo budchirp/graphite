@@ -38,12 +38,12 @@ llvm::Value *CallExpression::codegen(
       return nullptr;
     }
 
-    auto function = context->get_env()
-                               ->get_function(name->get_identifier());
+    auto function = context->get_env()->get_function(name->get_identifier());
     auto parameter_type = function->type->parameters[idx++].second;
 
     argument_value =
-        Codegen::cast_type(context, argument_value, parameter_type->to_llvm(context->llvm_context));
+        Codegen::cast_type(context, argument_value,
+                           parameter_type->to_llvm(context->llvm_context));
     if (!argument_value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                     argument->get_position());

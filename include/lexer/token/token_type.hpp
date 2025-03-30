@@ -3,6 +3,8 @@
 enum TokenType {
   TOKEN_EOF,
 
+  TOKEN_INCLUDE,
+
   TOKEN_FUN,
   TOKEN_RETURN,
 
@@ -17,6 +19,9 @@ enum TokenType {
   TOKEN_WHILE,
 
   TOKEN_MUT,
+
+  TOKEN_PUBLIC,
+  TOKEN_PRIVATE,
 
   TOKEN_IDENTIFIER,
   TOKEN_INT,

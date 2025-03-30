@@ -1,8 +1,12 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "ast/program.hpp"
+
 using namespace std;
 
 class Compiler {
@@ -12,9 +16,16 @@ class Compiler {
  public:
   explicit Compiler(const string &ld_flags) : ld_flags(ld_flags) {};
 
-  void compile(const filesystem::path &source_file_path,
-               const vector<string> &libs, const vector<string> &objs);
-  void compile_gph(const filesystem::path &source_file_path);
-  void compile_objects(const vector<string> &objs,
-                       const filesystem::path &output_file_path);
+  static shared_ptr<Program> parse_program(const filesystem::path &root,
+                                           const filesystem::path &filename);
+
+  void compile(const filesystem::path &main, const vector<string> &objs);
+
+  vector<string> compile_project(const filesystem::path &root,
+                                 const filesystem::path &filename);
+
+  void compile_gph(const filesystem::path &root,
+                   const filesystem::path &filename);
+
+  void link(const vector<string> &objs, const filesystem::path &output);
 };

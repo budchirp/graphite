@@ -2,12 +2,15 @@
 
 #include <memory>
 
+#include "lexer/token/token_type.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/parsers/statement/extern.hpp"
 #include "parser/parsers/statement/for.hpp"
 #include "parser/parsers/statement/function.hpp"
+#include "parser/parsers/statement/include.hpp"
 #include "parser/parsers/statement/return.hpp"
 #include "parser/parsers/statement/var.hpp"
+#include "parser/parsers/statement/visibility.hpp"
 #include "parser/parsers/statement/while.hpp"
 
 unique_ptr<Statement> StatementParser::parse() {
@@ -16,6 +19,15 @@ unique_ptr<Statement> StatementParser::parse() {
     case TOKEN_EOF: {
       parser->eat_token();
       break;
+    }
+
+    case TOKEN_INCLUDE: {
+      return IncludeStatementParser(parser).parse();
+    }
+
+    case TOKEN_PUBLIC:
+    case TOKEN_PRIVATE: {
+      return VisibilityStatementParser(parser).parse();
     }
 
     case TOKEN_FUN: {

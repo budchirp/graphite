@@ -26,6 +26,8 @@ llvm::Value *UnaryExpression::codegen(
   auto type = expression->get_type();
   auto llvm_type = type->to_llvm(context->llvm_context);
 
+  auto scope = context->get_env()->get_current_scope();
+
   switch (op.type) {
     case TOKEN_ASTERISK: {
       return context->builder->CreateLoad(llvm_type, value, "load");
@@ -67,10 +69,7 @@ llvm::Value *UnaryExpression::codegen(
             value, llvm::ConstantFP::get(llvm_type, 1.0), "dec");
       }
 
-      auto ptr = context->get_env()
-                     ->get_current_scope()
-                     ->get_variable(expression->get_name())
-                     ->value;
+      auto ptr = scope->get_variable(expression->get_name())->value;
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;
@@ -87,10 +86,7 @@ llvm::Value *UnaryExpression::codegen(
             value, llvm::ConstantFP::get(llvm_type, 1.0), "inc");
       }
 
-      auto ptr = context->get_env()
-                     ->get_current_scope()
-                     ->get_variable(expression->get_name())
-                     ->value;
+      auto ptr = scope->get_variable(expression->get_name())->value;
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;
@@ -103,6 +99,8 @@ llvm::Value *UnaryExpression::codegen(
 
 void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
   expression->validate(context);
+
+  auto scope = context->get_env()->get_current_scope();
 
   switch (op.type) {
     case TOKEN_ASTERISK:
@@ -125,8 +123,7 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     case TOKEN_PLUSPLUS:
     case TOKEN_MINUS:
     case TOKEN_PLUS: {
-      auto variable = context->get_env()->get_current_scope()->get_variable(
-          expression->get_name());
+      auto variable = scope->get_variable(expression->get_name());
       if (!variable->is_mutable) {
         Logger::error("Cannot mutate an immutable variable",
                       LogTypes::Error::SYNTAX, &position);
@@ -163,7 +160,9 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
       if (auto null_type = TypeHelper::is_null(expression_type)) {
         type = null_type->child_type;
       } else {
-        Logger::error("Trying to make a non-null type non-null", LogTypes::Error::TYPE_MISMATCH, expression->get_position());
+        Logger::error("Trying to make a non-null type non-null",
+                      LogTypes::Error::TYPE_MISMATCH,
+                      expression->get_position());
         return;
       }
 
@@ -174,7 +173,9 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
       if (auto pointer_type = TypeHelper::is_pointer(expression_type)) {
         type = pointer_type->pointee_type;
       } else {
-        Logger::error("Cannot dereference non-pointer type", LogTypes::Error::TYPE_MISMATCH, expression->get_position());
+        Logger::error("Cannot dereference non-pointer type",
+                      LogTypes::Error::TYPE_MISMATCH,
+                      expression->get_position());
         return;
       }
 

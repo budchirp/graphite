@@ -30,33 +30,12 @@ string join_strings(const vector<string> &strings, const string &delimiter) {
                     });
 }
 
-void Compiler::compile(const filesystem::path &source_file_path,
-                       const vector<string> &libs, const vector<string> &objs) {
-  auto filename = source_file_path.filename().stem().string();
-
-  vector<string> initial_objs = {source_file_path.stem().string() + ".o"};
-  for (const auto &lib_file : libs) {
-    filesystem::path lib_file_path(lib_file);
-
-    compile_gph(lib_file_path);
-
-    initial_objs.push_back(lib_file_path.filename().stem().string() + ".o");
-  }
-
-  compile_gph(source_file_path);
-
-  initial_objs.insert(initial_objs.end(), objs.begin(), objs.end());
-  compile_objects(initial_objs, filename);
-}
-
-void Compiler::compile_gph(const filesystem::path &source_file_path) {
-  auto filename = source_file_path.filename().stem().string();
-  Logger::log("Compiling `" + filename + ".gph`");
-
-  ifstream source_file(source_file_path);
+shared_ptr<Program> Compiler::parse_program(const filesystem::path &root,
+                                            const filesystem::path &filename) {
+  ifstream source_file(root / filename);
   if (!source_file.is_open()) {
-    Logger::error("Failed to open file `" + source_file_path.string() + "`");
-    return;
+    Logger::error("Failed to open file `" + filename.string() + "`");
+    return nullptr;
   }
 
   string content((istreambuf_iterator<char>(source_file)),
@@ -65,35 +44,78 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
 
   auto lexer = make_shared<Lexer>(content);
 
-  auto env = make_shared<Env>();
+  auto module = filename.filename().stem().string();
 
-  auto program_context = make_shared<ProgramContext>(filename, env);
+  auto program_context = make_shared<ProgramContext>(
+      module, (root / filename).string(), make_shared<Env>());
   auto program = make_shared<Program>(program_context);
-  auto parser = make_shared<Parser>(lexer, program);
 
-  auto program_parser = make_shared<ProgramParser>(parser);
-  program_parser->parse();
+  auto program_parser = ProgramParser(make_shared<Parser>(lexer, program));
+  program_parser.parse();
 
-  auto type_resolver = make_shared<TypeResolver>(program);
-  type_resolver->resolve();
+  auto type_resolver = TypeResolver(program);
+  type_resolver.resolve();
 
-  auto validator = make_shared<Validator>(program);
-  validator->validate();
+  auto validator = Validator(program);
+  validator.validate();
+
+  return program;
+}
+
+void Compiler::compile(const filesystem::path &main,
+                       const vector<string> &objs) {
+  auto root = main.parent_path();
+  auto filename = main.filename().stem().string();
+
+  auto modules = compile_project(root, main);
+  modules.insert(modules.end(), objs.begin(), objs.end());
+
+  link(modules, filename);
+}
+
+vector<string> Compiler::compile_project(const filesystem::path &root,
+                                         const filesystem::path &filename) {
+  auto program = parse_program(root, filename);
+
+  vector<string> modules;
+
+  filesystem::create_directory(root / "build");
+
+  compile_gph(root, filename);
+  modules.push_back((root / "build" / filename.stem()).string() + ".o");
+
+  for (const auto &module : program->get_context()->get_env()->get_includes()) {
+    compile_gph(root, filesystem::path(module + ".gph"));
+    modules.push_back((root / "build" / module).string() + ".o");
+  }
+
+  return modules;
+}
+
+void Compiler::compile_gph(const filesystem::path &root,
+                           const filesystem::path &filename) {
+  Logger::log("Compiling `" + filename.string() + "`");
+
+  auto program = parse_program(root, filename);
 
   Codegen::init();
 
-  auto codegen_context = make_shared<CodegenContext>(program_context);
-  auto codegen = make_shared<Codegen>(codegen_context);
-  codegen->codegen(program);
+  auto codegen_context = make_shared<CodegenContext>(program->get_context());
+  auto codegen = Codegen(codegen_context);
+
+  codegen.codegen(program);
   codegen_context->module->print(llvm::outs(), nullptr);
-  codegen->optimize();
+
+  codegen.optimize();
   codegen_context->module->print(llvm::outs(), nullptr);
 
   error_code err_code;
-  llvm::raw_fd_ostream output_file(source_file_path.stem().string() + ".o",
-                                   err_code, llvm::sys::fs::OF_None);
+  llvm::raw_fd_ostream output_file(
+      (root / "build" / filename.stem()).string() + ".o", err_code,
+      llvm::sys::fs::OF_None);
   if (err_code) {
-    Logger::error("Failed to open file `" + source_file_path.string() + "`");
+    Logger::error("Failed to open file `" +
+                  (root / "build" / filename.stem()).string() + ".o`");
     return;
   }
 
@@ -110,9 +132,9 @@ void Compiler::compile_gph(const filesystem::path &source_file_path) {
   cout << endl;
 };
 
-void Compiler::compile_objects(const vector<string> &objs,
-                               const filesystem::path &output_file_path) {
-  auto filename = output_file_path.filename().stem().string();
+void Compiler::link(const vector<string> &objs,
+                    const filesystem::path &output) {
+  auto filename = output.filename().stem().string();
   Logger::log("Creating executable `" + filename + "`");
 
   vector<string> command{"clang", ld_flags, "-o", filename,

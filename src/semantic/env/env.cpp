@@ -1,10 +1,12 @@
 #include "semantic/env/env.hpp"
 
+#include <algorithm>
 #include <memory>
 
 #include "logger/logger.hpp"
 #include "semantic/symbols/function.hpp"
 #include "semantic/symbols/variable.hpp"
+#include "semantic/visibilty.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
 #include "types/int.hpp"
@@ -35,8 +37,10 @@ Env::Env() {
   set_current_scope("global");
 
   current_scope->add_variable(
-      "null",
-      make_shared<VariableSymbol>("null", make_shared<NullType>(nullptr), false, true));
+      "null", make_shared<VariableSymbol>(
+                  "null", SymbolLinkageType::Value::Internal,
+                  SymbolVisibility::Value::PUBLIC,
+                  make_shared<NullType>(nullptr), false, false, true));
 }
 
 void Env::add_type(const string &name, const shared_ptr<Type> &type) {
@@ -74,7 +78,7 @@ void Env::set_current_scope(const string &name) {
 shared_ptr<Scope> Env::get_current_scope() { return current_scope; }
 
 void Env::add_scope(const string &name, const shared_ptr<Scope> &scope) {
-  scopes.emplace(name, scope);
+  scopes.insert_or_assign(name, scope);
 }
 shared_ptr<Scope> Env::get_scope(const string &name) {
   auto it = scopes.find(name);
@@ -85,3 +89,9 @@ shared_ptr<Scope> Env::get_scope(const string &name) {
   Logger::warn("Accessed to an undefined scope `" + name + "`");
   return nullptr;
 }
+
+void Env::add_include(const string &module_name) {
+  includes.push_back(module_name);
+};
+
+vector<string> Env::get_includes() { return includes; };

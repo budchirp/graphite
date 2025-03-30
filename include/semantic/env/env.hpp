@@ -3,7 +3,6 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Value.h>
 
-#include <iostream>
 #include <memory>
 #include <unordered_map>
 
@@ -22,8 +21,14 @@ class Env {
   unordered_map<string, shared_ptr<Scope>> scopes;
   shared_ptr<Scope> current_scope;
 
+  vector<string> includes;
+
  public:
   explicit Env();
+
+  unordered_map<string, shared_ptr<FunctionSymbol>> get_functions() {
+    return functions;
+  }
 
   void add_type(const string &name, const shared_ptr<Type> &type);
   shared_ptr<Type> get_type(const string &name) const;
@@ -37,4 +42,7 @@ class Env {
 
   void add_scope(const string &name, const shared_ptr<Scope> &scope);
   shared_ptr<Scope> get_scope(const string &name);
+
+  void add_include(const string &module_name);
+  vector<string> get_includes();
 };

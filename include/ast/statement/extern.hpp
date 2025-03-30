@@ -17,12 +17,15 @@ class ExternStatement : public Statement {
  private:
   Position position;
 
+  SymbolVisibility::Value visibilty;
+
   unique_ptr<ProtoStatement> proto;
 
  public:
   explicit ExternStatement(const Position &position,
+                           const SymbolVisibility::Value &visibilty,
                            unique_ptr<ProtoStatement> proto)
-      : position(position), proto(std::move(proto)) {};
+      : position(position), visibilty(visibilty), proto(std::move(proto)) {};
 
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;

@@ -8,10 +8,10 @@
 using namespace std;
 
 class ProtoStatementParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit ProtoStatementParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 

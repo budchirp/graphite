@@ -2,10 +2,17 @@
 
 #include <memory>
 
+#include "ast/statement/extern.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/statement/proto.hpp"
+#include "semantic/visibilty.hpp"
 
 unique_ptr<ExternStatement> ExternStatementParser::parse() {
+  return parse(TokenType::TOKEN_PRIVATE);
+}
+
+unique_ptr<ExternStatement> ExternStatementParser::parse(
+    const TokenType &visibility) {
   const auto position = *parser->get_lexer()->position;
 
   parser->eat_token();  // eat extern
@@ -23,5 +30,7 @@ unique_ptr<ExternStatement> ExternStatementParser::parse() {
     return nullptr;
   }
 
-  return make_unique<ExternStatement>(position, std::move(proto_statement));
+  return make_unique<ExternStatement>(
+      position, SymbolVisibility::from_token_type(visibility),
+      std::move(proto_statement));
 }

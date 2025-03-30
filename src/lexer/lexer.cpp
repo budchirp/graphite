@@ -31,6 +31,7 @@ void Lexer::eat_whitespace() {
   while (current_char == '\n') {
     position->column = 1;
     position->line++;
+
     eat_char();
     eat_whitespace();
   }

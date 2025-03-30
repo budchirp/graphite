@@ -3,13 +3,20 @@
 #include <memory>
 
 #include "ast/expression/type.hpp"
+#include "ast/statement/var.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/expression/identifier.hpp"
 #include "parser/parsers/expression/type.hpp"
 #include "parser/parsers/statement/expression.hpp"
 #include "parser/precedence.hpp"
+#include "semantic/visibilty.hpp"
 
 unique_ptr<VarStatement> VarStatementParser::parse() {
+  return parse(SymbolVisibility::Value::SCOPE);
+}
+
+unique_ptr<VarStatement> VarStatementParser::parse(
+    const SymbolVisibility::Value &visibility) {
   const auto position = *parser->get_lexer()->position;
 
   parser->eat_token();  // eat var
@@ -85,7 +92,7 @@ unique_ptr<VarStatement> VarStatementParser::parse() {
   }
 
   return make_unique<VarStatement>(
-      position, is_mutable, expression != nullptr, std::move(name_expression),
-      std::move(type_expression),
+      position, visibility, is_mutable, expression != nullptr,
+      std::move(name_expression), std::move(type_expression),
       std::move(expression));
 }

@@ -65,7 +65,7 @@ unique_ptr<ForStatement> ForStatementParser::parse() {
     return nullptr;
   }
 
-  return make_unique<ForStatement>(position, std::move(init_statement),
-                                   std::move(condition_expression), std::move(increment_expression),
-                                   std::move(body_statement));
+  return make_unique<ForStatement>(
+      position, std::move(init_statement), std::move(condition_expression),
+      std::move(increment_expression), std::move(body_statement));
 }

@@ -21,13 +21,10 @@ vector<string> split_string(const string& text, char delimiter) {
 
 void CompileCommand::execute() {
   auto file_option = get_option<string>("main")->value;
-  auto libs_option = get_option<string>("libs")->value;
   auto objs_option = get_option<string>("objs")->value;
   auto ldflags_option = get_option<string>("ldflags")->value;
 
   filesystem::path path(file_option);
 
-  Compiler(ldflags_option)
-      .compile(path, split_string(libs_option, ','),
-               split_string(objs_option, ','));
+  Compiler(ldflags_option).compile(path, split_string(objs_option, ','));
 }

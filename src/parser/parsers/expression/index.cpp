@@ -17,9 +17,10 @@ unique_ptr<Expression> IndexExpressionParser::parse() {
     return nullptr;
   }
 
-  parser->eat_token(); // eat [
+  parser->eat_token();  // eat [
 
-  auto index_expression = ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
+  auto index_expression =
+      ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
 
   if (parser->current_token.type != TOKEN_RIGHT_BRACKET) {
     parser->get_logger()->error("Expected closing right bracket",
@@ -29,7 +30,7 @@ unique_ptr<Expression> IndexExpressionParser::parse() {
 
   parser->eat_token();  // eat ]
 
-
   return make_unique<IndexExpression>(*variable_expression->get_position(),
-                                      std::move(variable_expression), std::move(index_expression));
+                                      std::move(variable_expression),
+                                      std::move(index_expression));
 }

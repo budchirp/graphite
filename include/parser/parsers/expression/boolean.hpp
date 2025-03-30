@@ -9,10 +9,10 @@
 using namespace std;
 
 class BooleanExpressionParser : public ExpressionParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit BooleanExpressionParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 

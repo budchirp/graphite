@@ -26,9 +26,7 @@ class UnaryExpression : public Expression {
  public:
   explicit UnaryExpression(const Position &position, const Token &op,
                            unique_ptr<VarRefExpression> expression)
-      : position(position),
-        op(op),
-        expression(std::move(expression)) {};
+      : position(position), op(op), expression(std::move(expression)) {};
 
   llvm::Value *codegen(
       const shared_ptr<CodegenContext> &context) const override;

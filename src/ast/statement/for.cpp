@@ -6,7 +6,6 @@
 #include <llvm/Support/ConvertUTF.h>
 
 #include <memory>
-#include <ostream>
 
 #include "codegen/codegen.hpp"
 #include "logger/log_types.hpp"

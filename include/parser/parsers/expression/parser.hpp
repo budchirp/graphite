@@ -7,7 +7,7 @@
 using namespace std;
 
 class ExpressionParser {
-public:
+ public:
   virtual ~ExpressionParser() = default;
 
   virtual unique_ptr<Expression> parse() = 0;

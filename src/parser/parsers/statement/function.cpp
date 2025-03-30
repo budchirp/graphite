@@ -2,11 +2,19 @@
 
 #include <memory>
 
+#include "ast/statement/function.hpp"
+#include "lexer/token/token.hpp"
+#include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/parsers/statement/block.hpp"
 #include "parser/parsers/statement/proto.hpp"
 
 unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
+  return parse(TokenType::TOKEN_PRIVATE);
+}
+
+unique_ptr<FunctionStatement> FunctionStatementParser::parse(
+    const TokenType &visibility) {
   const auto position = *parser->get_lexer()->position;
 
   parser->eat_token();  // eat fn
@@ -31,10 +39,10 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   }
 
   auto name = proto_statement->name->get_identifier();
-  auto scope = make_shared<Scope>(name,
+  auto scope = make_shared<Scope>(
+      name,
       parser->get_program()->get_context()->get_env()->get_current_scope());
-  parser->get_program()->get_context()->get_env()->add_scope(
-      name, scope);
+  parser->get_program()->get_context()->get_env()->add_scope(name, scope);
 
   auto body_statement = BlockStatementParser(parser).parse();
   if (!body_statement) {
@@ -44,5 +52,6 @@ unique_ptr<FunctionStatement> FunctionStatementParser::parse() {
   }
 
   return make_unique<FunctionStatement>(
-      position, scope, std::move(proto_statement), std::move(body_statement));
+      position, scope, SymbolVisibility::from_token_type(visibility),
+      std::move(proto_statement), std::move(body_statement));
 }

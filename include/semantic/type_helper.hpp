@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+
 #include "types/array.hpp"
 #include "types/boolean.hpp"
 #include "types/float.hpp"
@@ -15,7 +16,7 @@
 using namespace std;
 
 class TypeHelper {
-public:
+ public:
   static shared_ptr<PointerType> is_pointer(const shared_ptr<Type>& type) {
     return dynamic_pointer_cast<PointerType>(type);
   }

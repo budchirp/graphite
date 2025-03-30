@@ -14,4 +14,4 @@ enum class Warn { SUGGESTION };
 
 enum class Log { INFO };
 
-} // namespace LogTypes
+}  // namespace LogTypes

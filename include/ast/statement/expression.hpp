@@ -24,7 +24,8 @@ class ExpressionStatement : public Statement {
                                unique_ptr<Expression> expression)
       : position(position), expression(std::move(expression)) {};
 
-  llvm::Value *codegen(const shared_ptr<CodegenContext> &context) const override;
+  llvm::Value *codegen(
+      const shared_ptr<CodegenContext> &context) const override;
 
   void validate(const shared_ptr<ProgramContext> &context) override;
   void resolve_types(const shared_ptr<ProgramContext> &context) override;

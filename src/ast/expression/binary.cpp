@@ -4,6 +4,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Value.h>
 
+#include <ios>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -55,12 +56,12 @@ llvm::Value *BinaryExpression::codegen(
     case TOKEN_ASSIGN: {
       if (auto *variable_expression =
               dynamic_cast<VarRefExpression *>(left.get())) {
-        auto variable = context->get_env()->get_current_scope()->get_variable(
-            variable_expression->get_name());
+        auto scope = context->get_env()->get_current_scope();
 
+        auto variable = scope->get_variable(variable_expression->get_name());
         if (!variable->is_initialized) {
           llvm::Value *value = right_value;
-          if (variable->is_mutable) {
+          if (variable->is_mutable || variable->is_global) {
             value = context->builder->CreateAlloca(
                 variable->type->to_llvm(context->llvm_context), nullptr,
                 "addr");
@@ -69,6 +70,8 @@ llvm::Value *BinaryExpression::codegen(
 
           variable->is_initialized = true;
           variable->add_llvm_value(value);
+
+          scope->add_variable(variable->name, variable);
         } else {
           context->builder->CreateStore(right_value, variable->value);
         }
@@ -197,9 +200,23 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
 
   switch (op.type) {
     case TOKEN_EQUAL:
-    case TOKEN_NOT_EQUAL:
-    case TOKEN_ASSIGN: {
+    case TOKEN_NOT_EQUAL: {
       return;
+    }
+
+    case TOKEN_ASSIGN: {
+      if (auto *variable_expression =
+              dynamic_cast<VarRefExpression *>(left.get())) {
+        auto scope = context->get_env()->get_current_scope();
+
+        auto variable = scope->get_variable(variable_expression->get_name());
+        if (!(variable->is_mutable || !variable->is_initialized)) {
+          Logger::error("Cannot mutate an immutable variable",
+                        LogTypes::Error::SYNTAX, right->get_position());
+        }
+      }
+
+      break;
     }
 
     default: {

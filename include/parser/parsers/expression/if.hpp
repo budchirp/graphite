@@ -8,10 +8,10 @@
 using namespace std;
 
 class IfExpressionParser : public ExpressionParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit IfExpressionParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 

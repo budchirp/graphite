@@ -8,10 +8,10 @@
 using namespace std;
 
 class GroupExpressionParser : public ExpressionParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit GroupExpressionParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 

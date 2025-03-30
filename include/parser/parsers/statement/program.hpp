@@ -7,10 +7,10 @@
 using namespace std;
 
 class ProgramParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
-public:
+ public:
   explicit ProgramParser(const shared_ptr<Parser> &parser) : parser(parser) {};
 
   void parse();

@@ -1,15 +1,19 @@
-#include <memory>
+#include "ast/statement/expression.hpp"
+
 #include <llvm/IR/Value.h>
 
-#include "ast/statement/expression.hpp"
+#include <memory>
+
 #include "codegen/codegen.hpp"
 
 using namespace llvm;
 
-Value *ExpressionStatement::codegen(const shared_ptr<CodegenContext> &context) const { return expression->codegen(context); }
+Value *ExpressionStatement::codegen(
+    const shared_ptr<CodegenContext> &context) const {
+  return expression->codegen(context);
+}
 
-void ExpressionStatement::validate(
-    const shared_ptr<ProgramContext> &context) {
+void ExpressionStatement::validate(const shared_ptr<ProgramContext> &context) {
   expression->validate(context);
 }
 

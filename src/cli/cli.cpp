@@ -1,9 +1,10 @@
+#include "cli/cli.hpp"
+
 #include <memory>
 #include <string>
 
-#include "codegen/codegen.hpp"
 #include "cli/commands/compile.hpp"
-#include "cli/cli.hpp"
+#include "codegen/codegen.hpp"
 
 CLI::CLI() {
   auto command_line_parser = make_shared<CommandLineParser>("graphite");
@@ -13,17 +14,13 @@ CLI::CLI() {
   compile_command->add_option(
       make_unique<Option<string>>("main", "Main file path", "src/main.gph"));
   compile_command->add_option(
-      make_unique<Option<string>>("libs", "Optional graphite libs", ""));
+      make_unique<Option<string>>("objs", "Object files to link", ""));
   compile_command->add_option(
-      make_unique<Option<string>>("objs", "Optional C and other libs", ""));
-  compile_command->add_option(make_unique<Option<string>>(
-      "ldflags", "Linker flags", ""));
+      make_unique<Option<string>>("ldflags", "Linker flags", ""));
 
   command_line_parser->add_command(std::move(compile_command));
 
   this->parser = std::move(command_line_parser);
 }
 
-void CLI::parse(int argc, char *argv[]) {
-  parser->parse(argc, argv);
-}
+void CLI::parse(int argc, char *argv[]) { parser->parse(argc, argv); }

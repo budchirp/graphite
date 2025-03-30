@@ -32,7 +32,9 @@ class BooleanExpression : public Expression {
 
   Position *get_position() override { return &position; };
 
-  void set_type(const shared_ptr<Type> &type) override { this->type = dynamic_pointer_cast<BooleanType>(type); }
+  void set_type(const shared_ptr<Type> &type) override {
+    this->type = dynamic_pointer_cast<BooleanType>(type);
+  }
   shared_ptr<Type> get_type() const override { return type; }
 
   string to_string() const override;

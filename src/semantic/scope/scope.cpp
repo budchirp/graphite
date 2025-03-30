@@ -5,17 +5,20 @@
 
 void Scope::add_variable(const string &name,
                          const shared_ptr<VariableSymbol> &variable) {
-  variables.emplace(name, variable);
+  variables.insert_or_assign(name, variable);
 }
 
 shared_ptr<VariableSymbol> Scope::get_variable(const string &name) const {
   auto it = variables.find(name);
-  if (it != variables.end()) {
+  if (it != variables.end() && it->second) {
     return it->second;
   }
 
-  if (auto var = parent->get_variable(name)) {
-    return var;
+  if (parent) {
+    auto var = parent->get_variable(name);
+    if (var) {
+      return var;
+    }
   }
 
   Logger::warn("Accessed to an undefined variable `" + name + "`");

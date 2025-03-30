@@ -9,12 +9,12 @@
 using namespace std;
 
 class BinaryExpressionParser : public ExpressionParser {
-private:
+ private:
   shared_ptr<Parser> parser;
 
   unique_ptr<Expression> left;
 
-public:
+ public:
   explicit BinaryExpressionParser(const shared_ptr<Parser> &parser,
                                   unique_ptr<Expression> left)
       : parser(parser), left(std::move(left)) {};

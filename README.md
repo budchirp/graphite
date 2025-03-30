@@ -19,14 +19,14 @@
 - [x] Function definition
 - [x] Variable definition
 - [x] Mutable/Immutable variables
-- [x] Null (?, !!, null, nullptr)
+- [x] Null (?, !!, null)
 - [x] If expression
 - [x] For & While statement
 - [x] Object generation
 - [x] Code optimization (LLVM IR Optimization, no optimization from graphite)
 - [x] Arrays
 - [ ] Structs
-- [ ] Module management
+- [x] Module management (garbage)
 - [ ] Classes
 - [ ] Stdlib
 - [ ] Maps
@@ -34,9 +34,11 @@
 - [ ] Switch expression
 - [ ] CLI
 
+- [ ] Rename `use` to `include`
+
 - [ ] Multiple codegen backend support
 
 - [ ] Fix bugs with pointers
-- [ ] Move type resolving logic to somewhere else from the parser
+- [x] Move type resolving logic to somewhere else from the parser
 
 - [ ] ~~Add unit tests~~
