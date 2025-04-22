@@ -16,7 +16,7 @@ shared_ptr<Expression> UnaryExpressionParser::parse() {
 
   if (left) {
     shared_ptr<VarRefExpression> _expression(
-        static_pointer_cast<VarRefExpression>(left));
+        dynamic_pointer_cast<VarRefExpression>(left));
     if (!_expression) {
       parser->get_logger()->error("Expected variable reference expression",
                                   LogTypes::Error::SYNTAX);

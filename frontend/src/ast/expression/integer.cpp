@@ -18,6 +18,6 @@ void IntegerExpression::resolve_types(
 string IntegerExpression::to_string() const { return value; }
 
 string IntegerExpression::to_string_tree() const {
-  return "IntegerExpression(type: " + type->to_string_tree() + ", value: '" +
-         value + "')";
+  return "IntegerExpression(type: " + (type ? type->to_string_tree() : "") +
+         ", value: '" + value + "')";
 }

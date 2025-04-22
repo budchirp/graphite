@@ -70,7 +70,7 @@ string CallExpression::to_string() const {
 
 string CallExpression::to_string_tree() const {
   ostringstream result;
-  result << "CallExpression(type: " << type->to_string_tree()
+  result << "CallExpression(type: " << (type ? type->to_string_tree() : "")
          << ", name: " << name->to_string_tree() << ", arguments: [";
 
   for (size_t i = 0; i < arguments.size(); ++i) {

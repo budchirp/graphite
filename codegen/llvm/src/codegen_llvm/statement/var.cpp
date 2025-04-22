@@ -10,7 +10,8 @@ llvm::Value *VarStatementCodegen::codegen() const {
   auto scope = context->get_env()->get_current_scope();
   auto variable = scope->get_variable(name);
 
-  auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(context, statement->get_type());
+  auto llvm_type =
+      LLVMCodegenUtils::type_to_llvm_type(context, statement->get_type());
 
   llvm::Value *value = llvm::Constant::getNullValue(llvm_type);
   if (variable->is_initialized) {

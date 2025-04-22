@@ -6,8 +6,8 @@ using namespace std;
 
 llvm::Value *BlockStatementCodegen::codegen() const {
   llvm::Value *last_statement = nullptr;
-  for (const auto &_statement : statement->statements) {
-    last_statement = LLVMCodegen::codegen(context, _statement);
+  for (const auto &child_statement : statement->statements) {
+    last_statement = LLVMCodegen::codegen(context, child_statement);
     if (context->builder->GetInsertBlock()->getTerminator()) {
       break;
     }

@@ -6,7 +6,7 @@
 #include "semantic/type_helper.hpp"
 
 llvm::Value *UnaryExpressionCodegen::codegen() const {
-  auto value = LLVMCodegen::codegen(context, expression->expression);
+  auto value = LLVMCodegen::codegen(context, expression->var_ref);
   if (!value) {
     Logger::error("Failed to generate low level code for expression",
                   LogTypes::Error::INTERNAL, expression->get_position());
@@ -61,7 +61,7 @@ llvm::Value *UnaryExpressionCodegen::codegen() const {
             value, llvm::ConstantFP::get(llvm_type, 1.0), "dec");
       }
 
-      auto ptr = context->get_variable(expression->expression->name);
+      auto ptr = context->get_variable(expression->var_ref->name);
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;
@@ -77,7 +77,7 @@ llvm::Value *UnaryExpressionCodegen::codegen() const {
             value, llvm::ConstantFP::get(llvm_type, 1.0), "inc");
       }
 
-      auto ptr = context->get_variable(expression->expression->name);
+      auto ptr = context->get_variable(expression->var_ref->name);
       context->builder->CreateStore(new_value, ptr);
 
       return ptr;

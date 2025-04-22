@@ -66,8 +66,7 @@ shared_ptr<VarStatement> VarStatementParser::parse(
   } else {
     parser->eat_token();  // eat :
 
-    shared_ptr<TypeExpression> _type_expression =
-        TypeExpressionParser(parser).parse_type();
+    auto _type_expression = TypeExpressionParser(parser).parse_type();
     if (!_type_expression) {
       parser->get_logger()->error(
           "Failed to parse the type of the variable statement",
@@ -75,7 +74,7 @@ shared_ptr<VarStatement> VarStatementParser::parse(
       return nullptr;
     }
 
-    type_expression = std::move(_type_expression);
+    type_expression = _type_expression;
   }
 
   if (parser->current_token.type == TOKEN_ASSIGN) {
@@ -91,8 +90,7 @@ shared_ptr<VarStatement> VarStatementParser::parse(
     }
   }
 
-  return make_shared<VarStatement>(
-      position, visibility, is_mutable, expression != nullptr,
-      name_expression, type_expression,
-      expression);
+  return make_shared<VarStatement>(position, visibility, is_mutable,
+                                   expression != nullptr, name_expression,
+                                   type_expression, expression);
 }

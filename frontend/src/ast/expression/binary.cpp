@@ -1,10 +1,12 @@
 #include "ast/expression/binary.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "ast/expression/type.hpp"
+#include "ast/expression/unary.hpp"
 #include "ast/expression/var_ref.hpp"
 #include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
@@ -38,18 +40,25 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_ASSIGN: {
-      if (auto *variable_expression =
-              dynamic_cast<VarRefExpression *>(left.get())) {
+      if (auto var_ref_expression = VarRefExpression::is_var_ref(left)) {
         auto scope = context->get_env()->get_current_scope();
+        auto variable = scope->get_variable(var_ref_expression->name);
 
-        auto variable = scope->get_variable(variable_expression->name);
-        if (!(variable->is_mutable || !variable->is_initialized)) {
-          Logger::error("Cannot mutate an immutable variable",
-                        LogTypes::Error::SYNTAX, right->get_position());
+        if (dynamic_pointer_cast<UnaryExpression>(left)) {
+          if (auto pointer_type = TypeHelper::is_pointer(variable->type);
+              !pointer_type->is_mutable) {
+            Logger::error("Cannot mutate an immutable pointer variable",
+                          LogTypes::Error::SYNTAX, right->get_position());
+          }
+        } else {
+          if (!(variable->is_mutable || !variable->is_initialized)) {
+            Logger::error("Cannot mutate an immutable variable",
+                          LogTypes::Error::SYNTAX, right->get_position());
+          }
         }
       }
 
-      break;
+      return;
     }
 
     default: {
@@ -90,23 +99,23 @@ void BinaryExpression::resolve_types(
   left->resolve_types(context);
   right->resolve_types(context);
 
-  shared_ptr<Type> type;
   switch (op.type) {
     case TOKEN_LESS_THAN:
     case TOKEN_GREATER_THAN:
     case TOKEN_EQUAL:
     case TOKEN_NOT_EQUAL:
-      type = make_shared<BooleanType>();
+      set_type(make_shared<BooleanType>());
       break;
 
     case TOKEN_ASSIGN: {
-      type = make_shared<VoidType>();
+      set_type(right->get_type());
       break;
     }
 
     case TOKEN_AS: {
-      if (auto type_expression = dynamic_cast<TypeExpression *>(right.get())) {
-        type = type_expression->get_type();
+      if (auto type_expression = dynamic_pointer_cast<TypeExpression>(right)) {
+        set_type(type_expression->get_type());
+
         left->set_type(type);
       } else {
         Logger::error("Expected type expression as right hand side expression");
@@ -120,14 +129,12 @@ void BinaryExpression::resolve_types(
       auto left_type = left->get_type();
       auto right_type = right->get_type();
       if (TypeHelper::is_float(left_type)) {
-        type = left_type;
+        set_type(left_type);
       } else {
-        type = right_type;
+        set_type(right_type);
       }
     }
   }
-
-  set_type(type);
 }
 
 string BinaryExpression::to_string() const {

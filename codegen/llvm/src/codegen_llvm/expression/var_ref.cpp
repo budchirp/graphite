@@ -1,4 +1,5 @@
 #include "codegen_llvm/expression/var_ref.hpp"
+
 #include "codegen_llvm/utils.hpp"
 
 llvm::Value *VarRefExpressionCodegen::codegen() const {
@@ -10,11 +11,12 @@ llvm::Value *VarRefExpressionCodegen::codegen() const {
   //   return nullptr;
   // }
 
+  auto type = expression->get_type();
   auto value = context->get_variable(expression->name);
 
   return (variable->is_global || variable->is_mutable)
              ? context->builder->CreateLoad(
-                   LLVMCodegenUtils::type_to_llvm_type(context,expression->get_type()),
-                   value, "load")
+                   LLVMCodegenUtils::type_to_llvm_type(context, type), value,
+                   "load")
              : value;
 }

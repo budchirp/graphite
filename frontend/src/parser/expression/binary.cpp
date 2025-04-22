@@ -21,7 +21,7 @@ shared_ptr<Expression> BinaryExpressionParser::parse() {
     auto type = TypeExpressionParser(parser).parse();
 
     return make_shared<BinaryExpression>(*left->get_position(), operator_token,
-                                         std::move(left), std::move(type));
+                                         left, type);
   }
 
   auto right = ExpressionStatementParser(parser).parse_expression(

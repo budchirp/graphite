@@ -25,7 +25,7 @@ shared_ptr<Type> TypeExpression::resolve_types(
   shared_ptr<Type> _type;
   if (auto pointer_type = TypeHelper::is_pointer(type)) {
     _type = make_shared<PointerType>(
-        resolve_types(context, pointer_type->pointee_type));
+        resolve_types(context, pointer_type->pointee_type), pointer_type->is_mutable);
   } else if (auto null_type = TypeHelper::is_null(type)) {
     _type =
         make_shared<NullType>(resolve_types(context, null_type->child_type));

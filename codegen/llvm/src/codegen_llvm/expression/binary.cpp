@@ -1,5 +1,8 @@
 #include "codegen_llvm/expression/binary.hpp"
 
+#include <memory>
+
+#include "ast/expression/unary.hpp"
 #include "ast/expression/var_ref.hpp"
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/utils.hpp"
@@ -26,29 +29,27 @@ llvm::Value *BinaryExpressionCodegen::codegen() const {
   }
 
   auto type = expression->right->get_type();
-  auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(context,type);
-  left_value =
-      LLVMCodegenUtils::cast_type(context, left_value, llvm_type,
-                                  !(expression->op.type == TOKEN_EQUAL ||
-                                    expression->op.type == TOKEN_NOT_EQUAL));
-  if (!left_value) {
-    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
-                  expression->right->get_position());
-    return nullptr;
+  auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(context, type);
+  if (auto casted = LLVMCodegenUtils::cast_type(
+          context, left_value, llvm_type,
+          !(expression->op.type == TOKEN_EQUAL ||
+            expression->op.type == TOKEN_NOT_EQUAL))) {
+    left_value = casted;
   }
 
   switch (expression->op.type) {
     case TOKEN_ASSIGN: {
-      if (auto *variable_expression =
-              dynamic_cast<VarRefExpression *>(expression->left.get())) {
+      if (auto var_ref_expression =
+              VarRefExpression::is_var_ref(expression->left)) {
         auto scope = context->get_env()->get_current_scope();
 
-        auto variable = scope->get_variable(variable_expression->name);
+        auto type = var_ref_expression->get_type();
+        auto variable = scope->get_variable(var_ref_expression->name);
         if (!variable->is_initialized) {
           llvm::Value *value = right_value;
           if (variable->is_mutable || variable->is_global) {
             value = context->builder->CreateAlloca(
-                LLVMCodegenUtils::type_to_llvm_type(context,variable->type), nullptr,
+                LLVMCodegenUtils::type_to_llvm_type(context, type), nullptr,
                 "addr");
             context->builder->CreateStore(right_value, value);
           }
@@ -56,11 +57,17 @@ llvm::Value *BinaryExpressionCodegen::codegen() const {
           variable->is_initialized = true;
 
           context->add_variable(variable->name, value);
-
           scope->add_variable(variable->name, variable);
         } else {
-          context->builder->CreateStore(right_value,
-                                        context->get_variable(variable->name));
+          if (variable->is_mutable && dynamic_pointer_cast<UnaryExpression>(expression->left)) {
+            auto ptr = context->builder->CreateLoad(
+                LLVMCodegenUtils::type_to_llvm_type(context, type),
+                context->get_variable(variable->name), "load");
+            context->builder->CreateStore(right_value, ptr);
+          } else {
+            context->builder->CreateStore(
+                right_value, context->get_variable(variable->name));
+          }
         }
 
         return llvm::Constant::getNullValue(

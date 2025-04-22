@@ -18,8 +18,8 @@ llvm::Value *CallExpressionCodegen::codegen() const {
 
   size_t idx = 0;
   for (const auto &argument : expression->arguments) {
-    auto argument_value = LLVMCodegen::codegen(context, argument);
-    if (!argument_value) {
+    auto llvm_argument = LLVMCodegen::codegen(context, argument);
+    if (!llvm_argument) {
       Logger::error("Failed to generate low level code for argument `" +
                         argument->to_string() + "` in function `" + name + "`",
                     LogTypes::Error::INTERNAL, argument->get_position());
@@ -29,16 +29,16 @@ llvm::Value *CallExpressionCodegen::codegen() const {
     auto function = context->get_env()->get_function(name);
     auto parameter_type = function->type->parameters[idx++].second;
 
-    argument_value = LLVMCodegenUtils::cast_type(
-        context, argument_value,
+    llvm_argument = LLVMCodegenUtils::cast_type(
+        context, llvm_argument,
         LLVMCodegenUtils::type_to_llvm_type(context,parameter_type));
-    if (!argument_value) {
+    if (!llvm_argument) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                     argument->get_position());
       return nullptr;
     }
 
-    llvm_arguments.push_back(argument_value);
+    llvm_arguments.push_back(llvm_argument);
   }
 
   if (function->getReturnType()->isVoidTy()) {

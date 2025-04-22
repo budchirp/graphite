@@ -3,6 +3,7 @@
 #include <llvm/IR/DerivedTypes.h>
 
 #include <memory>
+#include <string>
 
 #include "types/type.hpp"
 
@@ -12,8 +13,11 @@ class PointerType : public Type {
  public:
   shared_ptr<Type> pointee_type;
 
-  explicit PointerType(const shared_ptr<Type> &pointee_type)
-      : pointee_type(pointee_type) {};
+  bool is_mutable;
+
+  explicit PointerType(const shared_ptr<Type> &pointee_type,
+                       const bool &is_mutable)
+      : pointee_type(pointee_type), is_mutable(is_mutable) {};
 
   string get_name() const override { return pointee_type->get_name(); }
   const type_info &get_type_info() const override {
@@ -22,6 +26,7 @@ class PointerType : public Type {
 
   string to_string() const override { return "*" + pointee_type->to_string(); };
   string to_string_tree() const override {
-    return "PointerType(pointee_type: " + pointee_type->to_string_tree() + ")";
+    return "PointerType(pointee_type: " + pointee_type->to_string_tree() +
+           ", is_mutable: '" + ::to_string(is_mutable) + "')";
   };
 };

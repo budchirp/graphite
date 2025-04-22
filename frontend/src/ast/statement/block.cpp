@@ -31,7 +31,7 @@ string BlockStatement::to_string() const {
 
 string BlockStatement::to_string_tree() const {
   ostringstream oss;
-  oss << "BlockStatement(type: " << type->to_string_tree() << ", statement: [";
+  oss << "BlockStatement(type: " << (type ? type->to_string_tree() : "") << ", statement: [";
 
   for (size_t i = 0; i < statements.size(); ++i) {
     oss << statements[i]->to_string_tree();

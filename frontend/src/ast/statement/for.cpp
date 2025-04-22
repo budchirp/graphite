@@ -7,7 +7,6 @@
 #include "semantic/type_helper.hpp"
 #include "types/boolean.hpp"
 
-
 void ForStatement::validate(const shared_ptr<ProgramContext> &context) {
   init->validate(context);
 

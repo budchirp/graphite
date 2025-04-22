@@ -53,7 +53,6 @@ LLVMCodegenContext::LLVMCodegenContext(
   si->registerCallbacks(*pic, mam.get());
 }
 
-
 void LLVMCodegenContext::add_variable(const string &name,
                          llvm::Value* variable) {
   variables.insert_or_assign(program_context->get_env()->get_current_scope()->get_name() + "_" + name, variable);
@@ -65,6 +64,11 @@ llvm::Value* LLVMCodegenContext::get_variable(const string &name) const {
     return it->second;
   }
 
-  Logger::warn("Accessed to an undefined variable `" + name + "`");
+  it = variables.find("global_" + name);
+  if (it != variables.end() && it->second) {
+    return it->second;
+  }
+
+  Logger::error("Accessed to an undefined variable `" + name + "`");
   return nullptr;
 }

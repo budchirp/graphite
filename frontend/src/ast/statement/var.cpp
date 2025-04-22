@@ -31,7 +31,7 @@ void VarStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   if (variable_type) variable_type->resolve_types(context);
   if (expression) expression->resolve_types(context);
 
-  if (!expression) {
+  if (variable_type) {
     type = variable_type->get_type();
   } else {
     type = expression->get_type();

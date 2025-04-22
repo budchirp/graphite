@@ -2,9 +2,7 @@
 
 #include <memory>
 
-#include "ast/statement/proto.hpp"
 #include "semantic/linkage_type.hpp"
-
 
 void ExternStatement::validate(const shared_ptr<ProgramContext> &context) {
   proto->validate(context);

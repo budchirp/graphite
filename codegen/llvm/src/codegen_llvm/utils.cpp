@@ -1,5 +1,6 @@
 #include "codegen_llvm/utils.hpp"
-#include <iostream>
+
+#include <memory>
 
 #include "logger/logger.hpp"
 #include "types/array.hpp"
@@ -48,22 +49,16 @@ llvm::Value *LLVMCodegenUtils::cast_type(
     return context->builder->CreateFPToSI(value, expectedType);
   }
 
-  if (strict) {
-    cout << context->get_env()->get_current_scope()->get_name() << endl;
-
-  cout << value->getType()->getTypeID() << endl;
-  cout << expectedType->getTypeID() << endl;
-  }
-
-
   return strict ? nullptr : value;
 }
 
 llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
-      const shared_ptr<LLVMCodegenContext> &context,
-      const shared_ptr<Type> &type) {
+    const shared_ptr<LLVMCodegenContext> &context,
+    const shared_ptr<Type> &type) {
   if (auto array_type = dynamic_pointer_cast<ArrayType>(type)) {
-     return llvm::ArrayType::get(LLVMCodegenUtils::type_to_llvm_type(context, array_type->child_type),array_type->size);
+    return llvm::ArrayType::get(
+        LLVMCodegenUtils::type_to_llvm_type(context, array_type->child_type),
+        array_type->size);
   }
 
   if (auto boolean_type = dynamic_pointer_cast<BooleanType>(type)) {
@@ -89,13 +84,15 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
   }
 
   if (auto function_type = dynamic_pointer_cast<FunctionType>(type)) {
-    vector<llvm::Type*> parameters;
+    vector<llvm::Type *> parameters;
     parameters.reserve(function_type->parameters.size());
-    for (const auto& parameter : function_type->parameters) {
-      parameters.push_back(LLVMCodegenUtils::type_to_llvm_type(context, parameter.second));
+    for (const auto &parameter : function_type->parameters) {
+      parameters.push_back(
+          LLVMCodegenUtils::type_to_llvm_type(context, parameter.second));
     }
 
-    return llvm::FunctionType::get(LLVMCodegenUtils::type_to_llvm_type(context, function_type->return_type),
+    return llvm::FunctionType::get(LLVMCodegenUtils::type_to_llvm_type(
+                                       context, function_type->return_type),
                                    parameters, false);
   }
 
@@ -111,13 +108,17 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
         return llvm::Type::getInt64Ty(*context->llvm_context);
 
       default:
-        Logger::error("Unsupported int size: " + std::to_string(int_type->size));
+        Logger::error("Unsupported int size: " +
+                      std::to_string(int_type->size));
         return nullptr;
     }
   }
 
   if (auto null_type = dynamic_pointer_cast<NullType>(type)) {
-    return null_type->child_type ? LLVMCodegenUtils::type_to_llvm_type(context, null_type->child_type) : llvm::Type::getVoidTy(*context->llvm_context);
+    return null_type->child_type
+               ? LLVMCodegenUtils::type_to_llvm_type(context,
+                                                     null_type->child_type)
+               : llvm::Type::getVoidTy(*context->llvm_context);
   }
 
   if (auto pointer_type = dynamic_pointer_cast<PointerType>(type)) {
@@ -125,7 +126,8 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
   }
 
   if (auto string_type = dynamic_pointer_cast<StringType>(type)) {
-    return llvm::PointerType::get(llvm::Type::getInt8Ty(*context->llvm_context), 0);
+    return llvm::PointerType::get(llvm::Type::getInt8Ty(*context->llvm_context),
+                                  0);
   }
 
   if (auto void_type = dynamic_pointer_cast<VoidType>(type)) {

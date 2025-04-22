@@ -14,7 +14,6 @@
 
 #include "codegen/codegen.hpp"
 #include "codegen_llvm/codegen.hpp"
-#include "codegen_llvm/context.hpp"
 #include "compiler/compiler_backend.hpp"
 #include "lexer/lexer.hpp"
 #include "logger/logger.hpp"
@@ -53,13 +52,12 @@ shared_ptr<Program> Compiler::parse_program(const filesystem::path &root,
   auto program_parser = ProgramParser(make_shared<Parser>(lexer, program));
   program_parser.parse();
 
+
   auto type_resolver = TypeResolver(program);
   type_resolver.resolve();
 
   auto validator = Validator(program);
   validator.validate();
-
-  cout << program->to_string_tree() << endl;
 
   return program;
 }
@@ -126,8 +124,6 @@ void Compiler::compile_gph(const filesystem::path &root,
 
   pass.run(*backend->get_context()->module);
   output_file.flush();
-
-  cout << endl;
 };
 
 void Compiler::link(const vector<string> &objs,

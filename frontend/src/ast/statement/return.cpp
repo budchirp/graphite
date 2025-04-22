@@ -19,6 +19,6 @@ string ReturnStatement::to_string() const {
 }
 
 string ReturnStatement::to_string_tree() const {
-  return "ReturnStatement(type: " + type->to_string_tree() +
+  return "ReturnStatement(type: " + (type ? type->to_string_tree() : "") +
          ", expression: " + expression->to_string_tree() + ")";
 }

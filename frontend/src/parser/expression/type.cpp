@@ -5,6 +5,7 @@
 
 #include "ast/expression.hpp"
 #include "ast/expression/type.hpp"
+#include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/expression/integer.hpp"
 #include "semantic/type_helper.hpp"
@@ -22,14 +23,20 @@ shared_ptr<TypeExpression> TypeExpressionParser::parse_type() {
 }
 
 shared_ptr<Type> TypeExpressionParser::get_type() {
+  bool is_mutable = false;
+
+  if (parser->current_token.type == TOKEN_MUT) {
+    parser->eat_token();  // eat mut
+    is_mutable = true;
+  }
+
   if (parser->current_token.type == TOKEN_ASTERISK) {
     parser->eat_token();  // eat *
-    return make_shared<PointerType>(get_type());
+    return make_shared<PointerType>(get_type(), is_mutable);
   }
 
   auto type_name = parser->current_token.literal;
-
-  parser->eat_token();
+  parser->eat_token();  // eat type name
 
   shared_ptr<Type> type = make_shared<UnknownParserType>(type_name);
 

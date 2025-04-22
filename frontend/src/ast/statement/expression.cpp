@@ -2,11 +2,6 @@
 
 #include <memory>
 
-// Value *ExpressionStatement::codegen(
-//     const shared_ptr<CodegenContext> &context) const {
-//   return expression->codegen(context);
-// }
-
 void ExpressionStatement::validate(const shared_ptr<ProgramContext> &context) {
   expression->validate(context);
 }

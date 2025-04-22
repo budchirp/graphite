@@ -18,7 +18,7 @@
 - [x] Type checking
 - [x] Function definition
 - [x] Variable definition
-- [x] Mutable/Immutable variables
+- [x] Mutable/Immutable variables (immutable by default btw)
 - [x] Null (?, !!, null)
 - [x] If expression
 - [x] For & While statement
@@ -26,13 +26,17 @@
 - [x] Code optimization (LLVM IR Optimization, no optimization from graphite)
 - [x] Arrays
 - [ ] Structs
-- [x] Module management (public, private, include) (garbage)
+- [x] Module management (public, private, include) (garbage btw)
 - [ ] Classes
 - [ ] Stdlib
 - [ ] Maps
-- [ ] Scope management and ownership system similar to crab lang
+- [ ] Scope management and ownership system similar to crab 🦀 (aka crap) or C++ RAII
 - [ ] Switch expression
-- [ ] CLI
+- [ ] CLI (graphite, graphitec)
 
+- [ ] Improve my garbage code
+- [ ] Fix stupid parser errors
+- [x] `var mut x: mut *i32` syntax
+- [x] Fix mutability and pointer issues
 - [x] Seperate CLI, Compiler frontend, Compiler backend into submodules
-- [x] Multiple codegen backend support
+- [ ] Multiple codegen backend support (only llvm for now)

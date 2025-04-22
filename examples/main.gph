@@ -1,7 +1,10 @@
 extern printf(str: string) -> void
 extern print_number(number: i32) -> void
+extern malloc(size: i32) -> *void
 
 include "add"
+
+var global_var = 16
 
 # comment
 public fn main(argc: i32, argv: string[]) -> i32 {
@@ -17,10 +20,15 @@ public fn main(argc: i32, argv: string[]) -> i32 {
   }
 
   printf("\nAdding numbers\n")
-  var x: i32 = add(16, 32)
+  var x: i32 = add(global_var, 32)
   var y: i32 = (x * 1)
   var h: *i32 = &y
   print_number(*h)
+
+  printf("\nmalloc()\n")
+  var m = malloc(32) as mut *i32;
+  *m = 31;
+  print_number(*m)
 
   printf("\nFor loop\n")
   for (var mut i: i32 = 10; i > 0; i--) {
@@ -35,8 +43,9 @@ public fn main(argc: i32, argv: string[]) -> i32 {
   print_number(j)
 
   printf("\nVar without initializer - pointer\n")
-  var k: *i32
-  k = &y
+  var k: mut *i32
+  k = &y;
+  *k = 31
   print_number(*k)
 
   printf("\nWhile loop\n")

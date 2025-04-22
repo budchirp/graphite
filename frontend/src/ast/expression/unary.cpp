@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 
-#include "ast/expression/var_ref.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 #include "semantic/type_helper.hpp"
@@ -12,7 +11,7 @@
 #include "types/int.hpp"
 
 void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
-  expression->validate(context);
+  var_ref->validate(context);
 
   auto scope = context->get_env()->get_current_scope();
 
@@ -23,7 +22,7 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_BANG: {
-      if (!TypeHelper::compare(expression->get_type(),
+      if (!TypeHelper::compare(var_ref->get_type(),
                                make_shared<BooleanType>())) {
         Logger::error("Bang operator only supported with booleans",
                       LogTypes::Error::TYPE_MISMATCH, &position);
@@ -36,14 +35,14 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     case TOKEN_PLUSPLUS:
     case TOKEN_MINUS:
     case TOKEN_PLUS: {
-      auto variable = scope->get_variable(expression->name);
+      auto variable = scope->get_variable(var_ref->name);
       if (!variable->is_mutable) {
         Logger::error("Cannot mutate an immutable variable",
                       LogTypes::Error::SYNTAX, &position);
         return;
       }
 
-      if (!TypeHelper::compare(expression->get_type(),
+      if (!TypeHelper::compare(var_ref->get_type(),
                                make_shared<IntType>(32, false))) {
         Logger::error(
             op.literal + " operator only supported with integer or floats",
@@ -61,19 +60,16 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
 }
 
 void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
-  expression->resolve_types(context);
+  var_ref->resolve_types(context);
 
-  auto expression_type = expression->get_type();
-
-  shared_ptr<Type> type;
+  auto variable_type = var_ref->get_type();
   switch (op.type) {
     case TOKEN_BANG_BANG: {
-      if (auto null_type = TypeHelper::is_null(expression_type)) {
-        type = null_type->child_type;
+      if (auto null_type = TypeHelper::is_null(variable_type)) {
+        set_type(null_type->child_type);
       } else {
         Logger::error("Trying to make a non-null type non-null",
-                      LogTypes::Error::TYPE_MISMATCH,
-                      expression->get_position());
+                      LogTypes::Error::TYPE_MISMATCH, var_ref->get_position());
         return;
       }
 
@@ -81,12 +77,11 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_ASTERISK: {
-      if (auto pointer_type = TypeHelper::is_pointer(expression_type)) {
-        type = pointer_type->pointee_type;
+      if (auto pointer_type = TypeHelper::is_pointer(variable_type)) {
+        set_type(pointer_type->pointee_type);
       } else {
         Logger::error("Cannot dereference non-pointer type",
-                      LogTypes::Error::TYPE_MISMATCH,
-                      expression->get_position());
+                      LogTypes::Error::TYPE_MISMATCH, var_ref->get_position());
         return;
       }
 
@@ -94,24 +89,21 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_AMPERSAND: {
-      type = make_shared<PointerType>(expression_type);
+      set_type(make_shared<PointerType>(variable_type, false));
       break;
     }
 
     default:
-      type = expression_type;
+      set_type(variable_type);
       break;
   }
-
-  set_type(type);
 }
 
 string UnaryExpression::to_string() const {
-  return op.to_string() + expression->to_string();
+  return op.to_string() + var_ref->to_string();
 }
 
 string UnaryExpression::to_string_tree() const {
-  return "PrefixExpression(type: " + type->to_string_tree() + ", op: '" +
-         op.to_string_tree() + "', right: " + expression->to_string_tree() +
-         ")";
+  return "UnaryExpression(type: " + (type ? type->to_string_tree() : "") + ", op: '" +
+         op.to_string_tree() + "', right: " + var_ref->to_string_tree() + ")";
 }

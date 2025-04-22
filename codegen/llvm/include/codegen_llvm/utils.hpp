@@ -2,6 +2,7 @@
 
 #include <llvm/IR/Value.h>
 
+#include "ast/expression/var_ref.hpp"
 #include "codegen_llvm/context.hpp"
 
 class LLVMCodegenUtils {

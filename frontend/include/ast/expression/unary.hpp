@@ -20,11 +20,11 @@ class UnaryExpression : public Expression {
  public:
   Token op;
 
-  shared_ptr<VarRefExpression> expression;
+  shared_ptr<VarRefExpression> var_ref;
 
   explicit UnaryExpression(const Position &position, const Token &op,
-                           const shared_ptr<VarRefExpression> &expression)
-      : position(position), op(op), expression(expression) {};
+                           const shared_ptr<VarRefExpression> &var_ref)
+      : position(position), op(op), var_ref(var_ref) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;
