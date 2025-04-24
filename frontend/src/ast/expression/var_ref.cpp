@@ -1,6 +1,5 @@
 #include "ast/expression/var_ref.hpp"
 
-#include "ast/expression/unary.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 
@@ -23,11 +22,6 @@ shared_ptr<VarRefExpression> VarRefExpression::is_var_ref(
   if (auto var_ref_expression =
           dynamic_pointer_cast<VarRefExpression>(expression)) {
     return var_ref_expression;
-  }
-
-  if (auto unary_expression =
-          dynamic_pointer_cast<UnaryExpression>(expression)) {
-    return unary_expression->var_ref;
   }
 
   return nullptr;

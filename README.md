@@ -20,6 +20,8 @@
 - [x] Variable definition
 - [x] Mutable/Immutable variables (immutable by default btw)
 - [x] Null (?, !!, null)
+- [x] Binary expressions (=, ==, !=, +, -, /, *)
+- [x] Unary expressions (*, &, -, +, ++, --, !)
 - [x] If expression
 - [x] For & While statement
 - [x] Object generation
@@ -34,6 +36,7 @@
 - [ ] Switch expression
 - [ ] CLI (graphite, graphitec)
 
+- [ ] Make bang operator work with expressions (currently only supports variable reference)
 - [ ] Improve my garbage code
 - [ ] Fix stupid parser errors
 - [x] `var mut x: mut *i32` syntax

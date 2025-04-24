@@ -2,7 +2,6 @@
 
 #include <llvm/IR/Value.h>
 
-#include "ast/expression/var_ref.hpp"
 #include "codegen_llvm/context.hpp"
 
 class LLVMCodegenUtils {
@@ -14,4 +13,7 @@ class LLVMCodegenUtils {
   static llvm::Type *type_to_llvm_type(
       const shared_ptr<LLVMCodegenContext> &context,
       const shared_ptr<Type> &type);
+
+  static llvm::Type *type_to_llvm_type(const LLVMCodegenContext *context,
+                                       const shared_ptr<Type> &type);
 };

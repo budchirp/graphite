@@ -1,17 +1,18 @@
 #include "codegen_llvm/expression/binary.hpp"
 
+#include <iostream>
 #include <memory>
 
 #include "ast/expression/unary.hpp"
-#include "ast/expression/var_ref.hpp"
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/utils.hpp"
+#include "lexer/token/token_type.hpp"
 #include "logger/logger.hpp"
 #include "semantic/type_helper.hpp"
 
 llvm::Value *BinaryExpressionCodegen::codegen() const {
   auto left_value = LLVMCodegen::codegen(context, expression->left);
-  if (!left_value) {
+  if (expression->op.type != TOKEN_ASSIGN && !left_value) {
     Logger::error(
         "Failed to generate low level code for left hand side expression",
         LogTypes::Error::INTERNAL, expression->left->get_position());
@@ -30,27 +31,26 @@ llvm::Value *BinaryExpressionCodegen::codegen() const {
 
   auto type = expression->right->get_type();
   auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(context, type);
-  if (auto casted = LLVMCodegenUtils::cast_type(
-          context, left_value, llvm_type,
-          !(expression->op.type == TOKEN_EQUAL ||
-            expression->op.type == TOKEN_NOT_EQUAL))) {
-    left_value = casted;
-  }
+  if (expression->op.type != TOKEN_ASSIGN)
+    if (auto casted = LLVMCodegenUtils::cast_type(
+            context, left_value, llvm_type,
+            !(expression->op.type == TOKEN_EQUAL ||
+              expression->op.type == TOKEN_NOT_EQUAL))) {
+      left_value = casted;
+    }
 
   switch (expression->op.type) {
     case TOKEN_ASSIGN: {
-      if (auto var_ref_expression =
-              VarRefExpression::is_var_ref(expression->left)) {
+      if (auto identifier =
+              IdentifierExpression::is_identifier(expression->left)) {
         auto scope = context->get_env()->get_current_scope();
-
-        auto type = var_ref_expression->get_type();
-        auto variable = scope->get_variable(var_ref_expression->name);
+        auto variable = scope->get_variable(identifier->value);
         if (!variable->is_initialized) {
-          llvm::Value *value = right_value;
+          auto value = right_value;
           if (variable->is_mutable || variable->is_global) {
             value = context->builder->CreateAlloca(
-                LLVMCodegenUtils::type_to_llvm_type(context, type), nullptr,
-                "addr");
+                LLVMCodegenUtils::type_to_llvm_type(context, variable->type),
+                nullptr, "addr");
             context->builder->CreateStore(right_value, value);
           }
 
@@ -59,14 +59,12 @@ llvm::Value *BinaryExpressionCodegen::codegen() const {
           context->add_variable(variable->name, value);
           scope->add_variable(variable->name, variable);
         } else {
-          if (variable->is_mutable && dynamic_pointer_cast<UnaryExpression>(expression->left)) {
-            auto ptr = context->builder->CreateLoad(
-                LLVMCodegenUtils::type_to_llvm_type(context, type),
-                context->get_variable(variable->name), "load");
-            context->builder->CreateStore(right_value, ptr);
-          } else {
+          if (dynamic_pointer_cast<UnaryExpression>(expression->left)) {
             context->builder->CreateStore(
-                right_value, context->get_variable(variable->name));
+                right_value, context->get_variable_ptr(variable, true));
+          } else {
+            context->builder->CreateStore(right_value,
+                                          context->get_variable_ptr(variable));
           }
         }
 

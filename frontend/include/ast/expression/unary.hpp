@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ast/expression.hpp"
+#include "ast/expression/identifier.hpp"
 #include "ast/expression/var_ref.hpp"
 #include "lexer/token/token.hpp"
 #include "position.hpp"
@@ -20,11 +21,11 @@ class UnaryExpression : public Expression {
  public:
   Token op;
 
-  shared_ptr<VarRefExpression> var_ref;
+  shared_ptr<IdentifierExpression> identifier;
 
   explicit UnaryExpression(const Position &position, const Token &op,
-                           const shared_ptr<VarRefExpression> &var_ref)
-      : position(position), op(op), var_ref(var_ref) {};
+                           const shared_ptr<IdentifierExpression> &identifier)
+      : position(position), op(op), identifier(identifier) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;

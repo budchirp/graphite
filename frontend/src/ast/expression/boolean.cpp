@@ -14,6 +14,6 @@ void BooleanExpression::resolve_types(
 string BooleanExpression::to_string() const { return ::to_string(value); }
 
 string BooleanExpression::to_string_tree() const {
-  return "BooleanExpression(type: " + type->to_string_tree() + ", value: '" +
+  return "BooleanExpression(type: " + (type ? type->to_string_tree() : "") + ", value: '" +
          ::to_string(value) + "')";
 }

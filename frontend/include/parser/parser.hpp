@@ -15,6 +15,7 @@ class Parser {
   shared_ptr<Program> program;
 
  public:
+  Token previous_token;
   Token current_token;
   Token next_token;
 

@@ -14,12 +14,13 @@
 #include <memory>
 #include <string>
 
+#include "codegen_llvm/utils.hpp"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
 #include "logger/logger.hpp"
 
 LLVMCodegenContext::LLVMCodegenContext(
-    const shared_ptr<ProgramContext>& program_context)
+    const shared_ptr<ProgramContext> &program_context)
     : program_context(program_context) {
   auto triple = llvm::sys::getDefaultTargetTriple();
 
@@ -54,12 +55,15 @@ LLVMCodegenContext::LLVMCodegenContext(
 }
 
 void LLVMCodegenContext::add_variable(const string &name,
-                         llvm::Value* variable) {
-  variables.insert_or_assign(program_context->get_env()->get_current_scope()->get_name() + "_" + name, variable);
+                                      llvm::Value *variable) {
+  variables.insert_or_assign(
+      program_context->get_env()->get_current_scope()->get_name() + "_" + name,
+      variable);
 }
 
-llvm::Value* LLVMCodegenContext::get_variable(const string &name) const {
-  auto it = variables.find(program_context->get_env()->get_current_scope()->get_name() + "_" + name);
+llvm::Value *LLVMCodegenContext::get_variable(const string &name) const {
+  auto it = variables.find(
+      program_context->get_env()->get_current_scope()->get_name() + "_" + name);
   if (it != variables.end() && it->second) {
     return it->second;
   }
@@ -70,5 +74,35 @@ llvm::Value* LLVMCodegenContext::get_variable(const string &name) const {
   }
 
   Logger::error("Accessed to an undefined variable `" + name + "`");
+  return nullptr;
+}
+
+llvm::Value *LLVMCodegenContext::get_variable_value(
+    const shared_ptr<VariableSymbol> &variable, const bool &check) const {
+  if (check) {
+    if (!(variable->is_mutable || variable->is_global))
+      return get_variable(variable->name);
+  }
+
+  return builder->CreateLoad(
+      LLVMCodegenUtils::type_to_llvm_type(this, variable->type),
+      get_variable(variable->name));
+}
+
+llvm::Value *LLVMCodegenContext::get_variable_ptr(
+    const shared_ptr<VariableSymbol> &variable,
+    const bool &load_pointer) const {
+  if (load_pointer) {
+    if (variable->is_mutable || variable->is_global) {
+      return get_variable_value(variable, false);
+    } else {
+      return get_variable(variable->name);
+    }
+  }
+
+  if (variable->is_mutable || variable->is_global) {
+    return get_variable(variable->name);
+  }
+
   return nullptr;
 }

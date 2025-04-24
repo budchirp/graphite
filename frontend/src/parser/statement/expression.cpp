@@ -150,24 +150,24 @@ map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>,
 
 shared_ptr<Expression> ExpressionStatementParser::parse_expression(
     Precedence::Value precedence) {
-  auto prefix_parser_it = prefix_parse_fns.find(parser->current_token.type);
-  if (prefix_parser_it == prefix_parse_fns.end()) {
+  auto unary_parser_it = prefix_parse_fns.find(parser->current_token.type);
+  if (unary_parser_it == prefix_parse_fns.end()) {
     parser->get_logger()->error(
         "Unknown prefix / postfix: " + parser->current_token.to_string(),
         LogTypes::Error::SYNTAX);
   }
 
-  auto prefix_parser = prefix_parser_it->second(parser);
+  auto prefix_parser = unary_parser_it->second(parser);
   auto expression = prefix_parser->parse();
 
   while (Precedence::precedence_for(parser->current_token.type) > precedence) {
-    auto unary_parser_it = binary_parse_fns.find(parser->current_token.type);
-    if (unary_parser_it == binary_parse_fns.end()) {
+    auto binary_parser_it = binary_parse_fns.find(parser->current_token.type);
+    if (binary_parser_it == binary_parse_fns.end()) {
       break;
     }
 
-    auto unary_parser = unary_parser_it->second(parser, expression);
-    expression = unary_parser->parse();
+    auto binary_parser = binary_parser_it->second(parser, expression);
+    expression = binary_parser->parse();
   }
 
   return expression;

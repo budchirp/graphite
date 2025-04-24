@@ -40,7 +40,7 @@ string ArrayExpression::to_string() const {
 
 string ArrayExpression::to_string_tree() const {
   ostringstream result;
-  result << "ArrayExpression(type: " << type->to_string_tree() << ", values: [";
+  result << "ArrayExpression(type: " << (type ? type->to_string_tree() : "") << ", values: [";
 
   for (size_t i = 0; i < values.size(); ++i) {
     result << values[i]->to_string_tree();

@@ -1,6 +1,7 @@
 extern printf(str: string) -> void
 extern print_number(number: i32) -> void
-extern malloc(size: i32) -> *void
+extern malloc(size: i32) -> *mut void
+extern free(ptr: *void) -> void
 
 include "add"
 
@@ -29,6 +30,8 @@ public fn main(argc: i32, argv: string[]) -> i32 {
   var m = malloc(32) as mut *i32;
   *m = 31;
   print_number(*m)
+
+  free(m as *void)
 
   printf("\nFor loop\n")
   for (var mut i: i32 = 10; i > 0; i--) {

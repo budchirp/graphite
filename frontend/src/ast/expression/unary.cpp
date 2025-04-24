@@ -11,9 +11,10 @@
 #include "types/int.hpp"
 
 void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
-  var_ref->validate(context);
+  identifier->validate(context);
 
   auto scope = context->get_env()->get_current_scope();
+  auto variable = scope->get_variable(identifier->value);
 
   switch (op.type) {
     case TOKEN_ASTERISK:
@@ -22,7 +23,7 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_BANG: {
-      if (!TypeHelper::compare(var_ref->get_type(),
+      if (!TypeHelper::compare(variable->type,
                                make_shared<BooleanType>())) {
         Logger::error("Bang operator only supported with booleans",
                       LogTypes::Error::TYPE_MISMATCH, &position);
@@ -35,14 +36,13 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     case TOKEN_PLUSPLUS:
     case TOKEN_MINUS:
     case TOKEN_PLUS: {
-      auto variable = scope->get_variable(var_ref->name);
       if (!variable->is_mutable) {
         Logger::error("Cannot mutate an immutable variable",
                       LogTypes::Error::SYNTAX, &position);
         return;
       }
 
-      if (!TypeHelper::compare(var_ref->get_type(),
+      if (!TypeHelper::compare(variable->type,
                                make_shared<IntType>(32, false))) {
         Logger::error(
             op.literal + " operator only supported with integer or floats",
@@ -60,16 +60,18 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
 }
 
 void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
-  var_ref->resolve_types(context);
+  identifier->resolve_types(context);
 
-  auto variable_type = var_ref->get_type();
+      auto scope = context->get_env()->get_current_scope();
+  auto variable = scope->get_variable(identifier->value);
+
   switch (op.type) {
     case TOKEN_BANG_BANG: {
-      if (auto null_type = TypeHelper::is_null(variable_type)) {
+      if (auto null_type = TypeHelper::is_null(variable->type)) {
         set_type(null_type->child_type);
       } else {
         Logger::error("Trying to make a non-null type non-null",
-                      LogTypes::Error::TYPE_MISMATCH, var_ref->get_position());
+                      LogTypes::Error::TYPE_MISMATCH, identifier->get_position());
         return;
       }
 
@@ -77,11 +79,11 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_ASTERISK: {
-      if (auto pointer_type = TypeHelper::is_pointer(variable_type)) {
+      if (auto pointer_type = TypeHelper::is_pointer(variable->type)) {
         set_type(pointer_type->pointee_type);
       } else {
         Logger::error("Cannot dereference non-pointer type",
-                      LogTypes::Error::TYPE_MISMATCH, var_ref->get_position());
+                      LogTypes::Error::TYPE_MISMATCH, identifier->get_position());
         return;
       }
 
@@ -89,21 +91,21 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_AMPERSAND: {
-      set_type(make_shared<PointerType>(variable_type, false));
+      set_type(make_shared<PointerType>(variable->type, false));
       break;
     }
 
     default:
-      set_type(variable_type);
+      set_type(variable->type);
       break;
   }
 }
 
 string UnaryExpression::to_string() const {
-  return op.to_string() + var_ref->to_string();
+  return op.to_string() + identifier->to_string();
 }
 
 string UnaryExpression::to_string_tree() const {
   return "UnaryExpression(type: " + (type ? type->to_string_tree() : "") + ", op: '" +
-         op.to_string_tree() + "', right: " + var_ref->to_string_tree() + ")";
+         op.to_string_tree() + "', expression: " + identifier->to_string_tree() + ")";
 }

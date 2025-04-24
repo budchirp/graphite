@@ -4,7 +4,6 @@
 #include <memory>
 #include <sstream>
 
-
 void ProtoStatement::validate(const shared_ptr<ProgramContext> &context) {
   for (const auto &parameter : parameters) {
     parameter.second->validate(context);
@@ -43,7 +42,7 @@ string ProtoStatement::to_string_tree() const {
 
   for (size_t i = 0; i < parameters.size(); ++i) {
     oss << "(value: " << parameters[i].first->to_string_tree()
-        << ", type: " << parameters[i].second->to_string_tree() << ")";
+        << ", type: " << (parameters[i].second ? parameters[i].second->to_string_tree() : "") << ")";
     if (i < parameters.size() - 1) {
       oss << ", ";
     }

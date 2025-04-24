@@ -14,6 +14,7 @@ Parser::Parser(const shared_ptr<Lexer> &lexer,
 }
 
 void Parser::eat_token() {
+  previous_token = current_token;
   current_token = next_token;
   next_token = lexer->next_token();
 }

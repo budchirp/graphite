@@ -48,5 +48,5 @@ shared_ptr<Type> TypeExpression::resolve_types(
 string TypeExpression::to_string() const { return type->to_string(); }
 
 string TypeExpression::to_string_tree() const {
-  return "TypeExpression(type: " + type->to_string_tree() + ")";
+  return "TypeExpression(type: " + (type ? type->to_string_tree() : "") + ")";
 }

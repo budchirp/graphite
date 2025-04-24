@@ -4,26 +4,21 @@
 
 #include "ast/expression.hpp"
 #include "ast/expression/unary.hpp"
-#include "ast/expression/var_ref.hpp"
 #include "lexer/token/token.hpp"
 #include "logger/log_types.hpp"
-#include "parser/expression/var_ref.hpp"
+#include "parser/expression/identifier.hpp"
 
 shared_ptr<Expression> UnaryExpressionParser::parse() {
   Token op_token;
 
-  shared_ptr<VarRefExpression> expression;
-
+  shared_ptr<IdentifierExpression> expression;
   if (left) {
-    shared_ptr<VarRefExpression> _expression(
-        dynamic_pointer_cast<VarRefExpression>(left));
-    if (!_expression) {
-      parser->get_logger()->error("Expected variable reference expression",
+        expression = dynamic_pointer_cast<IdentifierExpression>(left);
+    if (!expression) {
+      parser->get_logger()->error("Expected identifier expression",
                                   LogTypes::Error::SYNTAX);
       return nullptr;
     }
-
-    expression = std::move(_expression);
 
     op_token = parser->current_token;
     parser->eat_token();  // eat postfix
@@ -31,7 +26,7 @@ shared_ptr<Expression> UnaryExpressionParser::parse() {
     op_token = parser->current_token;
     parser->eat_token();  // eat prefix
 
-    expression = VarRefExpressionParser(parser).parse_var_ref();
+    expression = IdentifierExpressionParser(parser).parse_identifier();
     if (!expression) {
       parser->get_logger()->error("Expected variable reference expression",
                                   LogTypes::Error::SYNTAX);

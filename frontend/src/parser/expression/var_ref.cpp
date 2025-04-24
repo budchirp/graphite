@@ -4,10 +4,11 @@
 
 #include "ast/expression.hpp"
 #include "ast/expression/var_ref.hpp"
+#include "lexer/token/token_type.hpp"
 #include "parser/expression/identifier.hpp"
 
 shared_ptr<Expression> VarRefExpressionParser::parse() {
-  if (parser->next_token.type == TOKEN_LEFT_PARENTHESES)
+  if (parser->next_token.type == TOKEN_LEFT_PARENTHESES || parser->next_token.type == TOKEN_LEFT_BRACKET || parser->previous_token.type == TOKEN_ASTERISK || parser->previous_token.type == TOKEN_AMPERSAND || parser->next_token.type == TOKEN_PLUSPLUS || parser->next_token.type == TOKEN_MINUSMINUS || parser->next_token.type == TOKEN_ASSIGN)
     return IdentifierExpressionParser(parser).parse();
 
   return parse_var_ref();

@@ -21,6 +21,6 @@ class UnknownParserType : public Type {
 
   string to_string() const override { return "unknown " + value; };
   string to_string_tree() const override {
-    return "UnknownParserType(value: " + value + ")";
+    return "UnknownParserType(value: '" + value + "')";
   };
 };

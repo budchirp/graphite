@@ -47,7 +47,7 @@ string IfExpression::to_string() const {
 
 string IfExpression::to_string_tree() const {
   ostringstream result;
-  result << "IfExpression(type: " + type->to_string_tree() + ", condition: "
+  result << "IfExpression(type: " + (type ? type->to_string_tree() : "") + ", condition: "
          << condition->to_string_tree()
          << ", consequence: " << consequence->to_string_tree()
          << ", alternative: "

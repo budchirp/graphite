@@ -19,8 +19,6 @@ shared_ptr<Expression> CallExpressionParser::parse() {
     return nullptr;
   }
 
-  const auto position = *parser->get_lexer()->position;
-
   parser->eat_token();  // eat '('
 
   auto expression_statement_parser = ExpressionStatementParser(parser);
@@ -41,6 +39,6 @@ shared_ptr<Expression> CallExpressionParser::parse() {
 
   parser->eat_token();  // eat ')'
 
-  return make_shared<CallExpression>(position, name_expression,
-                                     arguments);
+  return make_shared<CallExpression>(*name_expression->get_position(),
+                                     name_expression, arguments);
 }

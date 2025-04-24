@@ -1,13 +1,11 @@
 #include "ast/expression/binary.hpp"
 
-#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "ast/expression/type.hpp"
 #include "ast/expression/unary.hpp"
-#include "ast/expression/var_ref.hpp"
 #include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
@@ -26,7 +24,8 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
   auto left_type = left->get_type();
   auto right_type = right->get_type();
 
-  if (!TypeHelper::compare(left_type, right_type,
+  if (op.type != TOKEN_ASSIGN &&
+      !TypeHelper::compare(left_type, right_type,
                            op.type == TOKEN_ASSIGN || op.type == TOKEN_EQUAL ||
                                op.type == TOKEN_NOT_EQUAL)) {
     Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
@@ -40,17 +39,31 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_ASSIGN: {
-      if (auto var_ref_expression = VarRefExpression::is_var_ref(left)) {
+      if (auto identifier = IdentifierExpression::is_identifier(left)) {
         auto scope = context->get_env()->get_current_scope();
-        auto variable = scope->get_variable(var_ref_expression->name);
+        auto variable = scope->get_variable(identifier->value);
 
-        if (dynamic_pointer_cast<UnaryExpression>(left)) {
-          if (auto pointer_type = TypeHelper::is_pointer(variable->type);
-              !pointer_type->is_mutable) {
-            Logger::error("Cannot mutate an immutable pointer variable",
-                          LogTypes::Error::SYNTAX, right->get_position());
+        if (auto unary_expression = dynamic_pointer_cast<UnaryExpression>(left);
+            unary_expression && unary_expression->op.type == TOKEN_ASTERISK) {
+          if (auto pointer_type = TypeHelper::is_pointer(variable->type); pointer_type) {
+            if (!TypeHelper::compare(pointer_type->pointee_type, right_type,
+                                     true)) {
+              Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
+                            &position);
+              return;
+            }
+
+            if (!pointer_type->is_mutable)
+              Logger::error("Cannot mutate an immutable pointer variable",
+                            LogTypes::Error::SYNTAX, right->get_position());
           }
         } else {
+          if (!TypeHelper::compare(variable->type, right_type, true)) {
+            Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
+                          &position);
+            return;
+          }
+
           if (!(variable->is_mutable || !variable->is_initialized)) {
             Logger::error("Cannot mutate an immutable variable",
                           LogTypes::Error::SYNTAX, right->get_position());

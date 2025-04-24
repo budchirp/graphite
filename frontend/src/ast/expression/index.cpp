@@ -8,7 +8,7 @@
 #include "semantic/type_helper.hpp"
 
 void IndexExpression::validate(const shared_ptr<ProgramContext> &context) {
-  variable->validate(context);
+  identifier->validate(context);
   index->validate(context);
 
   if (!TypeHelper::is_int(index->get_type())) {
@@ -19,23 +19,26 @@ void IndexExpression::validate(const shared_ptr<ProgramContext> &context) {
 }
 
 void IndexExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
-  variable->resolve_types(context);
+  identifier->resolve_types(context);
   index->resolve_types(context);
 
-  if (auto array_type = TypeHelper::is_array(variable->get_type())) {
+  auto scope = context->get_env()->get_current_scope();
+  auto variable = scope->get_variable(identifier->value);
+
+  if (auto array_type = TypeHelper::is_array(variable->type)) {
     set_type(array_type->child_type);
   } else {
     Logger::error("Array expected", LogTypes::Error::TYPE_MISMATCH,
-                  variable->get_position());
+                  identifier->get_position());
   }
 }
 
 string IndexExpression::to_string() const {
-  return variable->to_string() + "[" + index->to_string() + "]";
+  return identifier->to_string() + "[" + index->to_string() + "]";
 }
 
 string IndexExpression::to_string_tree() const {
-  return "IndexExpression(type: " + type->to_string_tree() +
-         ", variable: " + variable->to_string_tree() +
+  return "IndexExpression(type: " + (type ? type->to_string_tree() : "") +
+         ", identifier: " + identifier->to_string_tree() +
          ", index: " + index->to_string_tree() + ")";
 }

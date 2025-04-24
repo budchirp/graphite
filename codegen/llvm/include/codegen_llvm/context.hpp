@@ -19,7 +19,7 @@ class LLVMCodegenContext {
  private:
   shared_ptr<ProgramContext> program_context;
 
-  unordered_map<string, llvm::Value*> variables;
+  unordered_map<string, llvm::Value *> variables;
 
  public:
   shared_ptr<llvm::LLVMContext> llvm_context;
@@ -46,7 +46,10 @@ class LLVMCodegenContext {
 
   shared_ptr<Env> get_env() const { return program_context->get_env(); }
 
-  void add_variable(const string &name,
-                    llvm::Value* variable);
-  llvm::Value* get_variable(const string &name) const;
+  void add_variable(const string &name, llvm::Value *variable);
+  llvm::Value *get_variable(const string &name) const;
+  llvm::Value *get_variable_value(
+      const shared_ptr<VariableSymbol> &variable, const bool &check = true) const;
+  llvm::Value *get_variable_ptr(const shared_ptr<VariableSymbol> &variable,
+                                const bool &load_pointer = false) const;
 };

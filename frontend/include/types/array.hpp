@@ -25,7 +25,7 @@ class ArrayType : public Type {
     return child_type->to_string() + "[" + ::to_string(size) + "]";
   };
   string to_string_tree() const override {
-    return "ArrayType(type: " + child_type->to_string_tree() +
-           ", size: " + ::to_string(size) + ")";
+    return "ArrayType(type: " + child_type->to_string_tree() + ", size: '" +
+           ::to_string(size) + "')";
   };
 };

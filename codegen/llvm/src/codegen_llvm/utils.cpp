@@ -55,10 +55,14 @@ llvm::Value *LLVMCodegenUtils::cast_type(
 llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
     const shared_ptr<LLVMCodegenContext> &context,
     const shared_ptr<Type> &type) {
+  return type_to_llvm_type(context.get(), type);
+}
+
+llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
+    const LLVMCodegenContext *context, const shared_ptr<Type> &type) {
   if (auto array_type = dynamic_pointer_cast<ArrayType>(type)) {
     return llvm::ArrayType::get(
-        LLVMCodegenUtils::type_to_llvm_type(context, array_type->child_type),
-        array_type->size);
+        type_to_llvm_type(context, array_type->child_type), array_type->size);
   }
 
   if (auto boolean_type = dynamic_pointer_cast<BooleanType>(type)) {
@@ -87,8 +91,7 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
     vector<llvm::Type *> parameters;
     parameters.reserve(function_type->parameters.size());
     for (const auto &parameter : function_type->parameters) {
-      parameters.push_back(
-          LLVMCodegenUtils::type_to_llvm_type(context, parameter.second));
+      parameters.push_back(type_to_llvm_type(context, parameter.second));
     }
 
     return llvm::FunctionType::get(LLVMCodegenUtils::type_to_llvm_type(
@@ -116,8 +119,7 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
 
   if (auto null_type = dynamic_pointer_cast<NullType>(type)) {
     return null_type->child_type
-               ? LLVMCodegenUtils::type_to_llvm_type(context,
-                                                     null_type->child_type)
+               ? type_to_llvm_type(context, null_type->child_type)
                : llvm::Type::getVoidTy(*context->llvm_context);
   }
 

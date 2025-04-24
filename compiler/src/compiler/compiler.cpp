@@ -52,7 +52,6 @@ shared_ptr<Program> Compiler::parse_program(const filesystem::path &root,
   auto program_parser = ProgramParser(make_shared<Parser>(lexer, program));
   program_parser.parse();
 
-
   auto type_resolver = TypeResolver(program);
   type_resolver.resolve();
 
@@ -104,6 +103,8 @@ void Compiler::compile_gph(const filesystem::path &root,
   auto backend = static_pointer_cast<LLVMCodegen>(codegen.get());
   backend->codegen(program);
   backend->optimize();
+
+  backend->get_context()->module->print(llvm::errs(), nullptr);
 
   error_code err_code;
   llvm::raw_fd_ostream output_file(

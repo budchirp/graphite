@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ast/expression.hpp"
+#include "ast/expression/identifier.hpp"
 #include "ast/expression/var_ref.hpp"
 #include "position.hpp"
 #include "types/type.hpp"
@@ -17,13 +18,13 @@ class IndexExpression : public Expression {
   shared_ptr<Type> type;
 
  public:
-  shared_ptr<VarRefExpression> variable;
+  shared_ptr<IdentifierExpression> identifier;
   shared_ptr<Expression> index;
 
   explicit IndexExpression(const Position &position,
-                           const shared_ptr<VarRefExpression> &variable,
+                           const shared_ptr<IdentifierExpression> &identifier,
                            const shared_ptr<Expression> &index)
-      : position(position), variable(variable), index(index) {};
+      : position(position), identifier(identifier), index(index) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;

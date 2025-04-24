@@ -3,15 +3,16 @@
 #include <memory>
 
 #include "ast/expression.hpp"
+#include "ast/expression/identifier.hpp"
 #include "ast/expression/index.hpp"
 #include "parser/precedence.hpp"
 #include "parser/statement/expression.hpp"
 
 shared_ptr<Expression> IndexExpressionParser::parse() {
-  shared_ptr<VarRefExpression> variable_expression(
-      static_pointer_cast<VarRefExpression>(left));
-  if (!variable_expression) {
-    parser->get_logger()->error("Expected variable reference expression",
+  shared_ptr<IdentifierExpression> identifier_expression(
+      dynamic_pointer_cast<IdentifierExpression>(left));
+  if (!identifier_expression) {
+    parser->get_logger()->error("Expected identifier expression",
                                 LogTypes::Error::SYNTAX);
     return nullptr;
   }
@@ -29,6 +30,6 @@ shared_ptr<Expression> IndexExpressionParser::parse() {
 
   parser->eat_token();  // eat ]
 
-  return make_shared<IndexExpression>(*variable_expression->get_position(),
-                                      variable_expression, index_expression);
+  return make_shared<IndexExpression>(*identifier_expression->get_position(),
+                                      identifier_expression, index_expression);
 }

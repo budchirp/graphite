@@ -14,6 +14,6 @@ string StringExpression::to_string() const {
 }
 
 string StringExpression::to_string_tree() const {
-  return "StringExpression(type: " + type->to_string_tree() + ", value: '" +
+  return "StringExpression(type: " + (type ? type->to_string_tree() : "") + ", value: '" +
          value + "')";
 }
