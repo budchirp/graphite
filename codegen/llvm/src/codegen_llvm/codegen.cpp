@@ -25,6 +25,7 @@
 #include "ast/expression/index.hpp"
 #include "ast/expression/integer.hpp"
 #include "ast/expression/string.hpp"
+#include "ast/expression/struct.hpp"
 #include "ast/expression/unary.hpp"
 #include "ast/statement/block.hpp"
 #include "ast/statement/expression.hpp"
@@ -33,12 +34,14 @@
 #include "ast/statement/function.hpp"
 #include "ast/statement/include.hpp"
 #include "ast/statement/return.hpp"
+#include "ast/statement/struct.hpp"
 #include "ast/statement/while.hpp"
 #include "codegen_llvm/expression/array.hpp"
 #include "codegen_llvm/expression/binary.hpp"
 #include "codegen_llvm/expression/call.hpp"
 #include "codegen_llvm/expression/if.hpp"
 #include "codegen_llvm/expression/index.hpp"
+#include "codegen_llvm/expression/struct.hpp"
 #include "codegen_llvm/expression/unary.hpp"
 #include "codegen_llvm/expression/var_ref.hpp"
 #include "codegen_llvm/program.hpp"
@@ -63,7 +66,9 @@ void LLVMCodegen::init() {
 }
 
 void LLVMCodegen::codegen(const shared_ptr<Program> &program) const {
-  context->add_variable("null", llvm::Constant::getNullValue(llvm::Type::getVoidTy(*context->llvm_context)));
+  context->add_variable("null",
+                        llvm::Constant::getNullValue(
+                            llvm::Type::getVoidTy(*context->llvm_context)));
 
   ProgramCodegen(context, program).codegen();
 
@@ -72,42 +77,56 @@ void LLVMCodegen::codegen(const shared_ptr<Program> &program) const {
 
 llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
                                   const shared_ptr<Expression> &expression) {
-  if (auto array_expression = dynamic_pointer_cast<ArrayExpression>(expression)) {
+  if (auto array_expression =
+          dynamic_pointer_cast<ArrayExpression>(expression)) {
     return ArrayExpressionCodegen(context, array_expression).codegen();
   }
-  if (auto binary_expression = dynamic_pointer_cast<BinaryExpression>(expression)) {
+  if (auto binary_expression =
+          dynamic_pointer_cast<BinaryExpression>(expression)) {
     return BinaryExpressionCodegen(context, binary_expression).codegen();
   }
-  if (auto boolean_expression = dynamic_pointer_cast<BooleanExpression>(expression)) {
+  if (auto boolean_expression =
+          dynamic_pointer_cast<BooleanExpression>(expression)) {
     return context->builder->getInt1(boolean_expression->value);
   }
   if (auto call_expression = dynamic_pointer_cast<CallExpression>(expression)) {
     return CallExpressionCodegen(context, call_expression).codegen();
   }
-  if (auto identifier_expression = dynamic_pointer_cast<IdentifierExpression>(expression)) {
+  if (auto identifier_expression =
+          dynamic_pointer_cast<IdentifierExpression>(expression)) {
     return nullptr;
   }
   if (auto if_expression = dynamic_pointer_cast<IfExpression>(expression)) {
     return IfExpressionCodegen(context, if_expression).codegen();
   }
-  if (auto index_expression = dynamic_pointer_cast<IndexExpression>(expression)) {
+  if (auto index_expression =
+          dynamic_pointer_cast<IndexExpression>(expression)) {
     return IndexExpressionCodegen(context, index_expression).codegen();
   }
-  if (auto integer_expression = dynamic_pointer_cast<IntegerExpression>(expression)) {
-    return llvm::ConstantInt::get(LLVMCodegenUtils::type_to_llvm_type(context, integer_expression->get_type()),
-                                stoi(integer_expression->value));
+  if (auto integer_expression =
+          dynamic_pointer_cast<IntegerExpression>(expression)) {
+    return llvm::ConstantInt::get(LLVMCodegenUtils::type_to_llvm_type(
+                                      context, integer_expression->get_type()),
+                                  stoi(integer_expression->value));
   }
-  if (auto string_expression = dynamic_pointer_cast<StringExpression>(expression)) {
-    return context->builder->CreateGlobalStringPtr(llvm::StringRef(string_expression->value), "str", 0,
-                                                 context->module.get());
+  if (auto string_expression =
+          dynamic_pointer_cast<StringExpression>(expression)) {
+    return context->builder->CreateGlobalStringPtr(
+        llvm::StringRef(string_expression->value), "str", 0,
+        context->module.get());
+  }
+  if (auto struct_expression = dynamic_pointer_cast<StructExpression>(expression)) {
+    return StructExpressionCodegen(context, struct_expression).codegen();
   }
   if (auto type_expression = dynamic_pointer_cast<TypeExpression>(expression)) {
     return nullptr;
   }
-  if (auto unary_expression = dynamic_pointer_cast<UnaryExpression>(expression)) {
+  if (auto unary_expression =
+          dynamic_pointer_cast<UnaryExpression>(expression)) {
     return UnaryExpressionCodegen(context, unary_expression).codegen();
   }
-  if (auto var_ref_expression = dynamic_pointer_cast<VarRefExpression>(expression)) {
+  if (auto var_ref_expression =
+          dynamic_pointer_cast<VarRefExpression>(expression)) {
     return VarRefExpressionCodegen(context, var_ref_expression).codegen();
   }
 
@@ -120,26 +139,35 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   if (auto block_statement = dynamic_pointer_cast<BlockStatement>(statement)) {
     return BlockStatementCodegen(context, block_statement).codegen();
   }
-  if (auto expression_statement = dynamic_pointer_cast<ExpressionStatement>(statement)) {
+  if (auto expression_statement =
+          dynamic_pointer_cast<ExpressionStatement>(statement)) {
     return LLVMCodegen::codegen(context, expression_statement->expression);
   }
-  if (auto extern_statement = dynamic_pointer_cast<ExternStatement>(statement)) {
+  if (auto extern_statement =
+          dynamic_pointer_cast<ExternStatement>(statement)) {
     return ExternStatementCodegen(context, extern_statement).codegen();
   }
   if (auto for_statement = dynamic_pointer_cast<ForStatement>(statement)) {
     return ForStatementCodegen(context, for_statement).codegen();
   }
-  if (auto function_statement = dynamic_pointer_cast<FunctionStatement>(statement)) {
+  if (auto function_statement =
+          dynamic_pointer_cast<FunctionStatement>(statement)) {
     return FunctionStatementCodegen(context, function_statement).codegen();
   }
-  if (auto include_statement = dynamic_pointer_cast<IncludeStatement>(statement)) {
+  if (auto include_statement =
+          dynamic_pointer_cast<IncludeStatement>(statement)) {
     return IncludeStatementCodegen(context, include_statement).codegen();
   }
   if (auto proto_statement = dynamic_pointer_cast<ProtoStatement>(statement)) {
     return ProtoStatementCodegen(context, proto_statement).codegen();
   }
-  if (auto return_statement = dynamic_pointer_cast<ReturnStatement>(statement)) {
+  if (auto return_statement =
+          dynamic_pointer_cast<ReturnStatement>(statement)) {
     return ReturnStatementCodegen(context, return_statement).codegen();
+  }
+  if (auto struct_statement =
+          dynamic_pointer_cast<StructStatement>(statement)) {
+    return nullptr;
   }
   if (auto var_statement = dynamic_pointer_cast<VarStatement>(statement)) {
     return VarStatementCodegen(context, var_statement).codegen();
@@ -169,4 +197,3 @@ void LLVMCodegen::optimize() const {
   Logger::log("Optimizing your garbage");
   mpm.run(*context->module, *context->mam);
 }
-

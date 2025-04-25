@@ -7,11 +7,29 @@ include "add"
 
 var global_var = 16
 
+struct Car {
+  seats: i32
+  model: i32
+
+  name: string
+}
+
 # comment
 public fn main(argc: i32, argv: string[]) -> i32 {
   printf(argv[argc - 1])
 
   printf("\nStart\n")
+  
+  printf("\nStruct\n")
+  var my_struct = Car {
+    seats: 4,
+    model: 2019,
+    name: "SuperCar\n",
+  }
+
+  print_number(my_struct["seats"])
+  print_number(my_struct["model"])
+  printf(my_struct["name"])
 
   printf("\nArray\n")
   var array = [123, 234, 345, 456, 567]

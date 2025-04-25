@@ -11,18 +11,18 @@ void ExternStatement::validate(const shared_ptr<ProgramContext> &context) {
 void ExternStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   proto->resolve_types(context);
 
-  vector<pair<string, shared_ptr<Type>>> parameters;
-  for (const auto &[parameter_name_expression, parameter_type_expression] :
-       proto->parameters) {
-    parameters.emplace_back(parameter_name_expression->value,
-                            parameter_type_expression->get_type());
+  vector<pair<string, shared_ptr<Type>>> parameters_type;
+  parameters_type.reserve(proto->parameters.size());
+  for (const auto &[parameter_name, parameter_type] : proto->parameters) {
+    parameters_type.emplace_back(parameter_name->value,
+                                 parameter_type->get_type());
   }
 
   auto name = proto->name->value;
   context->get_env()->add_function(
       name, make_shared<FunctionSymbol>(
                 name, SymbolLinkageType::Internal, visibility,
-                make_shared<FunctionType>(parameters,
+                make_shared<FunctionType>(parameters_type,
                                           proto->return_type->get_type())));
 }
 

@@ -13,6 +13,7 @@
 #include "types/boolean.hpp"
 #include "types/float.hpp"
 #include "types/int.hpp"
+#include "types/pointer.hpp"
 #include "types/string.hpp"
 
 void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
@@ -76,25 +77,25 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
 
     default: {
       static const unordered_map<string, vector<TokenType>> operations = {
-          {typeid(IntType).name(),
+          {IntType::name,
            {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH,
             TOKEN_LESS_THAN, TOKEN_GREATER_THAN}},
-          {typeid(FloatType).name(),
+          {FloatType::name,
            {TOKEN_PLUS, TOKEN_MINUS, TOKEN_ASTERISK, TOKEN_SLASH,
             TOKEN_LESS_THAN, TOKEN_GREATER_THAN}},
-          {typeid(BooleanType).name(), {TOKEN_AND, TOKEN_OR}},
-          {typeid(StringType).name(), {}},
-          {typeid(PointerType).name(), {}},
-          {typeid(NullType).name(), {}}};
+          {BooleanType::name, {TOKEN_AND, TOKEN_OR}},
+          {StringType::name, {}},
+          {PointerType::name, {}},
+          {NullType::name, {}}};
 
-      auto types_it = operations.find(left_type->get_type_info().name());
+      auto types_it = operations.find(left_type->get_name());
       if (types_it == operations.end()) {
         Logger::error("Unsupported type for binary expression",
                       LogTypes::Error::TYPE_MISMATCH, &position);
         return;
       }
 
-      auto type_operations = operations.at(left_type->get_type_info().name());
+      auto type_operations = operations.at(left_type->get_name());
       auto operations_it =
           find(type_operations.begin(), type_operations.end(), op.type);
       if (operations_it == type_operations.end()) {

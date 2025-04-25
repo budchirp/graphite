@@ -14,7 +14,7 @@ shared_ptr<BlockStatement> BlockStatementParser::parse() {
   auto statements = vector<shared_ptr<Statement>>();
   while (parser->current_token.type != TOKEN_RIGHT_BRACE) {
     if (auto statement = statement_parser.parse()) {
-      statements.push_back(std::move(statement));
+      statements.push_back(statement);
     }
   }
 

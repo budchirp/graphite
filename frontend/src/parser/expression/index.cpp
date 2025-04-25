@@ -9,7 +9,7 @@
 #include "parser/statement/expression.hpp"
 
 shared_ptr<Expression> IndexExpressionParser::parse() {
-  shared_ptr<IdentifierExpression> identifier_expression(
+  auto identifier_expression(
       dynamic_pointer_cast<IdentifierExpression>(left));
   if (!identifier_expression) {
     parser->get_logger()->error("Expected identifier expression",

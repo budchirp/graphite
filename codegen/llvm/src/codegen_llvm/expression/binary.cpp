@@ -1,6 +1,5 @@
 #include "codegen_llvm/expression/binary.hpp"
 
-#include <iostream>
 #include <memory>
 
 #include "ast/expression/unary.hpp"

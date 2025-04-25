@@ -1,7 +1,5 @@
 #pragma once
 
-#include <llvm/IR/DerivedTypes.h>
-
 #include <memory>
 #include <string>
 
@@ -11,6 +9,8 @@ using namespace std;
 
 class PointerType : public Type {
  public:
+  static string name;
+
   shared_ptr<Type> pointee_type;
 
   bool is_mutable;
@@ -19,10 +19,7 @@ class PointerType : public Type {
                        const bool &is_mutable)
       : pointee_type(pointee_type), is_mutable(is_mutable) {};
 
-  string get_name() const override { return pointee_type->get_name(); }
-  const type_info &get_type_info() const override {
-    return typeid(PointerType);
-  }
+  string get_name() const override { return name; }
 
   string to_string() const override { return "*" + pointee_type->to_string(); };
   string to_string_tree() const override {

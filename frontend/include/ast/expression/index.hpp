@@ -5,7 +5,6 @@
 
 #include "ast/expression.hpp"
 #include "ast/expression/identifier.hpp"
-#include "ast/expression/var_ref.hpp"
 #include "position.hpp"
 #include "types/type.hpp"
 

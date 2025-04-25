@@ -10,6 +10,7 @@
 #include "types/null.hpp"
 #include "types/pointer.hpp"
 #include "types/string.hpp"
+#include "types/struct.hpp"
 #include "types/type.hpp"
 #include "types/void.hpp"
 
@@ -49,6 +50,10 @@ class TypeHelper {
     return dynamic_pointer_cast<FunctionType>(type);
   }
 
+  static shared_ptr<StructType> is_struct(const shared_ptr<Type>& type) {
+    return dynamic_pointer_cast<StructType>(type);
+  }
+
   static shared_ptr<NullType> is_null(const shared_ptr<Type>& type) {
     return dynamic_pointer_cast<NullType>(type);
   }
@@ -65,6 +70,6 @@ class TypeHelper {
       return compare(a_ptr->pointee_type, b_ptr->pointee_type);
     }
 
-    return a->get_type_info() == b->get_type_info();
+    return a->get_name() == b->get_name();
   }
 };

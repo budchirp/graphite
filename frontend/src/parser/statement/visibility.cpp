@@ -1,8 +1,10 @@
 #include "parser/statement/visibility.hpp"
 
+#include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/statement/extern.hpp"
 #include "parser/statement/function.hpp"
+#include "parser/statement/struct.hpp"
 #include "parser/statement/var.hpp"
 #include "semantic/visibilty.hpp"
 
@@ -12,6 +14,10 @@ shared_ptr<Statement> VisibilityStatementParser::parse() {
   parser->eat_token();  // eat visibility indicator
 
   switch (parser->current_token.type) {
+    case TOKEN_STRUCT: {
+      return StructStatementParser(parser).parse(visibility_token);
+    }
+
     case TOKEN_FUN: {
       return FunctionStatementParser(parser).parse(visibility_token);
     }

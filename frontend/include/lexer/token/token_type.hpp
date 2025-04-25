@@ -18,6 +18,8 @@ enum TokenType {
   TOKEN_FOR,
   TOKEN_WHILE,
 
+  TOKEN_STRUCT,
+
   TOKEN_MUT,
 
   TOKEN_PUBLIC,

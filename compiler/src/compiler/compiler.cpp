@@ -102,9 +102,10 @@ void Compiler::compile_gph(const filesystem::path &root,
 
   auto backend = static_pointer_cast<LLVMCodegen>(codegen.get());
   backend->codegen(program);
-  backend->optimize();
 
   backend->get_context()->module->print(llvm::errs(), nullptr);
+
+  backend->optimize();
 
   error_code err_code;
   llvm::raw_fd_ostream output_file(

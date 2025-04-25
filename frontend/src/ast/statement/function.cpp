@@ -35,17 +35,18 @@ void FunctionStatement::resolve_types(
 
   context->get_env()->set_current_scope(scope->get_name());
 
-  vector<pair<string, shared_ptr<Type>>> parameters;
-  for (const auto &[parameter_name_expression, parameter_type_expression] :
-       proto->parameters) {
-    auto name = parameter_name_expression->value;
-    auto type = parameter_type_expression->get_type();
+  vector<pair<string, shared_ptr<Type>>> parameters_type;
+  parameters_type.reserve(proto->parameters.size());
+  for (const auto &[parameter_name, parameter_type] : proto->parameters) {
     scope->add_variable(
-        name, make_shared<VariableSymbol>(
-                  name, SymbolLinkageType::Value::Internal,
-                  SymbolVisibility::Value::PRIVATE, type, false, false, true));
+        parameter_name->value,
+        make_shared<VariableSymbol>(
+            parameter_name->value, SymbolLinkageType::Value::Internal,
+            SymbolVisibility::Value::PRIVATE, parameter_type->get_type(), false,
+            false, true));
 
-    parameters.emplace_back(name, type);
+    parameters_type.emplace_back(parameter_name->value,
+                                 parameter_type->get_type());
   }
 
   body->resolve_types(context);
@@ -55,8 +56,8 @@ void FunctionStatement::resolve_types(
   auto name = proto->name->value;
   context->get_env()->add_function(
       name, make_shared<FunctionSymbol>(
-                name, SymbolLinkageType::Value::Internal, visibilty,
-                make_shared<FunctionType>(parameters,
+                name, SymbolLinkageType::Value::Internal, visibility,
+                make_shared<FunctionType>(parameters_type,
                                           proto->return_type->get_type())));
 }
 

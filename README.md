@@ -14,8 +14,7 @@
 - [x] Lexer
 - [x] Parser
 - [x] Codegen
-- [x] Type support
-- [x] Type checking
+- [x] Type support & checking
 - [x] Function definition
 - [x] Variable definition
 - [x] Mutable/Immutable variables (immutable by default btw)
@@ -24,22 +23,21 @@
 - [x] Unary expressions (*, &, -, +, ++, --, !)
 - [x] If expression
 - [x] For & While statement
+- [x] Arrays
+- [x] Structs (just works nothing else)
+- [x] Module management (public, private, include) (garbage btw)
 - [x] Object generation
 - [x] Code optimization (LLVM IR Optimization, no optimization from graphite)
-- [x] Arrays
-- [ ] Structs
-- [x] Module management (public, private, include) (garbage btw)
-- [ ] Classes
+
 - [ ] Stdlib
 - [ ] Maps
 - [ ] Scope management and ownership system similar to crab 🦀 (aka crap) or C++ RAII
 - [ ] Switch expression
 - [ ] CLI (graphite, graphitec)
+- [ ] OOP
 
+- [ ] Fix sturct gep issues
+- [ ] Struct semantic analysis
 - [ ] Make bang operator work with expressions (currently only supports variable reference)
 - [ ] Improve my garbage code
 - [ ] Fix stupid parser errors
-- [x] `var mut x: mut *i32` syntax
-- [x] Fix mutability and pointer issues
-- [x] Seperate CLI, Compiler frontend, Compiler backend into submodules
-- [ ] Multiple codegen backend support (only llvm for now)

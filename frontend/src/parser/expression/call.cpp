@@ -10,8 +10,7 @@
 #include "parser/statement/expression.hpp"
 
 shared_ptr<Expression> CallExpressionParser::parse() {
-  shared_ptr<IdentifierExpression> name_expression(
-      static_pointer_cast<IdentifierExpression>(left));
+  auto name_expression(dynamic_pointer_cast<IdentifierExpression>(left));
 
   if (parser->current_token.type != TOKEN_LEFT_PARENTHESES) {
     parser->get_logger()->error("Expected left parentheses after identifier",

@@ -1,7 +1,6 @@
 #include "ast/expression.hpp"
 
 #include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
 
@@ -18,6 +17,7 @@
 #include "parser/expression/integer.hpp"
 #include "parser/expression/parser.hpp"
 #include "parser/expression/string.hpp"
+#include "parser/expression/struct.hpp"
 #include "parser/expression/unary.hpp"
 #include "parser/expression/var_ref.hpp"
 #include "parser/precedence.hpp"
@@ -27,7 +27,7 @@ shared_ptr<ExpressionStatement> ExpressionStatementParser::parse() {
   auto expression = parse_expression(Precedence::LOWEST);
 
   return make_shared<ExpressionStatement>(*expression->get_position(),
-                                          std::move(expression));
+                                          expression);
 }
 
 map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>)>>
@@ -48,6 +48,7 @@ map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>)>>
          [](const shared_ptr<Parser> &parser) {
            return make_shared<ArrayExpressionParser>(parser);
          }},
+
         {TOKEN_TRUE,
          [](const shared_ptr<Parser> &parser) {
            return make_shared<BooleanExpressionParser>(parser);
@@ -89,63 +90,67 @@ map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>,
     binary_parse_fns = {
         {TOKEN_PLUSPLUS,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<UnaryExpressionParser>(parser, std::move(left));
+           return make_shared<UnaryExpressionParser>(parser, left);
          }},
         {TOKEN_MINUSMINUS,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<UnaryExpressionParser>(parser, std::move(left));
+           return make_shared<UnaryExpressionParser>(parser, left);
          }},
         {TOKEN_BANG_BANG,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<UnaryExpressionParser>(parser, std::move(left));
+           return make_shared<UnaryExpressionParser>(parser, left);
          }},
         {TOKEN_LEFT_BRACKET,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<IndexExpressionParser>(parser, std::move(left));
+           return make_shared<IndexExpressionParser>(parser, left);
+         }},
+        {TOKEN_LEFT_BRACE,
+         [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
+           return make_shared<StructExpressionParser>(parser, left);
          }},
         {TOKEN_PLUS,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_MINUS,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_SLASH,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_ASTERISK,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_ASSIGN,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_EQUAL,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_NOT_EQUAL,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_LESS_THAN,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_GREATER_THAN,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_AS,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<BinaryExpressionParser>(parser, std::move(left));
+           return make_shared<BinaryExpressionParser>(parser, left);
          }},
         {TOKEN_LEFT_PARENTHESES,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
-           return make_shared<CallExpressionParser>(parser, std::move(left));
+           return make_shared<CallExpressionParser>(parser, left);
          }}};
 
 shared_ptr<Expression> ExpressionStatementParser::parse_expression(

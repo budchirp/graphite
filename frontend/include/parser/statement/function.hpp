@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "ast/statement/function.hpp"
-#include "lexer/token/token.hpp"
 #include "lexer/token/token_type.hpp"
 #include "parser/parser.hpp"
 

@@ -17,16 +17,6 @@ void VarRefExpression::resolve_types(
   set_type(variable->type);
 }
 
-shared_ptr<VarRefExpression> VarRefExpression::is_var_ref(
-    const shared_ptr<Expression> &expression) {
-  if (auto var_ref_expression =
-          dynamic_pointer_cast<VarRefExpression>(expression)) {
-    return var_ref_expression;
-  }
-
-  return nullptr;
-}
-
 string VarRefExpression::to_string() const { return name; }
 
 string VarRefExpression::to_string_tree() const {

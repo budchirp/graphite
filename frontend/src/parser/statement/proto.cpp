@@ -69,7 +69,7 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
       return nullptr;
     }
 
-    parameters.emplace_back(std::move(parameter), std::move(type_expression));
+    parameters.emplace_back(parameter, type_expression);
 
     if (parser->current_token.type == TOKEN_COMMA) {
       parser->eat_token();  // eat ,
@@ -96,7 +96,6 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
-  return make_shared<ProtoStatement>(position, name,
-                                     parameters,
+  return make_shared<ProtoStatement>(position, name, parameters,
                                      return_type_expression);
 }

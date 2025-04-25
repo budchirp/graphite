@@ -1,5 +1,7 @@
 #include "codegen_llvm/utils.hpp"
 
+#include <llvm/IR/DerivedTypes.h>
+
 #include <memory>
 
 #include "logger/logger.hpp"
@@ -10,6 +12,7 @@
 #include "types/null.hpp"
 #include "types/pointer.hpp"
 #include "types/string.hpp"
+#include "types/struct.hpp"
 #include "types/void.hpp"
 
 llvm::Value *LLVMCodegenUtils::cast_type(
@@ -90,8 +93,8 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
   if (auto function_type = dynamic_pointer_cast<FunctionType>(type)) {
     vector<llvm::Type *> parameters;
     parameters.reserve(function_type->parameters.size());
-    for (const auto &parameter : function_type->parameters) {
-      parameters.push_back(type_to_llvm_type(context, parameter.second));
+    for (const auto &[_, parameter_type] : function_type->parameters) {
+      parameters.push_back(type_to_llvm_type(context, parameter_type));
     }
 
     return llvm::FunctionType::get(LLVMCodegenUtils::type_to_llvm_type(
@@ -134,6 +137,16 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
 
   if (auto void_type = dynamic_pointer_cast<VoidType>(type)) {
     return llvm::Type::getVoidTy(*context->llvm_context);
+  }
+
+  if (auto struct_type = dynamic_pointer_cast<StructType>(type)) {
+    vector<llvm::Type *> field_types;
+    field_types.reserve(struct_type->fields.size());
+    for (const auto &[_, field_type] : struct_type->fields) {
+      field_types.push_back(type_to_llvm_type(context, field_type));
+    }
+
+    return llvm::StructType::get(*context->llvm_context, field_types);
   }
 
   Logger::error("Unknown type");
