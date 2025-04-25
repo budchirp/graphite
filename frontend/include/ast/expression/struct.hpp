@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "ast/expression.hpp"
 #include "ast/expression/identifier.hpp"
@@ -21,11 +22,14 @@ class StructExpression : public Expression {
  public:
   shared_ptr<IdentifierExpression> name;
 
-  vector<pair<shared_ptr<IdentifierExpression>, shared_ptr<Expression>>> fields;
+  unordered_map<string,
+                pair<shared_ptr<IdentifierExpression>, shared_ptr<Expression>>>
+      fields;
 
-  explicit StructExpression(const Position &position,
-                            const shared_ptr<IdentifierExpression> &name,
-                           const vector<pair<shared_ptr<IdentifierExpression>, shared_ptr<Expression>>> &fields)
+  explicit StructExpression(
+      const Position &position, const shared_ptr<IdentifierExpression> &name,
+      const unordered_map<string, pair<shared_ptr<IdentifierExpression>,
+                                       shared_ptr<Expression>>> &fields)
       : position(position), name(name), fields(fields) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;

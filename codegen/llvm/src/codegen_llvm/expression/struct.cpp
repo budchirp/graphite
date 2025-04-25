@@ -20,25 +20,16 @@ llvm::Value* StructExpressionCodegen::codegen() const {
   auto struct_ptr =
       context->builder->CreateAlloca(llvm_struct_type, nullptr, "struct");
 
-  for (const auto& [field_name, field_value] : expression->fields) {
-    auto llvm_value = LLVMCodegen::codegen(context, field_value);
+  size_t idx = 0;
+  for (const auto& [field_name, field_type] : struct_type->fields) {
+    auto field = expression->fields.at(field_name);
+
+    auto llvm_value = LLVMCodegen::codegen(context, field.second);
     if (!llvm_value) {
       Logger::error("Failed to generate low level code for struct value for `" +
-                        field_name->value + "`",
-                    LogTypes::Error::INTERNAL, field_value->get_position());
+                        field.first->value + "`",
+                    LogTypes::Error::INTERNAL, field.second->get_position());
       return nullptr;
-    }
-
-    shared_ptr<Type> field_type;
-
-    size_t idx = 0;
-    for (const auto& [type_field_name, type_field_type] : struct_type->fields) {
-      if (type_field_name == field_name->value) {
-        field_type = type_field_type;
-        break;
-      }
-
-      idx++;
     }
 
     llvm_value = LLVMCodegenUtils::cast_type(
@@ -46,12 +37,12 @@ llvm::Value* StructExpressionCodegen::codegen() const {
         LLVMCodegenUtils::type_to_llvm_type(context, field_type));
     if (!llvm_value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
-                    field_value->get_position());
+                    field.second->get_position());
       return nullptr;
     }
 
     auto index_ptr = context->builder->CreateStructGEP(
-        llvm_struct_type, struct_ptr, idx, field_name->value);
+        llvm_struct_type, struct_ptr, idx++, field.first->value);
     context->builder->CreateStore(llvm_value, index_ptr);
   }
 

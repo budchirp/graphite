@@ -10,6 +10,14 @@
 #include "logger/log_types.hpp"
 #include "position.hpp"
 
+void Logger::type_error(const string &message, const Position *position,
+                        const shared_ptr<Type> &expected,
+                        const shared_ptr<Type> &received) {
+  Logger::error(message + " expected `" + expected->to_string() +
+                    "` but received `" + received->to_string() + "`",
+                LogTypes::Error::TYPE_MISMATCH, position);
+}
+
 void Logger::log(const string &message, LogTypes::Log::Value type,
                  const Position *position) {
   string log_type;

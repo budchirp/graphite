@@ -23,8 +23,7 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
     }
 
     case TOKEN_BANG: {
-      if (!TypeHelper::compare(variable->type,
-                               make_shared<BooleanType>())) {
+      if (!TypeHelper::compare(variable->type, make_shared<BooleanType>())) {
         Logger::error("Bang operator only supported with booleans",
                       LogTypes::Error::TYPE_MISMATCH, &position);
       }
@@ -42,11 +41,11 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
         return;
       }
 
-      if (!TypeHelper::compare(variable->type,
-                               make_shared<IntType>(32, false))) {
-        Logger::error(
-            op.literal + " operator only supported with integer or floats",
-            LogTypes::Error::TYPE_MISMATCH, &position);
+      auto int_type = make_shared<IntType>(32, false);
+      if (!TypeHelper::compare(variable->type, int_type)) {
+        Logger::type_error(
+            op.literal + " operator can only be used with integer or floats",
+            &position, variable->type, int_type);
       }
 
       break;
@@ -62,7 +61,7 @@ void UnaryExpression::validate(const shared_ptr<ProgramContext> &context) {
 void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   identifier->resolve_types(context);
 
-      auto scope = context->get_env()->get_current_scope();
+  auto scope = context->get_env()->get_current_scope();
   auto variable = scope->get_variable(identifier->value);
 
   switch (op.type) {
@@ -71,7 +70,8 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
         set_type(null_type->child_type);
       } else {
         Logger::error("Trying to make a non-null type non-null",
-                      LogTypes::Error::TYPE_MISMATCH, identifier->get_position());
+                      LogTypes::Error::TYPE_MISMATCH,
+                      identifier->get_position());
         return;
       }
 
@@ -83,7 +83,8 @@ void UnaryExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
         set_type(pointer_type->pointee_type);
       } else {
         Logger::error("Cannot dereference non-pointer type",
-                      LogTypes::Error::TYPE_MISMATCH, identifier->get_position());
+                      LogTypes::Error::TYPE_MISMATCH,
+                      identifier->get_position());
         return;
       }
 
@@ -106,6 +107,7 @@ string UnaryExpression::to_string() const {
 }
 
 string UnaryExpression::to_string_tree() const {
-  return "UnaryExpression(type: " + (type ? type->to_string_tree() : "") + ", op: '" +
-         op.to_string_tree() + "', expression: " + identifier->to_string_tree() + ")";
+  return "UnaryExpression(type: " + (type ? type->to_string_tree() : "") +
+         ", op: '" + op.to_string_tree() +
+         "', expression: " + identifier->to_string_tree() + ")";
 }

@@ -36,8 +36,13 @@
 - [ ] CLI (graphite, graphitec)
 - [ ] OOP
 
-- [ ] Fix sturct gep issues
-- [ ] Struct semantic analysis
+## Notes
+
+Just some notes for myself
+
+- [ ] CONSTANTS
+- [ ] Add type statement `type asd = string` etc like
+- [ ] Visibility indicators on types and structs
 - [ ] Make bang operator work with expressions (currently only supports variable reference)
 - [ ] Improve my garbage code
 - [ ] Fix stupid parser errors

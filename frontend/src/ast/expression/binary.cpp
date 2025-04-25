@@ -26,10 +26,10 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
   auto right_type = right->get_type();
 
   if (op.type != TOKEN_ASSIGN &&
-      !TypeHelper::compare(left_type, right_type,
-                           op.type == TOKEN_ASSIGN || op.type == TOKEN_EQUAL ||
-                               op.type == TOKEN_NOT_EQUAL)) {
-    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH, &position);
+      !TypeHelper::compare(
+          left_type, right_type,
+          op.type == TOKEN_EQUAL || op.type == TOKEN_NOT_EQUAL)) {
+    Logger::type_error("Type mismatch", &position, left_type, right_type);
     return;
   }
 
@@ -46,11 +46,12 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
 
         if (auto unary_expression = dynamic_pointer_cast<UnaryExpression>(left);
             unary_expression && unary_expression->op.type == TOKEN_ASTERISK) {
-          if (auto pointer_type = TypeHelper::is_pointer(variable->type); pointer_type) {
+          if (auto pointer_type = TypeHelper::is_pointer(variable->type);
+              pointer_type) {
             if (!TypeHelper::compare(pointer_type->pointee_type, right_type,
                                      true)) {
-              Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
-                            &position);
+              Logger::type_error("Type mismatch", &position,
+                                 pointer_type->pointee_type, right_type);
               return;
             }
 
@@ -60,8 +61,8 @@ void BinaryExpression::validate(const shared_ptr<ProgramContext> &context) {
           }
         } else {
           if (!TypeHelper::compare(variable->type, right_type, true)) {
-            Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
-                          &position);
+            Logger::type_error("Type mismatch", &position, variable->type,
+                               right_type);
             return;
           }
 

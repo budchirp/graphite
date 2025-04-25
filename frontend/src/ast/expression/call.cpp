@@ -13,8 +13,7 @@
 using namespace std;
 
 void CallExpression::validate(const shared_ptr<ProgramContext> &context) {
-  auto function =
-      context->get_env()->get_function(name->value)->type;
+  auto function = context->get_env()->get_function(name->value)->type;
   if (function->parameters.size() != arguments.size()) {
     Logger::error("Incorrect number of arguments passed to function `" +
                       name->value + "`",
@@ -28,26 +27,24 @@ void CallExpression::validate(const shared_ptr<ProgramContext> &context) {
 
     auto parameter = function->parameters[idx++];
     if (!TypeHelper::compare(parameter.second, argument->get_type())) {
-      Logger::error("Type mismatch in argument `" + parameter.first +
-                        "`\nExpected `" + parameter.second->to_string() +
-                        "` Received `" + argument->get_type()->to_string() +
-                        "`",
-                    LogTypes::Error::TYPE_MISMATCH, argument->get_position());
+      Logger::type_error("Type mismatch in argument `" + parameter.first + "`",
+                         argument->get_position(), parameter.second,
+                         argument->get_type());
       return;
     }
   }
 }
 
 void CallExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
-  for (const auto &argument : arguments) {
-    argument->resolve_types(context);
-  }
-
   auto function = context->get_env()->get_function(name->value);
   if (!function) {
-    Logger::error("Undefined function `" + name->value + "` called",
+    Logger::error("Unknown function `" + name->value + "` called",
                   LogTypes::Error::UNDEFINED, name->get_position());
     return;
+  }
+
+  for (const auto &argument : arguments) {
+    argument->resolve_types(context);
   }
 
   set_type(function->type->return_type);

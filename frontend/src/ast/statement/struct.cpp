@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <sstream>
+#include <unordered_map>
 
 #include "types/struct.hpp"
 
@@ -13,12 +14,12 @@ void StructStatement::validate(const shared_ptr<ProgramContext> &context) {
 }
 
 void StructStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
-  vector<pair<string, shared_ptr<Type>>> fields_type;
+  unordered_map<string, shared_ptr<Type>> fields_type;
   fields_type.reserve(fields.size());
   for (const auto &[field_name, field_type] : fields) {
     field_type->resolve_types(context);
 
-    fields_type.emplace_back(field_name->value,
+    fields_type.insert_or_assign(field_name->value,
                              field_type->get_type());
   }
 

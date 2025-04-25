@@ -34,7 +34,9 @@ shared_ptr<StructExpression> StructExpressionParser::parse_struct() const {
   auto expression_statement_parser = ExpressionStatementParser(parser);
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
 
-  vector<pair<shared_ptr<IdentifierExpression>, shared_ptr<Expression>>> fields;
+  unordered_map<string,
+                pair<shared_ptr<IdentifierExpression>, shared_ptr<Expression>>>
+      fields;
   while (parser->current_token.type != TOKEN_RIGHT_BRACE) {
     if (parser->current_token.type != TOKEN_IDENTIFIER) {
       parser->get_logger()->error("Expected identifier as field name",
@@ -53,9 +55,10 @@ shared_ptr<StructExpression> StructExpressionParser::parse_struct() const {
 
     parser->eat_token();  // eat :
 
-    fields.emplace_back(field_name_expression,
-                        expression_statement_parser.parse_expression(
-                            Precedence::Value::LOWEST));
+    fields.insert_or_assign(field_name_expression->value,
+                            pair(field_name_expression,
+                                 expression_statement_parser.parse_expression(
+                                     Precedence::Value::LOWEST)));
 
     if (parser->current_token.type == TOKEN_COMMA) {
       parser->eat_token();  // eat ,

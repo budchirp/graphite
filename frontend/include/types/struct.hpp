@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <unordered_map>
 
 #include "types/type.hpp"
 
@@ -11,9 +11,9 @@ class StructType : public Type {
  public:
   static string name;
 
-  vector<pair<string, shared_ptr<Type>>> fields;
+  unordered_map<string, shared_ptr<Type>> fields;
 
-  explicit StructType(const vector<pair<string, shared_ptr<Type>>>& fields)
+  explicit StructType(const unordered_map<string, shared_ptr<Type>>& fields)
       : fields(fields) {};
 
   string get_name() const override { return name; }
