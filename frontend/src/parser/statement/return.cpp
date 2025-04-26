@@ -14,9 +14,8 @@ shared_ptr<ReturnStatement> ReturnStatementParser::parse() {
   auto expression =
       ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
   if (!expression) {
-    parser->get_logger()->error(
-        "Failed to parse expression of the return statement",
-        LogTypes::Error::INTERNAL);
+    parser->get_logger()->error("Failed to parse expression",
+                                LogTypes::Error::INTERNAL);
     return nullptr;
   }
 

@@ -25,7 +25,7 @@ shared_ptr<ExternStatement> ExternStatementParser::parse(
 
   auto proto_statement = ProtoStatementParser(parser).parse();
   if (!proto_statement) {
-    parser->get_logger()->error("Failed to parse the proto of the function",
+    parser->get_logger()->error("Failed to parse statement",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }

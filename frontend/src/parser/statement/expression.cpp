@@ -11,6 +11,7 @@
 #include "parser/expression/binary.hpp"
 #include "parser/expression/boolean.hpp"
 #include "parser/expression/call.hpp"
+#include "parser/expression/field.hpp"
 #include "parser/expression/group.hpp"
 #include "parser/expression/if.hpp"
 #include "parser/expression/index.hpp"
@@ -99,6 +100,10 @@ map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>,
         {TOKEN_BANG_BANG,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
            return make_shared<UnaryExpressionParser>(parser, left);
+         }},
+        {TOKEN_DOT,
+         [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {
+           return make_shared<FieldExpressionParser>(parser, left);
          }},
         {TOKEN_LEFT_BRACKET,
          [](const shared_ptr<Parser> &parser, shared_ptr<Expression> &left) {

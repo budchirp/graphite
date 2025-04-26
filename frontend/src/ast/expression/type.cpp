@@ -35,7 +35,7 @@ shared_ptr<Type> TypeExpression::resolve_types(
         resolve_types(context, array_type->child_type), array_type->size);
   } else {
     parsed_type = context->get_env()->get_type(
-        dynamic_pointer_cast<UnknownParserType>(type)->value);
+        dynamic_pointer_cast<UnknownParserType>(type)->value)->type;
   }
 
   if (!parsed_type) {

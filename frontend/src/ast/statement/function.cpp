@@ -20,7 +20,7 @@ void FunctionStatement::validate(const shared_ptr<ProgramContext> &context) {
   if (!TypeHelper::compare(return_type, make_shared<VoidType>()) &&
       !TypeHelper::compare(return_type, body->get_type())) {
     Logger::error(
-        "Function `" + proto->name->value + "` \nexpected `" +
+        "Function `" + proto->name->to_string() + "` \nexpected `" +
             return_type->to_string() + "` as return type but received `" +
             body->get_type()->to_string() + "`",
         LogTypes::Error::TYPE_MISMATCH, proto->return_type->get_position());

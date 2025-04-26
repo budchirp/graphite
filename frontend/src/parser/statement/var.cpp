@@ -36,7 +36,7 @@ shared_ptr<VarStatement> VarStatementParser::parse(
   auto name_expression = IdentifierExpressionParser(parser).parse_identifier();
   if (!name_expression) {
     parser->get_logger()->error(
-        "Failed to parse the name of the variable statement",
+        "Failed to parse identifier",
         LogTypes::Error::INTERNAL);
     return nullptr;
   }
@@ -58,7 +58,7 @@ shared_ptr<VarStatement> VarStatementParser::parse(
           expression_statement_parser.parse_expression(Precedence::LOWEST);
       if (!expression) {
         parser->get_logger()->error(
-            "Failed to parse the expression of the variable statement",
+            "Failed to parse expression",
             LogTypes::Error::INTERNAL);
         return nullptr;
       }
@@ -66,15 +66,13 @@ shared_ptr<VarStatement> VarStatementParser::parse(
   } else {
     parser->eat_token();  // eat :
 
-    auto _type_expression = TypeExpressionParser(parser).parse_type();
-    if (!_type_expression) {
+    type_expression = TypeExpressionParser(parser).parse_type();
+    if (!type_expression) {
       parser->get_logger()->error(
-          "Failed to parse the type of the variable statement",
+          "Failed to parse type",
           LogTypes::Error::INTERNAL);
       return nullptr;
     }
-
-    type_expression = _type_expression;
   }
 
   if (parser->current_token.type == TOKEN_ASSIGN) {
@@ -84,7 +82,7 @@ shared_ptr<VarStatement> VarStatementParser::parse(
         expression_statement_parser.parse_expression(Precedence::LOWEST);
     if (!expression) {
       parser->get_logger()->error(
-          "Failed to parse the expression of the variable statement",
+          "Failed to parse expression",
           LogTypes::Error::INTERNAL);
       return nullptr;
     }

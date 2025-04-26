@@ -18,7 +18,7 @@ shared_ptr<IncludeStatement> IncludeStatementParser::parse() {
 
   auto module_expression = StringExpressionParser(parser).parse_string();
   if (!module_expression) {
-    parser->get_logger()->error("Failed to parse the module string",
+    parser->get_logger()->error("Failed to parse string",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }

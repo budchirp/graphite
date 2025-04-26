@@ -5,6 +5,7 @@
 #include <sstream>
 #include <unordered_map>
 
+#include "semantic/symbols/type.hpp"
 #include "types/struct.hpp"
 
 void StructStatement::validate(const shared_ptr<ProgramContext> &context) {
@@ -19,12 +20,13 @@ void StructStatement::resolve_types(const shared_ptr<ProgramContext> &context) {
   for (const auto &[field_name, field_type] : fields) {
     field_type->resolve_types(context);
 
-    fields_type.insert_or_assign(field_name->value,
-                             field_type->get_type());
+    fields_type.insert_or_assign(field_name->value, field_type->get_type());
   }
 
-  context->get_env()->add_type(name->value,
-                               make_shared<StructType>(fields_type));
+  context->get_env()->add_type(
+      name->value,
+      make_shared<TypeSymbol>(name->value, visibility,
+                              make_shared<StructType>(fields_type)));
 }
 
 string StructStatement::to_string() const {

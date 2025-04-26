@@ -28,8 +28,8 @@ shared_ptr<Expression> UnaryExpressionParser::parse() {
 
     expression = IdentifierExpressionParser(parser).parse_identifier();
     if (!expression) {
-      parser->get_logger()->error("Expected variable reference expression",
-                                  LogTypes::Error::SYNTAX);
+      parser->get_logger()->error("Failed to parse expression",
+                                  LogTypes::Error::INTERNAL);
       return nullptr;
     }
   }

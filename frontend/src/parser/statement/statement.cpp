@@ -10,6 +10,7 @@
 #include "parser/statement/include.hpp"
 #include "parser/statement/return.hpp"
 #include "parser/statement/struct.hpp"
+#include "parser/statement/type.hpp"
 #include "parser/statement/var.hpp"
 #include "parser/statement/visibility.hpp"
 #include "parser/statement/while.hpp"
@@ -29,6 +30,10 @@ shared_ptr<Statement> StatementParser::parse() {
     case TOKEN_PUBLIC:
     case TOKEN_PRIVATE: {
       return VisibilityStatementParser(parser).parse();
+    }
+
+    case TOKEN_TYPE: {
+      return TypeStatementParser(parser).parse();
     }
 
     case TOKEN_STRUCT: {

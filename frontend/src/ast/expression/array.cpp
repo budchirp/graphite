@@ -4,9 +4,21 @@
 #include <memory>
 #include <string>
 
+#include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 #include "types/null.hpp"
 
-void ArrayExpression::validate(const shared_ptr<ProgramContext> &context) {}
+void ArrayExpression::validate(const shared_ptr<ProgramContext> &context) {
+  for (const auto &value : values) {
+    value->validate(context);
+
+    if (!TypeHelper::compare(type->child_type, value->get_type())) {
+      Logger::type_error("Type mismatch", value->get_position(), type,
+                         value->get_type());
+      return;
+    }
+  }
+}
 void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   return resolve_types(context, nullptr);
 }

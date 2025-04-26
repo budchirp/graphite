@@ -2,15 +2,17 @@
 
 #include <memory>
 
-#include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 #include "semantic/type_helper.hpp"
 
 void WhileStatement::validate(const shared_ptr<ProgramContext> &context) {
   condition->validate(context);
-  if (!TypeHelper::compare(condition->get_type(), make_shared<BooleanType>())) {
-    Logger::error("Only booleans are allowed on condition",
-                  LogTypes::Error::TYPE_MISMATCH, condition->get_position());
+
+  auto boolean_type = make_shared<BooleanType>();
+  if (!TypeHelper::compare(condition->get_type(), boolean_type)) {
+    Logger::type_error("Only booleans are allowed on if condition",
+                       condition->get_position(), condition->get_type(),
+                       boolean_type);
     return;
   }
 

@@ -5,14 +5,13 @@
 
 #include "semantic/scope/scope.hpp"
 #include "semantic/symbols/function.hpp"
-#include "types/type.hpp"
+#include "semantic/symbols/type.hpp"
 
 using namespace std;
 
 class Env {
  private:
-  unordered_map<string, shared_ptr<Type>> types;
-
+  unordered_map<string, shared_ptr<TypeSymbol>> types;
   unordered_map<string, shared_ptr<FunctionSymbol>> functions;
 
   unordered_map<string, shared_ptr<Scope>> scopes;
@@ -23,12 +22,16 @@ class Env {
  public:
   explicit Env();
 
+  unordered_map<string, shared_ptr<TypeSymbol>> get_types() {
+    return types;
+  }
+
   unordered_map<string, shared_ptr<FunctionSymbol>> get_functions() {
     return functions;
   }
 
-  void add_type(const string &name, const shared_ptr<Type> &type);
-  shared_ptr<Type> get_type(const string &name) const;
+  void add_type(const string &name, const shared_ptr<TypeSymbol> &type);
+  shared_ptr<TypeSymbol> get_type(const string &name) const;
 
   void add_function(const string &name,
                     const shared_ptr<FunctionSymbol> &function);

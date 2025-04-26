@@ -6,26 +6,26 @@
 #include "ast/expression.hpp"
 #include "ast/expression/identifier.hpp"
 #include "position.hpp"
-#include "types/array.hpp"
+#include "types/struct.hpp"
 #include "types/type.hpp"
 
 using namespace std;
 
-class IndexExpression : public Expression {
+class FieldExpression : public Expression {
  private:
   Position position;
 
   shared_ptr<Type> type;
-  shared_ptr<ArrayType> array_type;
+  shared_ptr<StructType> struct_type;
 
  public:
   shared_ptr<IdentifierExpression> identifier;
-  shared_ptr<Expression> index;
+  shared_ptr<IdentifierExpression> field;
 
-  explicit IndexExpression(const Position &position,
+  explicit FieldExpression(const Position &position,
                            const shared_ptr<IdentifierExpression> &identifier,
-                           const shared_ptr<Expression> &index)
-      : position(position), identifier(identifier), index(index) {};
+                           const shared_ptr<IdentifierExpression> &field)
+      : position(position), identifier(identifier), field(field) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;
@@ -34,7 +34,7 @@ class IndexExpression : public Expression {
 
   void set_type(const shared_ptr<Type> &type) override { this->type = type; }
   shared_ptr<Type> get_type() const override { return type; }
-  shared_ptr<ArrayType> get_array_type() const { return array_type; }
+  shared_ptr<StructType> get_struct_type() const { return struct_type; }
 
   string to_string() const override;
   string to_string_tree() const override;

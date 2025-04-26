@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "ast/expression.hpp"
+#include "logger/log_types.hpp"
 #include "parser/expression/array.hpp"
 #include "parser/statement/expression.hpp"
 
@@ -17,8 +18,15 @@ shared_ptr<ArrayExpression> ArrayExpressionParser::parse_array() const {
 
   vector<shared_ptr<Expression>> values;
   while (parser->current_token.type != TOKEN_RIGHT_BRACKET) {
-    values.push_back(expression_statement_parser.parse_expression(
-        Precedence::Value::LOWEST));
+    auto expression =
+        expression_statement_parser.parse_expression(Precedence::Value::LOWEST);
+    if (!expression) {
+      parser->get_logger()->error("Failed to parse expression",
+                                  LogTypes::Error::INTERNAL);
+      return nullptr;
+    }
+
+    values.push_back(expression);
 
     if (parser->current_token.type == TOKEN_COMMA) {
       parser->eat_token();  // eat ','

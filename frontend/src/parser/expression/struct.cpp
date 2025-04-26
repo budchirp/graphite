@@ -46,6 +46,11 @@ shared_ptr<StructExpression> StructExpressionParser::parse_struct() const {
 
     auto field_name_expression =
         identifier_expression_parser.parse_identifier();
+    if (!field_name_expression) {
+      parser->get_logger()->error("Failed to parse identifier",
+                                  LogTypes::Error::INTERNAL);
+      return nullptr;
+    }
 
     if (parser->current_token.type != TOKEN_COLON) {
       parser->get_logger()->error("Expected : after field name",
@@ -55,10 +60,17 @@ shared_ptr<StructExpression> StructExpressionParser::parse_struct() const {
 
     parser->eat_token();  // eat :
 
-    fields.insert_or_assign(field_name_expression->value,
-                            pair(field_name_expression,
-                                 expression_statement_parser.parse_expression(
-                                     Precedence::Value::LOWEST)));
+    auto field_value_expression =
+        expression_statement_parser.parse_expression(Precedence::Value::LOWEST);
+    if (!field_value_expression) {
+      parser->get_logger()->error("Failed to parse expression",
+                                  LogTypes::Error::INTERNAL);
+      return nullptr;
+    }
+
+    fields.insert_or_assign(
+        field_name_expression->value,
+        pair(field_name_expression, field_value_expression));
 
     if (parser->current_token.type == TOKEN_COMMA) {
       parser->eat_token();  // eat ,

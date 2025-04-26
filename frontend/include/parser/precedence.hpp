@@ -12,6 +12,7 @@ class Precedence {
     static const std::unordered_map<TokenType, Value> precedence_map = {
         {TOKEN_LEFT_BRACKET, CALL},
         {TOKEN_LEFT_BRACE, CALL},
+        {TOKEN_DOT, CALL},
         {TOKEN_AS, CALL},
         {TOKEN_ASSIGN, CALL},
         {TOKEN_BANG_BANG, CALL},
@@ -24,7 +25,8 @@ class Precedence {
         {TOKEN_PLUSPLUS, SUM},
         {TOKEN_MINUSMINUS, SUM},
         {TOKEN_SLASH, PRODUCT},
-        {TOKEN_ASTERISK, PRODUCT},
+        {TOKEN_ASTERISK, CALL},
+        {TOKEN_AMPERSAND, CALL},
         {TOKEN_LEFT_PARENTHESES, CALL}};
 
     if (const auto it = precedence_map.find(tokenType);

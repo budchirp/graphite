@@ -26,6 +26,11 @@ shared_ptr<StructStatement> StructStatementParser::parse(
 
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
   auto name_expression = identifier_expression_parser.parse_identifier();
+  if (!name_expression) {
+    parser->get_logger()->error("Failed to parse identifier",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
 
   if (parser->current_token.type != TOKEN_LEFT_BRACE) {
     parser->get_logger()->error("Expected { after identifier",
@@ -48,6 +53,11 @@ shared_ptr<StructStatement> StructStatementParser::parse(
 
     auto field_name_expression =
         identifier_expression_parser.parse_identifier();
+    if (!field_name_expression) {
+      parser->get_logger()->error("Failed to parse identifier",
+                                  LogTypes::Error::INTERNAL);
+      return nullptr;
+    }
 
     if (parser->current_token.type != TOKEN_COLON) {
       parser->get_logger()->error("Expected : after field name",
@@ -58,6 +68,11 @@ shared_ptr<StructStatement> StructStatementParser::parse(
     parser->eat_token();  // eat :
 
     auto field_type_expression = type_expression_parser.parse_type();
+    if (!field_type_expression) {
+      parser->get_logger()->error("Failed to parse type",
+                                  LogTypes::Error::INTERNAL);
+      return nullptr;
+    }
 
     fields.emplace_back(field_name_expression, field_type_expression);
   }

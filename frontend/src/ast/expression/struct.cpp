@@ -10,21 +10,19 @@
 #include "types/struct.hpp"
 
 void StructExpression::validate(const shared_ptr<ProgramContext> &context) {
-  auto struct_type = dynamic_pointer_cast<StructType>(
-      context->get_env()->get_type(name->value));
 
   for (const auto &[_, field] : fields) {
     field.second->validate(context);
 
-    auto it = struct_type->fields.find(field.first->value);
-    if (it == struct_type->fields.end()) {
+    auto it = type->fields.find(field.first->value);
+    if (it == type->fields.end()) {
       Logger::error("Unknown field `" + field.first->value + "`",
                     LogTypes::Error::SYNTAX, field.first->get_position());
       return;
     }
   }
 
-  for (const auto &[field_name, field_type] : struct_type->fields) {
+  for (const auto &[field_name, field_type] : type->fields) {
     auto it = fields.find(field_name);
     if (it == fields.end()) {
       Logger::error("`" + field_name + "` is uninitialized",
@@ -35,7 +33,7 @@ void StructExpression::validate(const shared_ptr<ProgramContext> &context) {
     auto field = it->second;
 
     if (!TypeHelper::compare(field_type, field.second->get_type())) {
-      Logger::type_error("Type mismatch in field `" + field.first->value + "`",
+      Logger::type_error("Type mismatch in field `" + field.first->to_string() + "`",
                          &position, field_type, field.second->get_type());
     }
   }
@@ -48,10 +46,9 @@ void StructExpression::resolve_types(
 
 void StructExpression::resolve_types(const shared_ptr<ProgramContext> &context,
                                      const shared_ptr<Type> &destination_type) {
-  auto struct_type = dynamic_pointer_cast<StructType>(
-      context->get_env()->get_type(name->value));
+  auto struct_type = dynamic_pointer_cast<StructType>(context->get_env()->get_type(name->value)->type);
   if (!struct_type) {
-    Logger::error("Unknown struct `" + name->to_string() + "`");
+    Logger::error("Type `" + name->to_string() + "` is not a struct");
   }
 
   for (const auto &[_, field] : fields) {

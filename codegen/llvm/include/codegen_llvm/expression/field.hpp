@@ -4,21 +4,21 @@
 
 #include <memory>
 
-#include "ast/expression/index.hpp"
+#include "ast/expression/field.hpp"
 #include "codegen_llvm/context.hpp"
 #include "codegen_llvm/expression/codegen.hpp"
 
 using namespace std;
 
-class IndexExpressionCodegen : public ExpressionCodegen {
+class FieldExpressionCodegen : public ExpressionCodegen {
  private:
   shared_ptr<LLVMCodegenContext> context;
 
-  shared_ptr<IndexExpression> expression;
+  shared_ptr<FieldExpression> expression;
 
  public:
-  explicit IndexExpressionCodegen(const shared_ptr<LLVMCodegenContext>& context,
-                                  const shared_ptr<IndexExpression>& expression)
+  explicit FieldExpressionCodegen(const shared_ptr<LLVMCodegenContext>& context,
+                                  const shared_ptr<FieldExpression>& expression)
       : context(context), expression(expression) {};
 
   llvm::Value* codegen() const override;

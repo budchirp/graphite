@@ -24,8 +24,15 @@ shared_ptr<Expression> CallExpressionParser::parse() {
 
   vector<shared_ptr<Expression>> arguments;
   while (parser->current_token.type != TOKEN_RIGHT_PARENTHESES) {
-    arguments.push_back(expression_statement_parser.parse_expression(
-        Precedence::Value::LOWEST));
+    auto argument_expression =
+        expression_statement_parser.parse_expression(Precedence::Value::LOWEST);
+    if (!argument_expression) {
+      parser->get_logger()->error("Failed to parse expression",
+                                  LogTypes::Error::INTERNAL);
+      return nullptr;
+    }
+
+    arguments.push_back(argument_expression);
 
     if (parser->current_token.type == TOKEN_COMMA) {
       parser->eat_token();  // eat ','

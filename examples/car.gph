@@ -1,0 +1,6 @@
+public struct Car {
+  seats: i32
+  model: i32
+
+  name: string
+}

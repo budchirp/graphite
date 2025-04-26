@@ -9,5 +9,6 @@ const unordered_map<string, TokenType> keywords = {
     {"return", TOKEN_RETURN},   {"true", TOKEN_TRUE},
     {"false", TOKEN_FALSE},     {"for", TOKEN_FOR},
     {"while", TOKEN_WHILE},     {"struct", TOKEN_STRUCT},
-    {"as", TOKEN_AS},           {"mut", TOKEN_MUT},
-    {"public", TOKEN_PUBLIC},   {"private", TOKEN_PRIVATE}};
+    {"type", TOKEN_TYPE},       {"as", TOKEN_AS},
+    {"mut", TOKEN_MUT},         {"public", TOKEN_PUBLIC},
+    {"private", TOKEN_PRIVATE}};

@@ -19,8 +19,8 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
 
-  auto name = identifier_expression_parser.parse_identifier();
-  if (!name) {
+  auto namen_expression = identifier_expression_parser.parse_identifier();
+  if (!namen_expression) {
     parser->get_logger()->error("Failed to parse the name of the proto",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
@@ -45,11 +45,10 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
       return nullptr;
     }
 
-    auto parameter = identifier_expression_parser.parse_identifier();
-    if (!parameter) {
-      parser->get_logger()->error(
-          "Failed to parse one of the parameter in proto",
-          LogTypes::Error::INTERNAL);
+    auto parameter_expression = identifier_expression_parser.parse_identifier();
+    if (!parameter_expression) {
+      parser->get_logger()->error("Failed to parse parameter",
+                                  LogTypes::Error::INTERNAL);
       return nullptr;
     }
 
@@ -63,13 +62,12 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
     auto type_expression = type_expression_parser.parse_type();
     if (!type_expression) {
-      parser->get_logger()->error(
-          "Failed to parse the parameter type of the proto",
-          LogTypes::Error::INTERNAL);
+      parser->get_logger()->error("Failed to parse type",
+                                  LogTypes::Error::INTERNAL);
       return nullptr;
     }
 
-    parameters.emplace_back(parameter, type_expression);
+    parameters.emplace_back(parameter_expression, type_expression);
 
     if (parser->current_token.type == TOKEN_COMMA) {
       parser->eat_token();  // eat ,
@@ -91,11 +89,11 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   auto return_type_expression = type_expression_parser.parse_type();
   if (!return_type_expression) {
-    parser->get_logger()->error("Failed to parse the return type of the proto",
+    parser->get_logger()->error("Failed to parse type",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
-  return make_shared<ProtoStatement>(position, name, parameters,
+  return make_shared<ProtoStatement>(position, namen_expression, parameters,
                                      return_type_expression);
 }

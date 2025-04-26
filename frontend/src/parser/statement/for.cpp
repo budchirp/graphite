@@ -21,6 +21,11 @@ shared_ptr<ForStatement> ForStatementParser::parse() {
   parser->eat_token();  // eat (
 
   auto init_statement = VarStatementParser(parser).parse();
+  if (!init_statement) {
+    parser->get_logger()->error("Failed to parse expression",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
 
   if (parser->current_token.type != TOKEN_SEMICOLON) {
     parser->get_logger()->error("Expected semicolon after initializer",
@@ -33,6 +38,11 @@ shared_ptr<ForStatement> ForStatementParser::parse() {
   auto expression_statement_parser = ExpressionStatementParser(parser);
   auto condition_expression =
       expression_statement_parser.parse_expression(Precedence::LOWEST);
+  if (!condition_expression) {
+    parser->get_logger()->error("Failed to parse expression",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
 
   if (parser->current_token.type != TOKEN_SEMICOLON) {
     parser->get_logger()->error("Expected semicolon after condition",
@@ -44,6 +54,11 @@ shared_ptr<ForStatement> ForStatementParser::parse() {
 
   auto increment_expression =
       expression_statement_parser.parse_expression(Precedence::LOWEST);
+  if (!increment_expression) {
+    parser->get_logger()->error("Failed to parse expression",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
 
   if (parser->current_token.type != TOKEN_RIGHT_PARENTHESES) {
     parser->get_logger()->error("Expected right parentheses after expression",
@@ -60,12 +75,12 @@ shared_ptr<ForStatement> ForStatementParser::parse() {
 
   auto body_statement = BlockStatementParser(parser).parse();
   if (!body_statement) {
-    parser->get_logger()->error("Failed to parse the body of the for statement",
+    parser->get_logger()->error("Failed to parse statement",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }
 
-  return make_shared<ForStatement>(
-      position, init_statement, condition_expression,
-      increment_expression, body_statement);
+  return make_shared<ForStatement>(position, init_statement,
+                                   condition_expression, increment_expression,
+                                   body_statement);
 }

@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include "logger/logger.hpp"
-
 void ReturnStatement::validate(const shared_ptr<ProgramContext> &context) {
   expression->validate(context);
 }

@@ -43,6 +43,7 @@ class StructExpression : public Expression {
     this->type = dynamic_pointer_cast<StructType>(type);
   }
   shared_ptr<Type> get_type() const override { return type; }
+  shared_ptr<StructType> get_struct_type() const { return type; }
 
   string to_string() const override;
   string to_string_tree() const override;

@@ -12,6 +12,11 @@ shared_ptr<Expression> GroupExpressionParser::parse() {
 
   auto expression = ExpressionStatementParser(parser).parse_expression(
       Precedence::Value::LOWEST);
+  if (!expression) {
+    parser->get_logger()->error("Failed to parse expression",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
 
   if (parser->current_token.type != TokenType::TOKEN_RIGHT_PARENTHESES) {
     parser->get_logger()->error("Expected right parentheses after expression",

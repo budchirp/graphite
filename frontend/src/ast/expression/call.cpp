@@ -38,7 +38,7 @@ void CallExpression::validate(const shared_ptr<ProgramContext> &context) {
 void CallExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   auto function = context->get_env()->get_function(name->value);
   if (!function) {
-    Logger::error("Unknown function `" + name->value + "` called",
+    Logger::error("Unknown function `" + name->to_string() + "` called",
                   LogTypes::Error::UNDEFINED, name->get_position());
     return;
   }

@@ -12,7 +12,7 @@ void ForStatement::validate(const shared_ptr<ProgramContext> &context) {
 
   condition->validate(context);
   if (!TypeHelper::compare(condition->get_type(), make_shared<BooleanType>())) {
-    Logger::error("Only booleans are allowed on condition",
+    Logger::error("Only booleans are allowed in condition",
                   LogTypes::Error::TYPE_MISMATCH, condition->get_position());
     return;
   }

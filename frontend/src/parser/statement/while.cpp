@@ -21,6 +21,11 @@ shared_ptr<WhileStatement> WhileStatementParser::parse() {
 
   auto condition =
       ExpressionStatementParser(parser).parse_expression(Precedence::LOWEST);
+  if (!condition) {
+    parser->get_logger()->error("Failed to parse condition",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
 
   if (parser->current_token.type != TOKEN_RIGHT_PARENTHESES) {
     parser->get_logger()->error("Expected right parentheses after condition",
@@ -37,7 +42,7 @@ shared_ptr<WhileStatement> WhileStatementParser::parse() {
 
   auto body = BlockStatementParser(parser).parse();
   if (!body) {
-    parser->get_logger()->error("Failed to parse the body of the for statement",
+    parser->get_logger()->error("Failed to parse body",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
   }

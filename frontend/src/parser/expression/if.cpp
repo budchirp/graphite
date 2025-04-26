@@ -56,7 +56,7 @@ shared_ptr<Expression> IfExpressionParser::parse() {
     alternative_statement = block_statement_parser.parse();
     if (!alternative_statement) {
       parser->get_logger()->error("Failed to parse else body",
-                                  LogTypes::Error::SYNTAX);
+                                  LogTypes::Error::INTERNAL);
       return nullptr;
     }
   }

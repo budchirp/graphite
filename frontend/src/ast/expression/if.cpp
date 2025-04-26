@@ -11,6 +11,8 @@
 using namespace std;
 
 void IfExpression::validate(const shared_ptr<ProgramContext> &context) {
+  condition->validate(context);
+
   auto boolean_type = make_shared<BooleanType>();
   if (!TypeHelper::compare(condition->get_type(), boolean_type)) {
     Logger::type_error("Only booleans are allowed on if condition",
@@ -18,8 +20,6 @@ void IfExpression::validate(const shared_ptr<ProgramContext> &context) {
                        boolean_type);
     return;
   }
-
-  condition->validate(context);
 
   consequence->validate(context);
   if (alternative) alternative->validate(context);

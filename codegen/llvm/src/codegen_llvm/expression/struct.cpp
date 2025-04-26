@@ -8,12 +8,9 @@
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/utils.hpp"
 #include "logger/logger.hpp"
-#include "types/struct.hpp"
 
 llvm::Value* StructExpressionCodegen::codegen() const {
-  auto struct_type = dynamic_pointer_cast<StructType>(
-      context->get_env()->get_type(expression->name->value));
-
+  auto struct_type = expression->get_struct_type();
   auto llvm_struct_type =
       LLVMCodegenUtils::type_to_llvm_type(context, struct_type);
 
