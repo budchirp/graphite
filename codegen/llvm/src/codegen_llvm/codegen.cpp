@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "ast/expression/array.hpp"
+#include "ast/expression/assembly.hpp"
 #include "ast/expression/binary.hpp"
 #include "ast/expression/boolean.hpp"
 #include "ast/expression/call.hpp"
@@ -39,6 +40,7 @@
 #include "ast/statement/type.hpp"
 #include "ast/statement/while.hpp"
 #include "codegen_llvm/expression/array.hpp"
+#include "codegen_llvm/expression/assembly.hpp"
 #include "codegen_llvm/expression/binary.hpp"
 #include "codegen_llvm/expression/call.hpp"
 #include "codegen_llvm/expression/field.hpp"
@@ -83,6 +85,10 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   if (auto array_expression =
           dynamic_pointer_cast<ArrayExpression>(expression)) {
     return ArrayExpressionCodegen(context, array_expression).codegen();
+  }
+  if (auto assembly_expression =
+          dynamic_pointer_cast<AssemblyExpression>(expression)) {
+    return AssemblyExpressionCodegen(context, assembly_expression).codegen();
   }
   if (auto binary_expression =
           dynamic_pointer_cast<BinaryExpression>(expression)) {
@@ -144,6 +150,7 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
 
 llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
                                   const shared_ptr<Statement> &statement) {
+
   if (auto block_statement = dynamic_pointer_cast<BlockStatement>(statement)) {
     return BlockStatementCodegen(context, block_statement).codegen();
   }
@@ -177,8 +184,7 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
           dynamic_pointer_cast<StructStatement>(statement)) {
     return nullptr;
   }
-  if (auto type_statement =
-          dynamic_pointer_cast<TypeStatement>(statement)) {
+  if (auto type_statement = dynamic_pointer_cast<TypeStatement>(statement)) {
     return nullptr;
   }
   if (auto var_statement = dynamic_pointer_cast<VarStatement>(statement)) {

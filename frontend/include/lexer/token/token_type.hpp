@@ -3,6 +3,8 @@
 enum TokenType {
   TOKEN_EOF,
 
+  TOKEN_ASM,
+
   TOKEN_INCLUDE,
 
   TOKEN_FUN,

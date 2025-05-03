@@ -8,7 +8,6 @@
 #include "ast/expression/type.hpp"
 #include "ast/statement.hpp"
 #include "position.hpp"
-#include "types/void.hpp"
 
 using namespace std;
 

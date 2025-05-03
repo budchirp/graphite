@@ -29,6 +29,8 @@
 - [x] Object generation
 - [x] Code optimization (LLVM IR Optimization, no optimization from graphite)
 
+- [ ] Inline assembly
+- [ ] Better compiler (for module management)
 - [ ] Stdlib
 - [ ] Maps
 - [ ] Scope management and ownership system similar to crab 🦀 (aka crap) or C++ RAII

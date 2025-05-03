@@ -30,7 +30,7 @@ void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context,
 
   set_type(destination_type ? dynamic_pointer_cast<ArrayType>(destination_type)
                             : make_shared<ArrayType>(
-                                  values[0] ? values[0]->get_type()
+                                  values.size() > 0 ? values[0]->get_type()
                                             : make_shared<NullType>(nullptr),
                                   values.size()));
 }

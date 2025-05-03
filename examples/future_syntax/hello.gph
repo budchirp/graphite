@@ -1,7 +1,0 @@
-use std.io
-
-fn main() -> void {
-  var world: string = "World"
-  
-  io.print("Hello, ${world}!")
-}

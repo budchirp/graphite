@@ -51,7 +51,7 @@ llvm::Value *VarStatementCodegen::codegen() const {
   }
 
   if (variable->is_mutable && !variable->is_global) {
-    auto ptr = context->builder->CreateAlloca(llvm_type, nullptr, "addr");
+    auto ptr = context->builder->CreateAlloca(llvm_type, nullptr, name);
     context->builder->CreateStore(value, ptr);
 
     value = ptr;

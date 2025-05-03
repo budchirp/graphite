@@ -8,6 +8,7 @@
 #include "lexer/token/token_type.hpp"
 #include "logger/log_types.hpp"
 #include "parser/expression/array.hpp"
+#include "parser/expression/assembly.hpp"
 #include "parser/expression/binary.hpp"
 #include "parser/expression/boolean.hpp"
 #include "parser/expression/call.hpp"
@@ -82,8 +83,12 @@ map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>)>>
          [](const shared_ptr<Parser> &parser) {
            return make_shared<GroupExpressionParser>(parser);
          }},
-        {TOKEN_IF, [](const shared_ptr<Parser> &parser) {
+        {TOKEN_IF,
+         [](const shared_ptr<Parser> &parser) {
            return make_shared<IfExpressionParser>(parser);
+         }},
+        {TOKEN_ASM, [](const shared_ptr<Parser> &parser) {
+           return make_shared<AssemblyExpressionParser>(parser);
          }}};
 
 map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>,

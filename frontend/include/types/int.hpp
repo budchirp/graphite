@@ -3,9 +3,9 @@
 #include "types/type.hpp"
 
 class IntType : public Type {
-public:
+ public:
   static string name;
-  
+
   short size;
   bool is_unsigned;
 
@@ -14,7 +14,9 @@ public:
 
   string get_name() const override { return name; }
 
-  string to_string() const override { return get_name(); };
+  string to_string() const override {
+    return is_unsigned ? "u" : "i" + ::to_string(size);
+  };
   string to_string_tree() const override {
     return "IntType(size: '" + ::to_string(size) + "', is_unsigned: '" +
            ::to_string(is_unsigned) + "')";

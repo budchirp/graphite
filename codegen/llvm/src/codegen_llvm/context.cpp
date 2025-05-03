@@ -18,6 +18,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
 #include "logger/logger.hpp"
+#include "semantic/type_helper.hpp"
 
 LLVMCodegenContext::LLVMCodegenContext(
     const shared_ptr<ProgramContext> &program_context)
@@ -79,14 +80,22 @@ llvm::Value *LLVMCodegenContext::get_variable(const string &name) const {
 
 llvm::Value *LLVMCodegenContext::get_variable_value(
     const shared_ptr<VariableSymbol> &variable, const bool &check) const {
+  auto value = get_variable(variable->name);
+
   if (check) {
-    if (!(variable->is_mutable || variable->is_global))
-      return get_variable(variable->name);
+    if (!(variable->is_mutable || variable->is_global)) return value;
+  }
+
+  if (TypeHelper::is_array(variable->type) && variable->is_mutable) {
+    auto index_ptr = builder->CreateGEP(
+        LLVMCodegenUtils::type_to_llvm_type(this, variable->type), value,
+        {builder->getInt32(0), builder->getInt32(0)}, "array_index");
+
+    return index_ptr;
   }
 
   return builder->CreateLoad(
-      LLVMCodegenUtils::type_to_llvm_type(this, variable->type),
-      get_variable(variable->name));
+      LLVMCodegenUtils::type_to_llvm_type(this, variable->type), value);
 }
 
 llvm::Value *LLVMCodegenContext::get_variable_ptr(
