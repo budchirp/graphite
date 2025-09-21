@@ -19,13 +19,13 @@ class FieldExpression : public Expression {
   shared_ptr<StructType> struct_type;
 
  public:
-  shared_ptr<IdentifierExpression> identifier;
+  shared_ptr<Expression> expression;
   shared_ptr<IdentifierExpression> field;
 
   explicit FieldExpression(const Position &position,
-                           const shared_ptr<IdentifierExpression> &identifier,
+                           const shared_ptr<Expression> &expression,
                            const shared_ptr<IdentifierExpression> &field)
-      : position(position), identifier(identifier), field(field) {};
+      : position(position), expression(expression), field(field) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;

@@ -29,12 +29,20 @@ llvm::Function *FunctionStatementCodegen::codegen_function() const {
 
   context->get_env()->set_current_scope(statement->scope->get_name());
 
+  auto body_block =
+      llvm::BasicBlock::Create(*context->llvm_context, "entry", llvm_function);
+  context->builder->SetInsertPoint(body_block);
+
   for (auto &argument : llvm_function->args()) {
-    context->add_variable(argument.getName().str(), &argument);
+    auto ptr = context->builder->CreateAlloca(
+        argument.getType(), nullptr);
+    context->builder->CreateStore(&argument, ptr);
+
+    context->add_variable(argument.getName().str(), ptr);
   }
 
-  auto body_block = BlockStatementCodegen(context, statement->body)
-                        .codegen_block(llvm_function, "entry");
+  BlockStatementCodegen(context, statement->body).codegen();
+
   if (!body_block) {
     Logger::error("Failed to generate low level code for function body",
                   LogTypes::Error::INTERNAL, statement->body->get_position());

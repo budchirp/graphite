@@ -16,6 +16,5 @@ class TypeStatementParser {
       : parser(parser) {};
 
   shared_ptr<TypeStatement> parse();
-  shared_ptr<TypeStatement> parse(
-      const TokenType &visibility) const;
+  shared_ptr<TypeStatement> parse(const TokenType &visibility) const;
 };

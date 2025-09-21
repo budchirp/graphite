@@ -74,37 +74,38 @@ void Compiler::compile(const filesystem::path &main,
 
 vector<string> Compiler::compile_project(
     const filesystem::path &root, const filesystem::path &filename) const {
-  auto program = parse_program(root, filename);
-
-  vector<string> modules;
-
   create_directory(root / "build");
 
-  compile_gph(root, filename);
-  modules.push_back((root / "build" / filename.stem()).string() + ".o");
+  auto program = compile_gph(root, filename);
 
+  vector<string> modules;
   for (const auto &module : program->get_context()->get_env()->get_includes()) {
     compile_gph(root, filesystem::path(module + ".gph"));
     modules.push_back((root / "build" / module).string() + ".o");
   }
 
+  modules.push_back((root / "build" / filename.stem()).string() + ".o");
+
   return modules;
 }
 
-void Compiler::compile_gph(const filesystem::path &root,
-                           const filesystem::path &filename) const {
-  Logger::log("Compiling `" + filename.string() + "`");
+shared_ptr<Program> Compiler::compile_gph(
+    const filesystem::path &root, const filesystem::path &filename) const {
+  Logger::log("Parsing `" + filename.string() + "`");
 
   auto program = parse_program(root, filename);
 
   auto codegen = Codegen(program, CompilerBackend::Value::LLVM);
   codegen.init();
 
+  Logger::log("Compiling `" + filename.string() + "`");
+
   auto backend = static_pointer_cast<LLVMCodegen>(codegen.get());
   backend->codegen(program);
-  backend->optimize();
 
   backend->get_context()->module->print(llvm::errs(), nullptr);
+
+  backend->optimize();
 
   error_code err_code;
   llvm::raw_fd_ostream output_file(
@@ -113,19 +114,21 @@ void Compiler::compile_gph(const filesystem::path &root,
   if (err_code) {
     Logger::error("Failed to open file `" +
                   (root / "build" / filename.stem()).string() + ".o`");
-    return;
+    return nullptr;
   }
 
   llvm::legacy::PassManager pass;
   if (backend->get_context()->target_machine->addPassesToEmitFile(
           pass, output_file, nullptr, llvm::CodeGenFileType::ObjectFile)) {
     Logger::error("Failed to generate object code");
-    return;
+    return nullptr;
   }
 
   pass.run(*backend->get_context()->module);
   output_file.flush();
-};
+
+  return program;
+}
 
 void Compiler::link(const vector<string> &objs,
                     const filesystem::path &output) const {

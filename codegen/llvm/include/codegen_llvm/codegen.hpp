@@ -9,6 +9,7 @@
 #include "ast/statement.hpp"
 #include "codegen/codegen_backend.hpp"
 #include "codegen_llvm/context.hpp"
+#include "codegen_llvm/options.hpp"
 #include "context.hpp"
 #include "program/program.hpp"
 
@@ -28,11 +29,14 @@ class LLVMCodegen : public CodegenBackend {
   static llvm::Value *codegen(const shared_ptr<LLVMCodegenContext> &context,
                               const shared_ptr<Expression> &expression);
   static llvm::Value *codegen(const shared_ptr<LLVMCodegenContext> &context,
+                              const shared_ptr<Expression> &expression,
+                              const shared_ptr<CodegenOptions> &options);
+
+  static llvm::Value *codegen(const shared_ptr<LLVMCodegenContext> &context,
                               const shared_ptr<Statement> &statement);
 
   void codegen(const shared_ptr<Program> &program) const override;
   void optimize() const override;
-
 
   shared_ptr<LLVMCodegenContext> get_context() const { return context; }
 };

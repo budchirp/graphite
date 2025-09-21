@@ -1,4 +1,4 @@
-public struct Car {
+public type Car = struct {
   seats: i32
   model: i32
 

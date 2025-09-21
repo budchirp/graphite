@@ -1,4 +1,4 @@
-extern printf(str: string) -> void
+extern print_string(str: string) -> void
 extern print_number(number: i32) -> void
 
 extern malloc(size: i32) -> *mut void
@@ -20,23 +20,21 @@ var stdin: i64 = 0
 
 # comment
 public fn main(argc: i32, argv: string_array) -> i32 {
-  printf(argv[argc - 1])
+  print_string("\nStart\n")
 
-  printf("\nStart\n")
-
-  printf("\nInline assembly\n")
+  print_string("\nInline assembly\n")
 
   var mut buffer = [] as i8[100]
 
   # implement sizeof and use `sizeof(buffer) - 1`
   var count: i64 = 99
 
-  var mut bytes_read: i64;
-  bytes_read = asm("mov $1, %rax\nmov $2, %rdi\nmov $3, %rsi\nmov $4, %rdx\nsyscall\nmov %rax, $0" : "=r" bytes_read : "r" syscall_read, "r" stdin, "r" buffer, "r" count : "rax", "rdi", "rsi", "rdx", "rcx", "r11", "memory")
+  var bytes_read = malloc(8) as mut *i64;
+  *bytes_read = asm("mov $1, %rax\nmov $2, %rdi\nmov $3, %rsi\nmov $4, %rdx\nsyscall\nmov %rax, $0" : "=r" bytes_read : "r" syscall_read, "r" stdin, "r" buffer, "r" count : "rax", "rdi", "rsi", "rdx", "rcx", "r11", "memory")
  
-  print_number(bytes_read)
+  print_number(*bytes_read)
 
-  printf("\nStruct\n")
+  print_string("\nStruct\n")
 
   # asd is Car
   var my_struct = asd {
@@ -47,61 +45,54 @@ public fn main(argc: i32, argv: string_array) -> i32 {
 
   print_number(my_struct.seats)
   print_number(my_struct.model)
-  printf(my_struct.name)
+  print_string(my_struct.name)
 
-  printf("\nArray\n")
+  print_string("\nArray\n")
   var array = [123, 234, 345, 456, 567]
   for (var mut i: i32 = 0; i < 5; i++) {
     print_number(array[i])
   }
 
-  printf("\nAdding numbers\n")
+  print_string("\nAdding numbers\n")
   var x: i32 = add(global_var, 32)
   var y: i32 = (x * 1)
   var h: *i32 = &y
   print_number(*h)
 
-  printf("\nmalloc()\n")
-  var m = malloc(32) as mut *i32;
-  *m = 31;
-  print_number(*m)
-
-  free(m as *void)
-
-  printf("\nFor loop\n")
+  print_string("\nFor loop\n")
   for (var mut i: i32 = 10; i > 0; i--) {
     print_number(i)
   }
 
-  printf("\nVar without initializer\n")
+  print_string("\nVar without initializer\n")
   var mut j: i32
   j = y
   j = 32
   j = y
   print_number(j)
 
-  printf("\nVar without initializer - pointer\n")
+  print_string("\nVar without initializer - pointer\n")
   var k: mut *i32
   k = &y;
   *k = 31
   print_number(*k)
 
-  printf("\nWhile loop\n")
+  print_string("\nWhile loop\n")
   var mut i: i32 = 0;
   while (i < 10) {
     print_number(i)
     i++
   }
 
-  printf("\nBoolean check\n")
+  print_string("\nBoolean check\n")
   var z: boolean = if (x == y) { true } else { false }
   if (z) {
-    printf("x and y is 64\n")
+    print_string("x and y is 64\n")
   } else {
-    printf("x and y is not 64\n")
+    print_string("x and y is not 64\n")
   }
 
-  printf("End\n")
+  print_string("End\n")
 
   return (10 - 10) * 10
 }

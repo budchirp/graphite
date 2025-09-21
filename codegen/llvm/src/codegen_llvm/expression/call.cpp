@@ -31,7 +31,7 @@ llvm::Value *CallExpressionCodegen::codegen() const {
 
     llvm_argument = LLVMCodegenUtils::cast_type(
         context, llvm_argument,
-        LLVMCodegenUtils::type_to_llvm_type(context,parameter_type));
+        LLVMCodegenUtils::type_to_llvm_type(context, parameter_type));
     if (!llvm_argument) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                     argument->get_position());
@@ -46,6 +46,6 @@ llvm::Value *CallExpressionCodegen::codegen() const {
     return llvm::Constant::getNullValue(
         llvm::Type::getVoidTy(*context->llvm_context));
   } else {
-    return context->builder->CreateCall(function, llvm_arguments, "call");
+    return context->builder->CreateCall(function, llvm_arguments);
   }
 }

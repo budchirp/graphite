@@ -6,7 +6,9 @@
 #include "logger/log_types.hpp"
 #include "logger/logger.hpp"
 #include "semantic/type_helper.hpp"
-#include "types/parser/unknown_parser_type.hpp"
+#include "types/parser/parser_struct_type.hpp"
+#include "types/parser/parser_unresolved_type.hpp"
+#include "types/struct.hpp"
 
 void TypeExpression::validate(const shared_ptr<ProgramContext> &context) {
   // if (!context->get_env()->get_type(type->get_name())) {
@@ -33,12 +35,20 @@ shared_ptr<Type> TypeExpression::resolve_types(
   } else if (auto array_type = TypeHelper::is_array(type)) {
     parsed_type = make_shared<ArrayType>(
         resolve_types(context, array_type->child_type), array_type->size);
-  } else {
-    parsed_type = context->get_env()->get_type(
-        dynamic_pointer_cast<UnknownParserType>(type)->value)->type;
-  }
+  } else if (auto struct_type = dynamic_pointer_cast<ParserStructType>(type)) {
+    unordered_map<string, shared_ptr<Type>> fields;
+    fields.reserve(struct_type->fields.size());
+    for (const auto &[field_name, field_type] : struct_type->fields) {
+      field_type->resolve_types(context);
 
-  if (!parsed_type) {
+      fields.insert_or_assign(field_name->value, field_type->get_type());
+    }
+
+    parsed_type = make_shared<StructType>(fields);
+  } else if (auto unresolved_type =
+                 dynamic_pointer_cast<ParserUnresolvedType>(type)) {
+    parsed_type = context->get_env()->get_type(unresolved_type->value)->type;
+  } else {
     Logger::error("Failed to parse type", LogTypes::Error::INTERNAL, &position);
     return nullptr;
   }

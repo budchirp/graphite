@@ -29,8 +29,8 @@ class Compiler {
   vector<string> compile_project(const filesystem::path &root,
                                  const filesystem::path &filename) const;
 
-  void compile_gph(const filesystem::path &root,
-                   const filesystem::path &filename) const;
+  shared_ptr<Program> compile_gph(const filesystem::path &root,
+                                  const filesystem::path &filename) const;
 
   void link(const vector<string> &objs, const filesystem::path &output) const;
 };

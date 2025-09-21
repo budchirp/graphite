@@ -25,7 +25,7 @@ class ArrayExpression : public Expression {
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void resolve_types(const shared_ptr<ProgramContext> &context,
-                     const shared_ptr<Type> &destination_type);
+                     const shared_ptr<ArrayType> &destination_type);
   void validate(const shared_ptr<ProgramContext> &context) override;
 
   Position *get_position() override { return &position; };

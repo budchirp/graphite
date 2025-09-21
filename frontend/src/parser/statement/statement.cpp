@@ -9,7 +9,6 @@
 #include "parser/statement/function.hpp"
 #include "parser/statement/include.hpp"
 #include "parser/statement/return.hpp"
-#include "parser/statement/struct.hpp"
 #include "parser/statement/type.hpp"
 #include "parser/statement/var.hpp"
 #include "parser/statement/visibility.hpp"
@@ -34,10 +33,6 @@ shared_ptr<Statement> StatementParser::parse() {
 
     case TOKEN_TYPE: {
       return TypeStatementParser(parser).parse();
-    }
-
-    case TOKEN_STRUCT: {
-      return StructStatementParser(parser).parse();
     }
 
     case TOKEN_FUN: {

@@ -50,7 +50,6 @@ map<TokenType, function<shared_ptr<ExpressionParser>(shared_ptr<Parser>)>>
          [](const shared_ptr<Parser> &parser) {
            return make_shared<ArrayExpressionParser>(parser);
          }},
-
         {TOKEN_TRUE,
          [](const shared_ptr<Parser> &parser) {
            return make_shared<BooleanExpressionParser>(parser);

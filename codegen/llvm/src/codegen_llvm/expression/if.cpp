@@ -46,7 +46,7 @@ llvm::Value *IfExpressionCodegen::codegen() const {
 
   if (else_value && (then_value->getType() == else_value->getType())) {
     llvm::PHINode *phi =
-        context->builder->CreatePHI(then_value->getType(), 2, "iftmp");
+        context->builder->CreatePHI(then_value->getType(), 2);
     phi->addIncoming(then_value, then_block);
     phi->addIncoming(else_value, else_block);
 

@@ -48,5 +48,6 @@ llvm::Value *IncludeStatementCodegen::codegen() const {
     }
   }
 
-  return nullptr;
+  return llvm::Constant::getNullValue(
+      llvm::Type::getVoidTy(*context->llvm_context));
 }

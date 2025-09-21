@@ -4,7 +4,6 @@
 #include "logger/log_types.hpp"
 #include "parser/statement/extern.hpp"
 #include "parser/statement/function.hpp"
-#include "parser/statement/struct.hpp"
 #include "parser/statement/type.hpp"
 #include "parser/statement/var.hpp"
 #include "semantic/visibilty.hpp"
@@ -17,10 +16,6 @@ shared_ptr<Statement> VisibilityStatementParser::parse() {
   switch (parser->current_token.type) {
     case TOKEN_TYPE: {
       return TypeStatementParser(parser).parse(visibility_token);
-    }
-
-    case TOKEN_STRUCT: {
-      return StructStatementParser(parser).parse(visibility_token);
     }
 
     case TOKEN_FUN: {

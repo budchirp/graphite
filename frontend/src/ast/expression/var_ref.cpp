@@ -4,7 +4,10 @@ void VarRefExpression::validate(const shared_ptr<ProgramContext> &context) {}
 
 void VarRefExpression::resolve_types(
     const shared_ptr<ProgramContext> &context) {
-  set_type(context->get_env()->get_current_scope()->get_variable(name)->type);
+  auto scope = context->get_env()->get_current_scope();
+  auto variable = scope->get_variable(name);
+
+  set_type(variable->type);
 }
 
 string VarRefExpression::to_string() const { return name; }

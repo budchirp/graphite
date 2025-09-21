@@ -46,10 +46,12 @@ class LLVMCodegenContext {
 
   shared_ptr<Env> get_env() const { return program_context->get_env(); }
 
+
   void add_variable(const string &name, llvm::Value *variable);
+
   llvm::Value *get_variable(const string &name) const;
+  llvm::Value *get_variable(const shared_ptr<VariableSymbol> &variable) const;
+  llvm::Value* get_variable_value(llvm::Value* value, const shared_ptr<Type> &type) const;
   llvm::Value *get_variable_value(
-      const shared_ptr<VariableSymbol> &variable, const bool &check = true) const;
-  llvm::Value *get_variable_ptr(const shared_ptr<VariableSymbol> &variable,
-                                const bool &load_pointer = false) const;
+      const shared_ptr<VariableSymbol> &variable) const;
 };

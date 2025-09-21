@@ -1,4 +1,3 @@
-
 #include "parser/expression/if.hpp"
 
 #include <memory>

@@ -2,16 +2,16 @@
 
 #include <memory>
 
-#include "ast/expression/unary.hpp"
 #include "codegen_llvm/codegen.hpp"
+#include "codegen_llvm/options.hpp"
 #include "codegen_llvm/utils.hpp"
 #include "lexer/token/token_type.hpp"
 #include "logger/logger.hpp"
 #include "semantic/type_helper.hpp"
 
 llvm::Value *BinaryExpressionCodegen::codegen() const {
-  auto left_value = LLVMCodegen::codegen(context, expression->left);
-  if (expression->op.type != TOKEN_ASSIGN && !left_value) {
+  auto left_value = LLVMCodegen::codegen(context, expression->left, expression->op.type == TOKEN_ASSIGN ? make_shared<CodegenOptions>(false, false) : nullptr);
+  if (!left_value) {
     Logger::error(
         "Failed to generate low level code for left hand side expression",
         LogTypes::Error::INTERNAL, expression->left->get_position());
@@ -40,38 +40,10 @@ llvm::Value *BinaryExpressionCodegen::codegen() const {
 
   switch (expression->op.type) {
     case TOKEN_ASSIGN: {
-      if (auto identifier =
-              IdentifierExpression::is_identifier(expression->left)) {
-        auto scope = context->get_env()->get_current_scope();
-        auto variable = scope->get_variable(identifier->value);
-        if (!variable->is_initialized) {
-          auto value = right_value;
-          if (variable->is_mutable || variable->is_global) {
-            value = context->builder->CreateAlloca(
-                LLVMCodegenUtils::type_to_llvm_type(context, variable->type),
-                nullptr, "addr");
-            context->builder->CreateStore(right_value, value);
-          }
+      context->builder->CreateStore(right_value, left_value);
 
-          variable->is_initialized = true;
-
-          context->add_variable(variable->name, value);
-          scope->add_variable(variable->name, variable);
-        } else {
-          if (dynamic_pointer_cast<UnaryExpression>(expression->left)) {
-            context->builder->CreateStore(
-                right_value, context->get_variable_ptr(variable, true));
-          } else {
-            context->builder->CreateStore(right_value,
-                                          context->get_variable_ptr(variable));
-          }
-        }
-
-        return llvm::Constant::getNullValue(
-            llvm::Type::getVoidTy(*context->llvm_context));
-      }
-
-      return nullptr;
+      return llvm::Constant::getNullValue(
+          llvm_type);
     }
 
     default: {

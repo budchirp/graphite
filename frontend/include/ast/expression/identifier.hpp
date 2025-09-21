@@ -23,9 +23,6 @@ class IdentifierExpression : public Expression {
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;
 
-  static shared_ptr<IdentifierExpression> is_identifier(
-      const shared_ptr<Expression> &expression);
-
   Position *get_position() override { return &position; };
 
   void set_type(const shared_ptr<Type> &type) override {}

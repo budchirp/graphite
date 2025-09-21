@@ -1,6 +1,7 @@
 #include "codegen_llvm/expression/index.hpp"
 
 #include <memory>
+#include <string>
 
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/utils.hpp"
@@ -14,13 +15,15 @@ llvm::Value* IndexExpressionCodegen::codegen() const {
     return nullptr;
   }
 
+  auto value = LLVMCodegen::codegen(context, expression->expression);
+
   auto index_ptr = context->builder->CreateGEP(
       LLVMCodegenUtils::type_to_llvm_type(context,
                                           expression->get_array_type()),
-      context->get_variable(expression->identifier->value),
-      {context->builder->getInt32(0), index_value}, "array_index");
+      value,
+      {context->builder->getInt32(0), index_value});
 
   return context->builder->CreateLoad(
       LLVMCodegenUtils::type_to_llvm_type(context, expression->get_type()),
-      index_ptr, "load");
+      index_ptr);
 }

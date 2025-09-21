@@ -21,7 +21,9 @@ class PointerType : public Type {
 
   string get_name() const override { return name; }
 
-  string to_string() const override { return "*" + pointee_type->to_string(); };
+  string to_string() const override {
+    return (is_mutable ? "mut *" : "*") + pointee_type->to_string();
+  };
   string to_string_tree() const override {
     return "PointerType(pointee_type: " + pointee_type->to_string_tree() +
            ", is_mutable: '" + ::to_string(is_mutable) + "')";

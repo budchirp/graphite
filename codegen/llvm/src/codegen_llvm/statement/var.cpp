@@ -13,7 +13,7 @@ llvm::Value *VarStatementCodegen::codegen() const {
   auto llvm_type =
       LLVMCodegenUtils::type_to_llvm_type(context, statement->get_type());
 
-  llvm::Value *value = llvm::Constant::getNullValue(llvm_type);
+  llvm::Value *value;
   if (variable->is_initialized) {
     value = LLVMCodegen::codegen(context, statement->expression);
     if (!value) {
@@ -22,42 +22,45 @@ llvm::Value *VarStatementCodegen::codegen() const {
                     statement->expression->get_position());
       return nullptr;
     }
+  } else {
+    value = nullptr;
   }
 
-  value = LLVMCodegenUtils::cast_type(context, value, llvm_type);
-  if (!value) {
-    Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
-                  statement->expression->get_position());
-    return nullptr;
-  }
-
-  if (variable->is_global) {
-    llvm::Constant *initializer = nullptr;
-    if (auto *const_value = dyn_cast<llvm::Constant>(value)) {
-      initializer = const_value;
-    } else {
-      initializer = llvm::Constant::getNullValue(llvm_type);
-      Logger::warn(
-          "Global variable '" + name +
-              "' requires a constant initializer; using default zero value",
-          LogTypes::Warn::SUGGESTION, statement->expression->get_position());
+  if (value) {
+    value = LLVMCodegenUtils::cast_type(context, value, llvm_type);
+    if (!value) {
+      Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
+                    statement->expression->get_position());
+      return nullptr;
     }
 
-    auto global_variable = new llvm::GlobalVariable(
-        *context->module, llvm_type, !variable->is_mutable,
-        llvm::GlobalValue::ExternalLinkage, initializer, name);
+    if (variable->is_global) {
+      llvm::Constant *initializer = nullptr;
+      if (auto *const_value = dyn_cast<llvm::Constant>(value)) {
+        initializer = const_value;
+      } else {
+        initializer = llvm::Constant::getNullValue(llvm_type);
+        Logger::warn(
+            "Global variable '" + name +
+                "' requires a constant initializer; using default zero value",
+            LogTypes::Warn::SUGGESTION, statement->expression->get_position());
+      }
 
-    value = global_variable;
-  }
+      value = new llvm::GlobalVariable(
+          *context->module, llvm_type, !variable->is_mutable,
+          llvm::GlobalValue::ExternalLinkage, initializer);
+    } else {
+      auto ptr = context->builder->CreateAlloca(llvm_type, nullptr);
+      context->builder->CreateStore(value, ptr);
 
-  if (variable->is_mutable && !variable->is_global) {
-    auto ptr = context->builder->CreateAlloca(llvm_type, nullptr, name);
-    context->builder->CreateStore(value, ptr);
-
-    value = ptr;
+      value = ptr;
+    }
+  } else {
+    value = context->builder->CreateAlloca(llvm_type, nullptr);
   }
 
   context->add_variable(name, value);
 
-  return value;
+  return llvm::Constant::getNullValue(
+      llvm::Type::getVoidTy(*context->llvm_context));
 }

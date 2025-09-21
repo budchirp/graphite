@@ -20,7 +20,7 @@ class StructType : public Type {
 
   string to_string() const override {
     // TODO:
-    return "struct";
+    return "struct {}";
   };
   string to_string_tree() const override {
     // TODO:

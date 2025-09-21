@@ -10,7 +10,6 @@
 #include "types/struct.hpp"
 
 void StructExpression::validate(const shared_ptr<ProgramContext> &context) {
-
   for (const auto &[_, field] : fields) {
     field.second->validate(context);
 
@@ -33,8 +32,9 @@ void StructExpression::validate(const shared_ptr<ProgramContext> &context) {
     auto field = it->second;
 
     if (!TypeHelper::compare(field_type, field.second->get_type())) {
-      Logger::type_error("Type mismatch in field `" + field.first->to_string() + "`",
-                         &position, field_type, field.second->get_type());
+      Logger::type_error(
+          "Type mismatch in field `" + field.first->to_string() + "`",
+          &position, field_type, field.second->get_type());
     }
   }
 }
@@ -46,7 +46,8 @@ void StructExpression::resolve_types(
 
 void StructExpression::resolve_types(const shared_ptr<ProgramContext> &context,
                                      const shared_ptr<Type> &destination_type) {
-  auto struct_type = dynamic_pointer_cast<StructType>(context->get_env()->get_type(name->value)->type);
+  auto struct_type = dynamic_pointer_cast<StructType>(
+      context->get_env()->get_type(name->value)->type);
   if (!struct_type) {
     Logger::error("Type `" + name->to_string() + "` is not a struct");
   }

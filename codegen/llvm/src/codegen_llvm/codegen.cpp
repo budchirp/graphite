@@ -12,9 +12,6 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Transforms/Scalar/SimplifyCFG.h>
 
-#include <climits>
-#include <cstdio>
-#include <iostream>
 #include <memory>
 
 #include "ast/expression/array.hpp"
@@ -36,7 +33,6 @@
 #include "ast/statement/function.hpp"
 #include "ast/statement/include.hpp"
 #include "ast/statement/return.hpp"
-#include "ast/statement/struct.hpp"
 #include "ast/statement/type.hpp"
 #include "ast/statement/while.hpp"
 #include "codegen_llvm/expression/array.hpp"
@@ -82,6 +78,11 @@ void LLVMCodegen::codegen(const shared_ptr<Program> &program) const {
 
 llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
                                   const shared_ptr<Expression> &expression) {
+  return codegen(context, expression, nullptr);
+}
+
+llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
+                                  const shared_ptr<Expression> &expression, const shared_ptr<CodegenOptions> &options) {
   if (auto array_expression =
           dynamic_pointer_cast<ArrayExpression>(expression)) {
     return ArrayExpressionCodegen(context, array_expression).codegen();
@@ -137,11 +138,11 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   }
   if (auto unary_expression =
           dynamic_pointer_cast<UnaryExpression>(expression)) {
-    return UnaryExpressionCodegen(context, unary_expression).codegen();
+    return UnaryExpressionCodegen(context, unary_expression).codegen(options);
   }
   if (auto var_ref_expression =
           dynamic_pointer_cast<VarRefExpression>(expression)) {
-    return VarRefExpressionCodegen(context, var_ref_expression).codegen();
+    return VarRefExpressionCodegen(context, var_ref_expression).codegen(options);
   }
 
   Logger::error("Unknown expression");
@@ -150,7 +151,6 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
 
 llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
                                   const shared_ptr<Statement> &statement) {
-
   if (auto block_statement = dynamic_pointer_cast<BlockStatement>(statement)) {
     return BlockStatementCodegen(context, block_statement).codegen();
   }
@@ -179,10 +179,6 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   if (auto return_statement =
           dynamic_pointer_cast<ReturnStatement>(statement)) {
     return ReturnStatementCodegen(context, return_statement).codegen();
-  }
-  if (auto struct_statement =
-          dynamic_pointer_cast<StructStatement>(statement)) {
-    return nullptr;
   }
   if (auto type_statement = dynamic_pointer_cast<TypeStatement>(statement)) {
     return nullptr;

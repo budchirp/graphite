@@ -14,8 +14,7 @@ llvm::Value* StructExpressionCodegen::codegen() const {
   auto llvm_struct_type =
       LLVMCodegenUtils::type_to_llvm_type(context, struct_type);
 
-  auto struct_ptr =
-      context->builder->CreateAlloca(llvm_struct_type, nullptr, "struct");
+  auto struct_ptr = context->builder->CreateAlloca(llvm_struct_type, nullptr);
 
   size_t idx = 0;
   for (const auto& [field_name, field_type] : struct_type->fields) {
@@ -38,8 +37,8 @@ llvm::Value* StructExpressionCodegen::codegen() const {
       return nullptr;
     }
 
-    auto index_ptr = context->builder->CreateStructGEP(
-        llvm_struct_type, struct_ptr, idx++, field.first->value);
+    auto index_ptr =
+        context->builder->CreateStructGEP(llvm_struct_type, struct_ptr, idx++);
     context->builder->CreateStore(llvm_value, index_ptr);
   }
 

@@ -8,7 +8,7 @@ llvm::Value* ArrayExpressionCodegen::codegen() const {
   auto llvm_array_type =
       LLVMCodegenUtils::type_to_llvm_type(context, expression->get_type());
   auto array_ptr =
-      context->builder->CreateAlloca(llvm_array_type, nullptr, "array_ptr");
+      context->builder->CreateAlloca(llvm_array_type, nullptr);
 
   size_t idx = 0;
   for (const auto& value : expression->values) {
@@ -33,8 +33,7 @@ llvm::Value* ArrayExpressionCodegen::codegen() const {
 
     auto index_ptr = context->builder->CreateGEP(
         llvm_array_type, array_ptr,
-        {context->builder->getInt32(0), context->builder->getInt32(idx++)},
-        "array_index");
+        {context->builder->getInt32(0), context->builder->getInt32(idx++)});
 
     context->builder->CreateStore(llvm_value, index_ptr);
   }

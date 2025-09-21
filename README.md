@@ -17,7 +17,7 @@
 - [x] Type support & checking
 - [x] Function definition
 - [x] Variable definition
-- [x] Mutable/Immutable variables (immutable by default btw)
+- [x] Mutable/Immutable variables
 - [x] Null (?, !!, null)
 - [x] Binary expressions (=, ==, !=, +, -, /, *)
 - [x] Unary expressions (*, &, -, +, ++, --, !)
@@ -25,11 +25,11 @@
 - [x] For & While statement
 - [x] Arrays
 - [x] Structs (just works nothing else)
-- [x] Module management (public, private, include) (garbage btw)
+- [x] Module management (public, private, include)
 - [x] Object generation
-- [x] Code optimization (LLVM IR Optimization, no optimization from graphite)
+- [x] Code optimization (LLVM IR Optimization)
 
-- [ ] Inline assembly
+- [x] Inline assembly
 - [ ] Better compiler (for module management)
 - [ ] Stdlib
 - [ ] Maps
@@ -37,11 +37,3 @@
 - [ ] Switch expression
 - [ ] CLI (graphite, graphitec)
 - [ ] OOP
-
-## Notes
-
-Just some notes for myself
-
-- [ ] Make bang operator work with expressions (currently only supports variable reference)
-- [ ] Improve my garbage code
-- [ ] Fix stupid parser errors

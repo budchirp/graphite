@@ -22,17 +22,19 @@ void ArrayExpression::validate(const shared_ptr<ProgramContext> &context) {
 void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context) {
   return resolve_types(context, nullptr);
 }
-void ArrayExpression::resolve_types(const shared_ptr<ProgramContext> &context,
-                                    const shared_ptr<Type> &destination_type) {
+void ArrayExpression::resolve_types(
+    const shared_ptr<ProgramContext> &context,
+    const shared_ptr<ArrayType> &destination_type) {
   for (const auto &value : values) {
     value->resolve_types(context);
   }
 
-  set_type(destination_type ? dynamic_pointer_cast<ArrayType>(destination_type)
-                            : make_shared<ArrayType>(
-                                  values.size() > 0 ? values[0]->get_type()
+  set_type(destination_type
+               ? destination_type
+               : make_shared<ArrayType>(values.size() > 0
+                                            ? values[0]->get_type()
                                             : make_shared<NullType>(nullptr),
-                                  values.size()));
+                                        values.size()));
 }
 
 string ArrayExpression::to_string() const {

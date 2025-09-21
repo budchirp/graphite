@@ -12,16 +12,18 @@ llvm::Value *AssemblyExpressionCodegen::codegen() const {
 
   ostringstream constraints_oss;
   for (const auto &[identifier, variable] : expression->output) {
-    auto value = context->get_variable_ptr(
-        context->get_env()->get_current_scope()->get_variable(variable->value));
+    auto value = context->get_variable(
+        variable->value);
     arguments.push_back(value);
 
     constraints_oss << identifier->value << ",";
   }
 
+  auto scope = context->get_env()->get_current_scope();
+
   for (const auto &[identifier, variable] : expression->input) {
     auto value = context->get_variable_value(
-        context->get_env()->get_current_scope()->get_variable(variable->value));
+        scope->get_variable(variable->value));
     arguments.push_back(value);
 
     constraints_oss << identifier->value << ",";

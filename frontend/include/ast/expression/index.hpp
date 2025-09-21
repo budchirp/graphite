@@ -19,13 +19,13 @@ class IndexExpression : public Expression {
   shared_ptr<ArrayType> array_type;
 
  public:
-  shared_ptr<IdentifierExpression> identifier;
+  shared_ptr<Expression> expression;
   shared_ptr<Expression> index;
 
   explicit IndexExpression(const Position &position,
-                           const shared_ptr<IdentifierExpression> &identifier,
+                           const shared_ptr<Expression> &expression,
                            const shared_ptr<Expression> &index)
-      : position(position), identifier(identifier), index(index) {};
+      : position(position), expression(expression), index(index) {};
 
   void resolve_types(const shared_ptr<ProgramContext> &context) override;
   void validate(const shared_ptr<ProgramContext> &context) override;

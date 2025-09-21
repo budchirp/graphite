@@ -64,8 +64,13 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
 llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
     const LLVMCodegenContext *context, const shared_ptr<Type> &type) {
   if (auto array_type = dynamic_pointer_cast<ArrayType>(type)) {
-    return llvm::ArrayType::get(
-        type_to_llvm_type(context, array_type->child_type), array_type->size);
+    if (array_type->size >= 0) {
+      return llvm::ArrayType::get(
+          type_to_llvm_type(context, array_type->child_type), array_type->size);
+    } else {
+      return llvm::PointerType::get(
+          type_to_llvm_type(context, array_type->child_type), 0);
+    }
   }
 
   if (auto boolean_type = dynamic_pointer_cast<BooleanType>(type)) {
@@ -140,13 +145,13 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
   }
 
   if (auto struct_type = dynamic_pointer_cast<StructType>(type)) {
-    vector<llvm::Type *> field_types;
-    field_types.reserve(struct_type->fields.size());
+    vector<llvm::Type *> fields;
+    fields.reserve(struct_type->fields.size());
     for (const auto &[_, field_type] : struct_type->fields) {
-      field_types.push_back(type_to_llvm_type(context, field_type));
+      fields.push_back(type_to_llvm_type(context, field_type));
     }
 
-    return llvm::StructType::get(*context->llvm_context, field_types);
+    return llvm::StructType::get(*context->llvm_context, fields);
   }
 
   Logger::error("Unknown type");
