@@ -10,7 +10,11 @@
 #include "semantic/type_helper.hpp"
 
 llvm::Value *BinaryExpressionCodegen::codegen() const {
-  auto left_value = LLVMCodegen::codegen(context, expression->left, expression->op.type == TOKEN_ASSIGN ? make_shared<CodegenOptions>(false, false) : nullptr);
+  auto left_value =
+      LLVMCodegen::codegen(context, expression->left,
+                           expression->op.type == TOKEN_ASSIGN
+                               ? make_shared<CodegenOptions>(false, true)
+                               : nullptr);
   if (!left_value) {
     Logger::error(
         "Failed to generate low level code for left hand side expression",
@@ -41,9 +45,7 @@ llvm::Value *BinaryExpressionCodegen::codegen() const {
   switch (expression->op.type) {
     case TOKEN_ASSIGN: {
       context->builder->CreateStore(right_value, left_value);
-
-      return llvm::Constant::getNullValue(
-          llvm_type);
+      return right_value;
     }
 
     default: {

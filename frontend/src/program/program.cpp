@@ -3,8 +3,6 @@
 #include <sstream>
 #include <vector>
 
-#include "ast/statement.hpp"
-
 void Program::validate() {
   for (const auto &statement : statements) {
     statement->validate(context);

@@ -5,12 +5,7 @@ extern print_string(str: string) -> void
 extern print_number(number: i32) -> void
 
 public fn main(argc: i32, argv: string[]) -> i32 {
-  var y = 1
-
-  var k: mut *i32
-  k = &y;
-  *k = 31;
-  print_number(*k)
+  print_number(add(1, 2))
 
   return 0
 }

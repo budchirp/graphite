@@ -1,10 +1,5 @@
 #include "codegen_llvm/expression/struct.hpp"
 
-#include <llvm/IR/Constants.h>
-
-#include <cstddef>
-#include <memory>
-
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/utils.hpp"
 #include "logger/logger.hpp"
@@ -37,10 +32,11 @@ llvm::Value* StructExpressionCodegen::codegen() const {
       return nullptr;
     }
 
-    auto index_ptr =
-        context->builder->CreateStructGEP(llvm_struct_type, struct_ptr, idx++);
+    auto index_ptr = context->builder->CreateStructGEP(
+        llvm_struct_type, struct_ptr, static_cast<unsigned>(idx++));
     context->builder->CreateStore(llvm_value, index_ptr);
   }
 
-  return struct_ptr;
+  // Return the loaded struct value, not the pointer
+  return context->builder->CreateLoad(llvm_struct_type, struct_ptr);
 }

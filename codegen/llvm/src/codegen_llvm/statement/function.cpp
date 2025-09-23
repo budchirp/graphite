@@ -10,7 +10,6 @@ llvm::Value *FunctionStatementCodegen::codegen() const {
 }
 llvm::Function *FunctionStatementCodegen::codegen_function() const {
   auto name = statement->proto->name->value;
-  auto function = context->get_env()->get_function(name);
 
   auto llvm_function = context->module->getFunction(name);
   if (llvm_function) {
@@ -34,8 +33,7 @@ llvm::Function *FunctionStatementCodegen::codegen_function() const {
   context->builder->SetInsertPoint(body_block);
 
   for (auto &argument : llvm_function->args()) {
-    auto ptr = context->builder->CreateAlloca(
-        argument.getType(), nullptr);
+    auto ptr = context->builder->CreateAlloca(argument.getType(), nullptr);
     context->builder->CreateStore(&argument, ptr);
 
     context->add_variable(argument.getName().str(), ptr);

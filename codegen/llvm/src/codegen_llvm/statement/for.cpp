@@ -56,6 +56,5 @@ llvm::Value *ForStatementCodegen::codegen() const {
   parent_function->insert(parent_function->end(), end_block);
   context->builder->SetInsertPoint(end_block);
 
-  return llvm::Constant::getNullValue(
-      llvm::Type::getVoidTy(*context->llvm_context));
+  return llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context));
 }

@@ -35,7 +35,7 @@ shared_ptr<Expression> AssemblyExpressionParser::parse() {
     return nullptr;
   }
 
-  parser->eat_token();  // eat ;
+  parser->eat_token();  // eat :
 
   auto string_expression_parser = StringExpressionParser(parser);
   auto identifier_expression_parser = IdentifierExpressionParser(parser);

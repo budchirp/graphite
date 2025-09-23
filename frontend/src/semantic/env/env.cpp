@@ -1,6 +1,5 @@
 #include "semantic/env/env.hpp"
 
-#include <algorithm>
 #include <memory>
 
 #include "logger/logger.hpp"

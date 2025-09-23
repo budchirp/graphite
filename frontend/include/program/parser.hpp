@@ -14,4 +14,6 @@ class ProgramParser {
   explicit ProgramParser(const shared_ptr<Parser> &parser) : parser(parser) {};
 
   void parse() const;
+  static shared_ptr<Program> parse_program(const filesystem::path &root,
+                                           const filesystem::path &filename);
 };

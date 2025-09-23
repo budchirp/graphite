@@ -63,6 +63,7 @@ shared_ptr<ForStatement> ForStatementParser::parse() {
   if (parser->current_token.type != TOKEN_RIGHT_PARENTHESES) {
     parser->get_logger()->error("Expected right parentheses after expression",
                                 LogTypes::Error::SYNTAX);
+    return nullptr;
   }
 
   parser->eat_token();  // eat )

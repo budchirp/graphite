@@ -7,6 +7,7 @@
 #include "ast/expression/index.hpp"
 #include "codegen_llvm/context.hpp"
 #include "codegen_llvm/expression/codegen.hpp"
+#include "codegen_llvm/options.hpp"
 
 using namespace std;
 
@@ -22,4 +23,5 @@ class IndexExpressionCodegen : public ExpressionCodegen {
       : context(context), expression(expression) {};
 
   llvm::Value* codegen() const override;
+  llvm::Value* codegen(const shared_ptr<CodegenOptions>& options) const;
 };

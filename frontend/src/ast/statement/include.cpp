@@ -1,9 +1,23 @@
 #include "ast/statement/include.hpp"
 
-#include "compiler/compiler.hpp"
+#include <iostream>
+
+#include "logger/log_types.hpp"
+#include "logger/logger.hpp"
+#include "program/parser.hpp"
+
+using namespace std;
 
 void IncludeStatement::validate(const shared_ptr<ProgramContext> &context) {
   module->validate(context);
+
+  auto env = context->get_env();
+  auto scope = env->get_current_scope();
+
+  if (scope->get_name() != "global") {
+    Logger::error("Include statement must be in global scope",
+                  LogTypes::Error::SYNTAX, &position);
+  }
 }
 
 void IncludeStatement::resolve_types(
@@ -19,7 +33,8 @@ void IncludeStatement::resolve_types(
 
   env->add_include(module->value);
 
-  program = Compiler::parse_program(context->get_path().parent_path(),
+  std::cout << context->get_path().parent_path() << std::endl;
+  program = ProgramParser::parse_program(context->get_path().parent_path(),
                                          module->value + ".gph");
 
   auto program_env = program->get_context()->get_env();

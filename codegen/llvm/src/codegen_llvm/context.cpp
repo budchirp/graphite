@@ -7,7 +7,6 @@
 #include <llvm/Support/CodeGen.h>
 #include <llvm/Support/Error.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm/Target/TargetOptions.h>
 #include <llvm/TargetParser/Host.h>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar/SimplifyCFG.h>
@@ -16,10 +15,7 @@
 #include <string>
 
 #include "codegen_llvm/utils.hpp"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
 #include "logger/logger.hpp"
-#include "semantic/type_helper.hpp"
 
 LLVMCodegenContext::LLVMCodegenContext(
     const shared_ptr<ProgramContext> &program_context)
@@ -29,7 +25,7 @@ LLVMCodegenContext::LLVMCodegenContext(
   string error;
   auto target = llvm::TargetRegistry::lookupTarget(triple, error);
   if (!target) {
-    Logger::error("Unsupported OS");
+    Logger::error("Unsupported OS: " + error);
     return;
   }
 
@@ -69,8 +65,8 @@ llvm::Value *LLVMCodegenContext::get_variable(
 }
 
 llvm::Value *LLVMCodegenContext::get_variable(const string &name) const {
-  auto it = variables.find(
-      program_context->get_env()->get_current_scope()->get_name() + "_" + name);
+  auto scope_name = program_context->get_env()->get_current_scope()->get_name();
+  auto it = variables.find(scope_name + "_" + name);
   if (it != variables.end() && it->second) {
     return it->second;
   }
@@ -86,18 +82,17 @@ llvm::Value *LLVMCodegenContext::get_variable(const string &name) const {
 
 llvm::Value *LLVMCodegenContext::get_variable_value(
     const shared_ptr<VariableSymbol> &variable) const {
-  return get_variable_value(get_variable(variable), variable->type);
+  auto var_ptr = get_variable(variable);
+  if (!var_ptr) return nullptr;
+
+  auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(this, variable->type);
+  return builder->CreateLoad(llvm_type, var_ptr);
 }
 
 llvm::Value *LLVMCodegenContext::get_variable_value(
     llvm::Value *value, const shared_ptr<Type> &type) const {
-  if (TypeHelper::is_struct(type) || TypeHelper::is_array(type)) {
-    return builder->CreateLoad(
-        llvm::PointerType::get(LLVMCodegenUtils::type_to_llvm_type(this, type),
-                               0),
-        value);
-  }
+  if (!value) return nullptr;
 
-  return builder->CreateLoad(LLVMCodegenUtils::type_to_llvm_type(this, type),
-                             value);
+  auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(this, type);
+  return builder->CreateLoad(llvm_type, value);
 }

@@ -61,6 +61,5 @@ llvm::Value *VarStatementCodegen::codegen() const {
 
   context->add_variable(name, value);
 
-  return llvm::Constant::getNullValue(
-      llvm::Type::getVoidTy(*context->llvm_context));
+  return llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context));
 }

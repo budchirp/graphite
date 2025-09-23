@@ -1,0 +1,47 @@
+---
+globs: *.cpp,*.hpp,*.h,*.cc,*.cxx
+---
+
+# C++ Coding Standards for Graphite
+
+## Code Style Requirements
+
+- Use C++20 standard features
+- No comments in existing code (preserve clean, minimal style)
+- Keep code clean and minimal without explanatory comments
+- Only add functionally necessary code
+- Preserve existing code style and formatting
+- Use `using namespace std;` (follows project convention)
+
+## Memory Management
+
+- Prefer `shared_ptr` and `unique_ptr` for memory management
+- Use RAII principles
+- Avoid raw pointers except for non-owning references
+
+## Class Design
+
+- Pure virtual destructors with `= default`
+- Abstract base classes for AST nodes (Expression, Statement)
+- Use `const` methods where appropriate
+- Prefer composition over inheritance
+
+## Naming Conventions
+
+- snake_case for variables, functions, and files
+- PascalCase for class names
+- ALL_CAPS for constants/enums
+- Private members without special prefix
+
+## Include Patterns
+
+- System includes first (`<memory>`, `<string>`, etc.)
+- Project includes second (relative paths)
+- Use `#pragma once` for header guards
+- Forward declarations when possible
+
+## Error Handling
+
+- Use exceptions for error conditions
+- Validate inputs in public methods
+- Provide meaningful error messages

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Type.h>
@@ -10,7 +12,6 @@
 #include "codegen/codegen_backend.hpp"
 #include "codegen_llvm/context.hpp"
 #include "codegen_llvm/options.hpp"
-#include "context.hpp"
 #include "program/program.hpp"
 
 using namespace std;
@@ -21,10 +22,8 @@ class LLVMCodegen : public CodegenBackend {
 
  public:
   explicit LLVMCodegen(const shared_ptr<LLVMCodegenContext> &context)
-      : context(context) {};
+      : context(context) {}
   ~LLVMCodegen() override { llvm::llvm_shutdown(); }
-
-  static void init();
 
   static llvm::Value *codegen(const shared_ptr<LLVMCodegenContext> &context,
                               const shared_ptr<Expression> &expression);
@@ -34,6 +33,8 @@ class LLVMCodegen : public CodegenBackend {
 
   static llvm::Value *codegen(const shared_ptr<LLVMCodegenContext> &context,
                               const shared_ptr<Statement> &statement);
+
+  static void init();
 
   void codegen(const shared_ptr<Program> &program) const override;
   void optimize() const override;

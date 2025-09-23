@@ -30,6 +30,7 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
     parser->get_logger()->error(
         "Expected left parentheses after prototype name",
         LogTypes::Error::SYNTAX);
+    return nullptr;
   }
 
   parser->eat_token();  // eat (

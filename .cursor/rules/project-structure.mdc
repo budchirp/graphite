@@ -1,0 +1,38 @@
+---
+alwaysApply: true
+---
+
+# Graphite Compiler Project Structure
+
+Graphite is a fast, memory-safe programming language compiler written in C++ using LLVM. The project follows a modular architecture:
+
+## Core Components
+
+- **[frontend/](mdc:frontend/)** - Lexer, parser, AST, and semantic analysis
+  - `lexer/` - Tokenization of source code
+  - `parser/` - Syntax analysis and AST generation  
+  - `ast/` - Abstract Syntax Tree node definitions
+  - `semantic/` - Type checking and validation
+  - `types/` - Type system implementation
+
+- **[compiler/](mdc:compiler/)** - Main compilation orchestration
+  - Entry point: [compiler.hpp](mdc:compiler/include/compiler/compiler.hpp)
+
+- **[codegen/](mdc:codegen/)** - Code generation backends
+  - `llvm/` - LLVM IR generation (primary backend)
+  - `common/` - Shared codegen utilities
+
+- **[cli/](mdc:cli/)** - Command-line interfaces
+  - `graphite/` - Main compiler CLI
+  - `graphitec/` - Alternative compiler interface
+
+- **[common/](mdc:common/)** - Shared utilities and types
+  - Core types: [position.hpp](mdc:common/include/position.hpp), [compiler_backend.hpp](mdc:common/include/compiler_backend.hpp)
+
+- **[examples/](mdc:examples/)** - Sample Graphite programs (.gph files)
+  - Main example: [main.gph](mdc:examples/main.gph)
+
+## Build System
+
+Uses CMake with C++20 standard. Main configuration in [CMakeLists.txt](mdc:CMakeLists.txt).
+Build artifacts go in `build/` directory.

@@ -107,7 +107,7 @@ void Logger::warn(const string &message) {
 }
 void Logger::error(const string &message) {
   ostringstream str;
-  str << Colors::GRAY << "[" << Colors::YELLOW << "error" << Colors::GRAY
+  str << Colors::GRAY << "[" << Colors::RED << "error" << Colors::GRAY
       << "]: " << Colors::WHITE << message << endl;
 
   throw runtime_error(str.str());

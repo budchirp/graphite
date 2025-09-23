@@ -1,16 +1,10 @@
 #include "codegen_llvm/codegen.hpp"
 
 #include <llvm/IR/Constants.h>
-#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
-#include <llvm/Pass.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Target/TargetMachine.h>
-#include <llvm/Transforms/Scalar/SimplifyCFG.h>
 
 #include <memory>
 
@@ -67,9 +61,9 @@ void LLVMCodegen::init() {
 }
 
 void LLVMCodegen::codegen(const shared_ptr<Program> &program) const {
-  context->add_variable("null",
-                        llvm::Constant::getNullValue(
-                            llvm::Type::getVoidTy(*context->llvm_context)));
+  context->add_variable(
+      "null",
+      llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context)));
 
   ProgramCodegen(context, program).codegen();
 
@@ -82,7 +76,8 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
 }
 
 llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
-                                  const shared_ptr<Expression> &expression, const shared_ptr<CodegenOptions> &options) {
+                                  const shared_ptr<Expression> &expression,
+                                  const shared_ptr<CodegenOptions> &options) {
   if (auto array_expression =
           dynamic_pointer_cast<ArrayExpression>(expression)) {
     return ArrayExpressionCodegen(context, array_expression).codegen();
@@ -104,7 +99,7 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   }
   if (auto field_expression =
           dynamic_pointer_cast<FieldExpression>(expression)) {
-    return FieldExpressionCodegen(context, field_expression).codegen();
+    return FieldExpressionCodegen(context, field_expression).codegen(options);
   }
   if (auto identifier_expression =
           dynamic_pointer_cast<IdentifierExpression>(expression)) {
@@ -115,13 +110,14 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   }
   if (auto index_expression =
           dynamic_pointer_cast<IndexExpression>(expression)) {
-    return IndexExpressionCodegen(context, index_expression).codegen();
+    return IndexExpressionCodegen(context, index_expression).codegen(options);
   }
   if (auto integer_expression =
           dynamic_pointer_cast<IntegerExpression>(expression)) {
-    return llvm::ConstantInt::get(LLVMCodegenUtils::type_to_llvm_type(
-                                      context, integer_expression->get_type()),
-                                  stoi(integer_expression->value));
+    return llvm::ConstantInt::get(
+        LLVMCodegenUtils::type_to_llvm_type(context,
+                                            integer_expression->get_type()),
+        static_cast<uint64_t>(stoi(integer_expression->value)));
   }
   if (auto string_expression =
           dynamic_pointer_cast<StringExpression>(expression)) {
@@ -142,7 +138,8 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   }
   if (auto var_ref_expression =
           dynamic_pointer_cast<VarRefExpression>(expression)) {
-    return VarRefExpressionCodegen(context, var_ref_expression).codegen(options);
+    return VarRefExpressionCodegen(context, var_ref_expression)
+        .codegen(options);
   }
 
   Logger::error("Unknown expression");

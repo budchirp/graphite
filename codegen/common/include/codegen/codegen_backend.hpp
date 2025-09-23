@@ -1,6 +1,10 @@
 #pragma once
 
+#include <memory>
+
 #include "program/program.hpp"
+
+using namespace std;
 
 class CodegenBackend {
  public:

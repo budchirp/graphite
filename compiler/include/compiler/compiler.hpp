@@ -5,24 +5,21 @@
 #include <string>
 #include <vector>
 
-#include "compiler/compiler_backend.hpp"
+#include "codegen_backend_type.hpp"
 #include "program/program.hpp"
 
 using namespace std;
 
 class Compiler {
  private:
-  CompilerBackend::Value backend;
+  CodegenBackendType::Value backend_type;
 
   string ld_flags;
 
  public:
-  explicit Compiler(const CompilerBackend::Value &backend,
+  explicit Compiler(const CodegenBackendType::Value &backend_type,
                     const string &ld_flags)
-      : backend(backend), ld_flags(ld_flags) {};
-
-  static shared_ptr<Program> parse_program(const filesystem::path &root,
-                                           const filesystem::path &filename);
+      : backend_type(backend_type), ld_flags(ld_flags) {};
 
   void compile(const filesystem::path &main, const vector<string> &objs) const;
 

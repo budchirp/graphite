@@ -1,0 +1,61 @@
+---
+description: Compiler pipeline and architecture overview
+---
+
+# Compiler Architecture
+
+## Compilation Pipeline
+
+1. **Lexical Analysis** ([lexer/](mdc:frontend/src/lexer/))
+   - Tokenizes source code into tokens
+   - Handles keywords, operators, literals, identifiers
+   - Position tracking for error reporting
+
+2. **Syntax Analysis** ([parser/](mdc:frontend/src/parser/))
+   - Builds Abstract Syntax Tree (AST)
+   - Handles operator precedence
+   - Expression and statement parsing
+
+3. **Semantic Analysis** ([semantic/](mdc:frontend/src/semantic/))
+   - Type checking and resolution
+   - Symbol table management
+   - Validation of language rules
+
+4. **Code Generation** ([codegen/](mdc:codegen/))
+   - LLVM IR generation (primary backend)
+   - Optimization passes
+   - Object file generation
+
+5. **Linking** ([compiler/](mdc:compiler/))
+   - Links object files
+   - Handles external dependencies
+   - Produces executable
+
+## Key Classes
+
+- **[Lexer](mdc:frontend/include/lexer/lexer.hpp)** - Tokenization
+- **Parser** - AST construction  
+- **[Compiler](mdc:compiler/include/compiler/compiler.hpp)** - Orchestrates compilation
+- **Expression/Statement** - AST node base classes
+- **Type** - Type system representation
+- **ProgramContext** - Symbol tables and scoping
+
+## Module Dependencies
+
+```
+cli → compiler → frontend → common
+cli → compiler → codegen → common
+```
+
+## Error Handling
+
+- Position-aware error reporting
+- Validation at multiple stages
+- Graceful error recovery where possible
+- Detailed diagnostic messages
+
+## Backend Support
+
+- Primary: LLVM IR generation
+- Extensible architecture for additional backends
+- Optimization integration through LLVM

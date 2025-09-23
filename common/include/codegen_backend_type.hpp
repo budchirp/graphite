@@ -1,6 +1,6 @@
 #pragma once
 
-class CompilerBackend {
+class CodegenBackendType {
  public:
   enum Value {
     LLVM,

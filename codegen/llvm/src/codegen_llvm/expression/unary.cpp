@@ -1,11 +1,5 @@
 #include "codegen_llvm/expression/unary.hpp"
 
-#include <llvm/Support/raw_ostream.h>
-
-#include <iostream>
-#include <memory>
-#include <string>
-
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/options.hpp"
 #include "codegen_llvm/utils.hpp"
@@ -21,72 +15,109 @@ llvm::Value* UnaryExpressionCodegen::codegen(
   auto type = expression->get_type();
   auto llvm_type = LLVMCodegenUtils::type_to_llvm_type(context, type);
 
-  auto ptr = LLVMCodegen::codegen(context, expression->expression,
-                                  options ? options
-                                  : (expression->op.type == TOKEN_MINUSMINUS ||
-                                     expression->op.type == TOKEN_PLUSPLUS ||
-                                     expression->op.type == TOKEN_AMPERSAND)
-                                      ? make_shared<CodegenOptions>(false, true)
-                                      : nullptr);
-
   switch (expression->op.type) {
     case TOKEN_ASTERISK: {
-      return (options && !options->load_pointer)
-                 ? ptr
-                 : context->get_variable_value(ptr, type);
+      // Pointer dereference: *ptr
+      // Get the pointer value (not its address)
+      auto ptr_value = LLVMCodegen::codegen(context, expression->expression);
+      if (!ptr_value) return nullptr;
+
+      // ptr_value now contains the address to dereference
+      if (options && !options->load_variable) {
+        // Return the address for assignment: *ptr = value
+        return ptr_value;
+      } else {
+        // Return the dereferenced value: x = *ptr
+        return context->builder->CreateLoad(llvm_type, ptr_value);
+      }
     }
 
     case TOKEN_AMPERSAND: {
-      return ptr;
+      // Address-of: &var
+      // Get the address of the operand
+      auto operand_options = make_shared<CodegenOptions>(false, true);
+      return LLVMCodegen::codegen(context, expression->expression,
+                                  operand_options);
     }
 
     case TOKEN_MINUS: {
-      auto value = context->get_variable_value(ptr, type);
+      // Unary minus: -value
+      auto value = LLVMCodegen::codegen(context, expression->expression);
+      if (!value) return nullptr;
+
       if (TypeHelper::is_int(type)) {
         return context->builder->CreateNeg(value);
       } else if (TypeHelper::is_float(type)) {
         return context->builder->CreateFNeg(value);
       }
+      break;
     }
 
     case TOKEN_PLUS: {
-      return context->builder->CreateLoad(llvm_type, ptr);
+      // Unary plus: +value (just return the value)
+      return LLVMCodegen::codegen(context, expression->expression);
     }
 
     case TOKEN_BANG: {
-      return context->builder->CreateNot(
-          context->builder->CreateLoad(llvm_type, ptr));
+      // Logical not: !value
+      auto value = LLVMCodegen::codegen(context, expression->expression);
+      if (!value) return nullptr;
+      return context->builder->CreateNot(value);
     }
 
     case TOKEN_MINUSMINUS: {
-      auto value = context->get_variable_value(ptr, type);
+      // Decrement: --var (prefix) or var-- (postfix)
+      auto var_options = make_shared<CodegenOptions>(false, true);
+      auto var_address =
+          LLVMCodegen::codegen(context, expression->expression, var_options);
+      if (!var_address) return nullptr;
+
+      auto current_value = context->builder->CreateLoad(llvm_type, var_address);
+      llvm::Value* new_value = nullptr;
+
       if (TypeHelper::is_int(type)) {
-        value = context->builder->CreateSub(
-            value, llvm::ConstantInt::get(llvm_type, 1));
+        new_value = context->builder->CreateSub(
+            current_value, llvm::ConstantInt::get(llvm_type, 1));
       } else if (TypeHelper::is_float(type)) {
-        value = context->builder->CreateFSub(
-            value, llvm::ConstantFP::get(llvm_type, 1.0));
+        new_value = context->builder->CreateFSub(
+            current_value, llvm::ConstantFP::get(llvm_type, 1.0));
       }
 
-      context->builder->CreateStore(value, ptr);
-      return value;
+      if (new_value) {
+        context->builder->CreateStore(new_value, var_address);
+        return new_value;
+      }
+      break;
     }
 
     case TOKEN_PLUSPLUS: {
-      auto value = context->get_variable_value(ptr, type);
+      // Increment: ++var (prefix) or var++ (postfix)
+      auto var_options = make_shared<CodegenOptions>(false, true);
+      auto var_address =
+          LLVMCodegen::codegen(context, expression->expression, var_options);
+      if (!var_address) return nullptr;
+
+      auto current_value = context->builder->CreateLoad(llvm_type, var_address);
+      llvm::Value* new_value = nullptr;
+
       if (TypeHelper::is_int(type)) {
-        value = context->builder->CreateAdd(
-            value, llvm::ConstantInt::get(llvm_type, 1));
+        new_value = context->builder->CreateAdd(
+            current_value, llvm::ConstantInt::get(llvm_type, 1));
       } else if (TypeHelper::is_float(type)) {
-        value = context->builder->CreateFAdd(
-            value, llvm::ConstantFP::get(llvm_type, 1.0));
+        new_value = context->builder->CreateFAdd(
+            current_value, llvm::ConstantFP::get(llvm_type, 1.0));
       }
 
-      context->builder->CreateStore(value, ptr);
-      return value;
+      if (new_value) {
+        context->builder->CreateStore(new_value, var_address);
+        return new_value;
+      }
+      break;
     }
 
     default:
-      return nullptr;
+      break;
   }
+
+  return nullptr;
 }

@@ -1,0 +1,47 @@
+---
+description: AST node implementation patterns and conventions
+---
+
+# AST Implementation Patterns
+
+## Base Classes
+
+All AST nodes inherit from either [Expression](mdc:frontend/include/ast/expression.hpp) or [Statement](mdc:frontend/include/ast/statement.hpp).
+
+### Expression Interface
+```cpp
+class Expression {
+  virtual void validate(const shared_ptr<ProgramContext> &context) = 0;
+  virtual void resolve_types(const shared_ptr<ProgramContext> &context) = 0;
+  virtual Position *get_position() = 0;
+  virtual void set_type(const shared_ptr<Type> &type) = 0;
+  virtual shared_ptr<Type> get_type() const = 0;
+  virtual string to_string() const = 0;
+  virtual string to_string_tree() const = 0;
+};
+```
+
+### Statement Interface
+Similar pattern with validation and context methods.
+
+## Implementation Requirements
+
+- All AST nodes must implement validation logic
+- Type resolution is separate from parsing
+- Position tracking for error reporting
+- String representation for debugging
+- Use shared_ptr for child nodes
+
+## File Organization
+
+- Headers in `frontend/include/ast/[expression|statement]/`
+- Implementation in `frontend/src/ast/[expression|statement]/`
+- One class per file, matching filename
+- Include corresponding header first in .cpp files
+
+## Semantic Analysis
+
+- Validation happens after parsing
+- Type resolution is a separate pass
+- Use ProgramContext for symbol lookup
+- Report errors with position information

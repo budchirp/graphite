@@ -5,6 +5,7 @@
 #include <string>
 
 #include "types/int.hpp"
+#include "types/void.hpp"
 
 void AssemblyExpression::validate(const shared_ptr<ProgramContext> &context) {
   assembly->validate(context);
@@ -54,7 +55,7 @@ void AssemblyExpression::resolve_types(
     reg->resolve_types(context);
   }
 
-  set_function_type(make_shared<FunctionType>(types, make_shared<IntType>(64, false)));
+  set_function_type(make_shared<FunctionType>(types, make_shared<VoidType>()));
   set_type(function_type->return_type);
 }
 

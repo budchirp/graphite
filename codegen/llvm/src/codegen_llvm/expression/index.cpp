@@ -4,10 +4,16 @@
 #include <string>
 
 #include "codegen_llvm/codegen.hpp"
+#include "codegen_llvm/options.hpp"
 #include "codegen_llvm/utils.hpp"
 #include "logger/logger.hpp"
 
 llvm::Value* IndexExpressionCodegen::codegen() const {
+  return codegen(nullptr);
+}
+
+llvm::Value* IndexExpressionCodegen::codegen(
+    const shared_ptr<CodegenOptions>& options) const {
   auto index_value = LLVMCodegen::codegen(context, expression->index);
   if (!index_value) {
     Logger::error("Failed to generate low level code for index",
@@ -15,15 +21,20 @@ llvm::Value* IndexExpressionCodegen::codegen() const {
     return nullptr;
   }
 
-  auto value = LLVMCodegen::codegen(context, expression->expression);
+  auto array_ptr =
+      LLVMCodegen::codegen(context, expression->expression,
+                           make_shared<CodegenOptions>(false, true));
 
   auto index_ptr = context->builder->CreateGEP(
       LLVMCodegenUtils::type_to_llvm_type(context,
                                           expression->get_array_type()),
-      value,
-      {context->builder->getInt32(0), index_value});
+      array_ptr, {context->builder->getInt32(0), index_value});
 
-  return context->builder->CreateLoad(
-      LLVMCodegenUtils::type_to_llvm_type(context, expression->get_type()),
-      index_ptr);
+  if (options && !options->load_variable) {
+    return index_ptr;
+  } else {
+    return context->builder->CreateLoad(
+        LLVMCodegenUtils::type_to_llvm_type(context, expression->get_type()),
+        index_ptr);
+  }
 }

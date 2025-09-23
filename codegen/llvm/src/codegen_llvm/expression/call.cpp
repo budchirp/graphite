@@ -43,8 +43,7 @@ llvm::Value *CallExpressionCodegen::codegen() const {
 
   if (function->getReturnType()->isVoidTy()) {
     context->builder->CreateCall(function, llvm_arguments);
-    return llvm::Constant::getNullValue(
-        llvm::Type::getVoidTy(*context->llvm_context));
+    return llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context));
   } else {
     return context->builder->CreateCall(function, llvm_arguments);
   }

@@ -1,0 +1,43 @@
+---
+globs: CMakeLists.txt,*.cmake
+---
+
+# CMake Build Configuration
+
+## Project Configuration
+
+- C++20 standard required
+- Debug/Release build types with appropriate flags
+- LLVM backend enabled by default (`ENABLE_LLVM` option)
+- Address/undefined behavior sanitizers in Debug mode
+- Link-time optimization (LTO) in Release mode
+
+## Directory Structure
+
+Each module has its own CMakeLists.txt:
+- [CMakeLists.txt](mdc:CMakeLists.txt) - Root configuration
+- [frontend/CMakeLists.txt](mdc:frontend/CMakeLists.txt) - Frontend library
+- [compiler/CMakeLists.txt](mdc:compiler/CMakeLists.txt) - Compiler library
+- [codegen/CMakeLists.txt](mdc:codegen/CMakeLists.txt) - Codegen backends
+- [cli/CMakeLists.txt](mdc:cli/CMakeLists.txt) - CLI applications
+
+## Library Targets
+
+- `common` - Shared utilities
+- `frontend` - Lexer, parser, AST
+- `compiler` - Compilation orchestration  
+- `codegen` - Code generation
+- CLI executables link against these libraries
+
+## Compiler Flags
+
+Debug: `-Og -g -fsanitize=address -fsanitize=undefined`
+Release: `-O3` with LTO when supported
+Always: `-Wall -Wextra -Wpedantic` and additional warnings
+
+## File Globbing
+
+Use `GLOB_RECURSE` with `CONFIGURE_DEPENDS` for source files:
+```cmake
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+```

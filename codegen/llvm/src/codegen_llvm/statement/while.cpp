@@ -8,7 +8,8 @@ llvm::Value *WhileStatementCodegen::codegen() const {
 
   auto condition_block =
       llvm::BasicBlock::Create(*context->llvm_context, "loop.condition");
-  auto body_block = llvm::BasicBlock::Create(*context->llvm_context, "loop.body");
+  auto body_block =
+      llvm::BasicBlock::Create(*context->llvm_context, "loop.body");
   auto end_block = llvm::BasicBlock::Create(*context->llvm_context, "loop.end");
 
   context->builder->CreateBr(condition_block);
@@ -35,5 +36,5 @@ llvm::Value *WhileStatementCodegen::codegen() const {
   parent_function->insert(parent_function->end(), end_block);
   context->builder->SetInsertPoint(end_block);
 
-  return llvm::Constant::getNullValue(llvm::Type::getVoidTy(*context->llvm_context));
+  return llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context));
 }

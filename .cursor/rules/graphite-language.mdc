@@ -1,0 +1,51 @@
+---
+globs: *.gph
+description: Graphite programming language syntax and features
+---
+
+# Graphite Programming Language
+
+## File Extension
+Graphite source files use `.gph` extension.
+
+## Language Features
+
+### Type System
+- Primitive types: `i32`, `i64`, `string`, `boolean`, `void`
+- Arrays: `type[]` (e.g., `i32[]`, `string[]`)
+- Pointers: `*type`, `*mut type` for mutable pointers
+- Custom types: `type alias_name = existing_type`
+- Structs with named fields
+
+### Variables
+- Immutable by default: `var name = value`
+- Mutable: `var mut name = value`
+- Type annotations: `var name: type = value`
+- Uninitialized: `var mut name: type` (must assign before use)
+
+### Functions
+- Syntax: `fn name(param: type) -> return_type { ... }`
+- External functions: `extern name(params) -> return_type`
+- Public/private visibility: `public fn` vs `fn`
+
+### Control Flow
+- If expressions: `if (condition) { ... } else { ... }`
+- For loops: `for (init; condition; increment) { ... }`
+- While loops: `while (condition) { ... }`
+
+### Module System
+- Include files: `include "filename"` (without .gph extension)
+- Visibility: `public` for exported symbols
+- Private by default
+
+### Memory Management
+- Manual memory management with `malloc`/`free`
+- Pointer arithmetic and dereferencing
+- Address-of operator: `&variable`
+
+### Inline Assembly
+- Syntax: `asm("assembly code" : outputs : inputs : clobbers)`
+- Used for system calls and low-level operations
+
+## Example Program Structure
+See [main.gph](mdc:examples/main.gph) for comprehensive language usage examples.

@@ -1,7 +1,8 @@
+#pragma once
+
 #include <memory>
 
 #include "codegen/codegen_backend.hpp"
-#include "compiler/compiler_backend.hpp"
 #include "program/program.hpp"
 
 using namespace std;
@@ -9,14 +10,14 @@ using namespace std;
 class Codegen {
   shared_ptr<Program> program;
 
-  CompilerBackend::Value backend;
+  shared_ptr<CodegenBackend> backend;
 
  public:
   explicit Codegen(const shared_ptr<Program> &program,
-                   const CompilerBackend::Value &backend)
-      : program(program), backend(backend) {};
+                   const shared_ptr<CodegenBackend> &backend)
+      : program(program), backend(backend) {}
 
-  void init() const;
+  shared_ptr<CodegenBackend> get() const { return backend; }
 
-  shared_ptr<CodegenBackend> get() const;
+  void codegen() const;
 };

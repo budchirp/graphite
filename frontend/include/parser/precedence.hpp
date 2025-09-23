@@ -28,7 +28,7 @@ class Precedence {
         {TOKEN_PLUS, SUM},
         {TOKEN_MINUS, SUM},
         {TOKEN_SLASH, PRODUCT},
-        {TOKEN_ASTERISK, PREFIX},
+        {TOKEN_ASTERISK, PRODUCT},
         {TOKEN_AMPERSAND, PREFIX},       // &x is a prefix operator
         {TOKEN_BANG, PREFIX},            // !x is a prefix operator
         {TOKEN_PLUSPLUS, POSTFIX},       // x++ is a postfix operator

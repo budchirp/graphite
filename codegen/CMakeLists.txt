@@ -1,2 +1,5 @@
 add_subdirectory(common)
-add_subdirectory(llvm)
+
+if(ENABLE_LLVM)
+    add_subdirectory(llvm)
+endif()

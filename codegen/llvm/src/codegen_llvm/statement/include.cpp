@@ -1,7 +1,9 @@
 #include "codegen_llvm/statement/include.hpp"
+
 #include <llvm/IR/GlobalValue.h>
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/Verifier.h>
+
 #include "codegen_llvm/utils.hpp"
 
 llvm::Value *IncludeStatementCodegen::codegen() const {
@@ -16,8 +18,9 @@ llvm::Value *IncludeStatementCodegen::codegen() const {
 
     if (variable->visibility == SymbolVisibility::Value::PUBLIC) {
       auto value = new llvm::GlobalVariable(
-          *context->module, LLVMCodegenUtils::type_to_llvm_type(context, variable->type),
-          false, llvm::GlobalValue::ExternalLinkage, nullptr, name);
+          *context->module,
+          LLVMCodegenUtils::type_to_llvm_type(context, variable->type), false,
+          llvm::GlobalValue::ExternalLinkage, nullptr, name);
 
       auto new_variable = scope->get_variable(name);
       new_variable->is_global = true;
@@ -48,6 +51,5 @@ llvm::Value *IncludeStatementCodegen::codegen() const {
     }
   }
 
-  return llvm::Constant::getNullValue(
-      llvm::Type::getVoidTy(*context->llvm_context));
+  return llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context));
 }

@@ -15,24 +15,21 @@ type asd = Car
 type my_type = string
 type string_array = my_type[]
 
-var syscall_read: i64 = 0
-var stdin: i64 = 0
+public fn test() -> void {
+  print_string("INLINE ASSEMBLY")
+}
 
 # comment
 public fn main(argc: i32, argv: string_array) -> i32 {
+  asm("call test" : : : :)
+
   print_string("\nStart\n")
 
-  print_string("\nInline assembly\n")
+  print_string("\nBasic test\n")
 
-  var mut buffer = [] as i8[100]
-
-  # implement sizeof and use `sizeof(buffer) - 1`
-  var count: i64 = 99
-
-  var bytes_read = malloc(8) as mut *i64;
-  *bytes_read = asm("mov $1, %rax\nmov $2, %rdi\nmov $3, %rsi\nmov $4, %rdx\nsyscall\nmov %rax, $0" : "=r" bytes_read : "r" syscall_read, "r" stdin, "r" buffer, "r" count : "rax", "rdi", "rsi", "rdx", "rcx", "r11", "memory")
- 
-  print_number(*bytes_read)
+  # Test basic operations
+  var test_val: i32 = 42
+  print_number(test_val)
 
   print_string("\nStruct\n")
 
