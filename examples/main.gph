@@ -1,40 +1,29 @@
-extern print_string(str: string) -> void
+extern printf(str: string) -> void
 extern print_number(number: i32) -> void
 
-extern malloc(size: i32) -> *mut void
-extern free(ptr: *void) -> void
+extern malloc(size: i32) -> *mut ptr
+extern free(ptr: *ptr) -> void
 
 include "add"
 include "car"
 
-var global_var = 16
+var global = 16
 
-# Car is imported from car.gph
-type asd = Car
-
-type my_type = string
-type string_array = my_type[]
+type string_array = string[]
 
 public fn test() -> void {
-  print_string("INLINE ASSEMBLY")
+  printf("INLINE ASSEMBLY\n")
 }
 
 # comment
 public fn main(argc: i32, argv: string_array) -> i32 {
   asm("call test" : : : :)
 
-  print_string("\nStart\n")
+  printf("\nStart\n")
 
-  print_string("\nBasic test\n")
+  printf("\nStruct\n")
 
-  # Test basic operations
-  var test_val: i32 = 42
-  print_number(test_val)
-
-  print_string("\nStruct\n")
-
-  # asd is Car
-  var my_struct = asd {
+  var my_struct = Car {
     name: "SuperCar\n",
     model: 2019,
     seats: 4,
@@ -42,54 +31,56 @@ public fn main(argc: i32, argv: string_array) -> i32 {
 
   print_number(my_struct.seats)
   print_number(my_struct.model)
-  print_string(my_struct.name)
+  printf(my_struct.name)
 
-  print_string("\nArray\n")
+  printf("\nArray\n")
+
   var array = [123, 234, 345, 456, 567]
   for (var mut i: i32 = 0; i < 5; i++) {
     print_number(array[i])
   }
 
-  print_string("\nAdding numbers\n")
-  var x: i32 = add(global_var, 32)
+  printf("\nAdding numbers\n")
+  var x: i32 = add(global, 32)
   var y: i32 = (x * 1)
   var h: *i32 = &y
   print_number(*h)
 
-  print_string("\nFor loop\n")
+  printf("\nFor loop\n")
   for (var mut i: i32 = 10; i > 0; i--) {
     print_number(i)
   }
 
-  print_string("\nVar without initializer\n")
+  printf("\nVar without initializer\n")
   var mut j: i32
   j = y
   j = 32
   j = y
   print_number(j)
 
-  print_string("\nVar without initializer - pointer\n")
+  printf("\nVar without initializer - pointer\n")
   var k: mut *i32
   k = &y;
   *k = 31
   print_number(*k)
+  print_number(y)
 
-  print_string("\nWhile loop\n")
+  printf("\nWhile loop\n")
   var mut i: i32 = 0;
   while (i < 10) {
     print_number(i)
     i++
   }
 
-  print_string("\nBoolean check\n")
+  printf("\nBoolean check\n")
   var z: boolean = if (x == y) { true } else { false }
   if (z) {
-    print_string("x and y is 64\n")
+    printf("x and y is 64\n")
   } else {
-    print_string("x and y is not 64\n")
+    printf("x and y is not 64\n")
   }
 
-  print_string("End\n")
+  printf("End\n")
 
   return (10 - 10) * 10
 }

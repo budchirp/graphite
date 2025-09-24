@@ -6,10 +6,10 @@
 
 llvm::Value *ReturnStatementCodegen::codegen() const {
   if (auto value = LLVMCodegen::codegen(context, statement->expression)) {
-    auto function = context->builder->GetInsertBlock()->getParent();
-    auto return_type = function->getReturnType();
+    auto llvm_function = context->builder->GetInsertBlock()->getParent();
+    auto llvm_return_type = llvm_function->getReturnType();
 
-    value = LLVMCodegenUtils::cast_type(context, value, return_type);
+    value = LLVMCodegenUtils::cast_type(context, value, llvm_return_type);
     if (!value) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                     statement->get_position());

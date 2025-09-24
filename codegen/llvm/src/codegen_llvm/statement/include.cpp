@@ -14,8 +14,6 @@ llvm::Value *IncludeStatementCodegen::codegen() const {
                                           ->get_env()
                                           ->get_scope("global")
                                           ->get_variables()) {
-    if (name == "null") continue;
-
     if (variable->visibility == SymbolVisibility::Value::PUBLIC) {
       auto value = new llvm::GlobalVariable(
           *context->module,
@@ -34,20 +32,20 @@ llvm::Value *IncludeStatementCodegen::codegen() const {
   for (const auto &[name, function] :
        statement->program->get_context()->get_env()->get_functions()) {
     if (function->visibility == SymbolVisibility::Value::PUBLIC) {
-      auto new_function = env->get_function(name);
+      auto llvm_function_type = static_cast<llvm::FunctionType *>(
+          LLVMCodegenUtils::type_to_llvm_type(context, function->type));
 
-      auto function = llvm::Function::Create(
-          static_cast<llvm::FunctionType *>(
-              LLVMCodegenUtils::type_to_llvm_type(context, new_function->type)),
-          llvm::Function::ExternalLinkage, name, *context->module);
+      auto llvm_function = llvm::Function::Create(
+          llvm_function_type, llvm::Function::ExternalLinkage, name,
+          *context->module);
 
       size_t idx = 0;
-      for (auto &argument : function->args())
-        argument.setName(new_function->type->parameters[idx++].first);
+      for (auto &argument : llvm_function->args())
+        argument.setName(function->type->parameters[idx++].first);
 
-      llvm::verifyFunction(*function);
+      llvm::verifyFunction(*llvm_function);
 
-      env->add_function(name, new_function);
+      env->add_function(name, function);
     }
   }
 

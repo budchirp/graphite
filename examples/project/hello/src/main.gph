@@ -1,0 +1,7 @@
+include "std/io"
+
+public fun main(argc: i32, argv: string[]) -> i32 {
+  print("Hello, World!\n")
+
+  return 0;
+}

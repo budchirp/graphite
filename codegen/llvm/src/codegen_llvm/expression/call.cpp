@@ -5,33 +5,33 @@
 #include "logger/logger.hpp"
 
 llvm::Value *CallExpressionCodegen::codegen() const {
-  auto name = expression->name->value;
+  auto function = context->get_env()->get_function(expression->name->value);
 
-  auto function = context->module->getFunction(name);
-  if (!function) {
-    Logger::error("Undefined function `" + name + "` called",
+  auto llvm_function = context->module->getFunction(function->name);
+  if (!llvm_function) {
+    Logger::error("Undefined function `" + function->name + "` called",
                   LogTypes::Error::UNDEFINED, expression->get_position());
     return nullptr;
   }
 
   vector<llvm::Value *> llvm_arguments;
+  llvm_arguments.reserve(expression->arguments.size());
 
   size_t idx = 0;
   for (const auto &argument : expression->arguments) {
     auto llvm_argument = LLVMCodegen::codegen(context, argument);
     if (!llvm_argument) {
       Logger::error("Failed to generate low level code for argument `" +
-                        argument->to_string() + "` in function `" + name + "`",
+                        argument->to_string() + "` in function `" +
+                        function->name + "`",
                     LogTypes::Error::INTERNAL, argument->get_position());
       return nullptr;
     }
 
-    auto function = context->get_env()->get_function(name);
-    auto parameter_type = function->type->parameters[idx++].second;
-
     llvm_argument = LLVMCodegenUtils::cast_type(
         context, llvm_argument,
-        LLVMCodegenUtils::type_to_llvm_type(context, parameter_type));
+        LLVMCodegenUtils::type_to_llvm_type(
+            context, function->type->parameters[idx++].second));
     if (!llvm_argument) {
       Logger::error("Type mismatch", LogTypes::Error::TYPE_MISMATCH,
                     argument->get_position());
@@ -41,10 +41,10 @@ llvm::Value *CallExpressionCodegen::codegen() const {
     llvm_arguments.push_back(llvm_argument);
   }
 
-  if (function->getReturnType()->isVoidTy()) {
-    context->builder->CreateCall(function, llvm_arguments);
+  if (llvm_function->getReturnType()->isVoidTy()) {
+    context->builder->CreateCall(llvm_function, llvm_arguments);
     return llvm::UndefValue::get(llvm::Type::getVoidTy(*context->llvm_context));
   } else {
-    return context->builder->CreateCall(function, llvm_arguments);
+    return context->builder->CreateCall(llvm_function, llvm_arguments);
   }
 }

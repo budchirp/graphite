@@ -1,5 +1,7 @@
 #include "codegen_llvm/statement/var.hpp"
 
+#include <llvm/IR/Constants.h>
+
 #include "codegen_llvm/codegen.hpp"
 #include "codegen_llvm/utils.hpp"
 #include "logger/logger.hpp"
@@ -39,10 +41,10 @@ llvm::Value *VarStatementCodegen::codegen() const {
       if (auto *const_value = dyn_cast<llvm::Constant>(value)) {
         initializer = const_value;
       } else {
-        initializer = llvm::Constant::getNullValue(llvm_type);
+        initializer = llvm::UndefValue::get(llvm_type);
         Logger::warn(
             "Global variable '" + name +
-                "' requires a constant initializer; using default zero value",
+                "' requires a constant initializer; using undefined value",
             LogTypes::Warn::SUGGESTION, statement->expression->get_position());
       }
 

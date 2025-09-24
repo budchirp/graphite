@@ -34,9 +34,9 @@ llvm::Value* StructExpressionCodegen::codegen() const {
 
     auto index_ptr = context->builder->CreateStructGEP(
         llvm_struct_type, struct_ptr, static_cast<unsigned>(idx++));
+
     context->builder->CreateStore(llvm_value, index_ptr);
   }
 
-  // Return the loaded struct value, not the pointer
   return context->builder->CreateLoad(llvm_struct_type, struct_ptr);
 }

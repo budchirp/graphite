@@ -4,6 +4,8 @@
 #include "codegen_llvm/options.hpp"
 #include "codegen_llvm/utils.hpp"
 #include "lexer/token/token_type.hpp"
+#include "logger/log_types.hpp"
+#include "logger/logger.hpp"
 #include "semantic/type_helper.hpp"
 
 llvm::Value* UnaryExpressionCodegen::codegen() const {
@@ -17,33 +19,34 @@ llvm::Value* UnaryExpressionCodegen::codegen(
 
   switch (expression->op.type) {
     case TOKEN_ASTERISK: {
-      // Pointer dereference: *ptr
-      // Get the pointer value (not its address)
-      auto ptr_value = LLVMCodegen::codegen(context, expression->expression);
-      if (!ptr_value) return nullptr;
+      auto ptr = LLVMCodegen::codegen(context, expression->expression);
+      if (!ptr) {
+        Logger::error("Failed to generate low level code for pointer",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
+      }
 
-      // ptr_value now contains the address to dereference
       if (options && !options->load_variable) {
-        // Return the address for assignment: *ptr = value
-        return ptr_value;
+        return ptr;
       } else {
-        // Return the dereferenced value: x = *ptr
-        return context->builder->CreateLoad(llvm_type, ptr_value);
+        return context->builder->CreateLoad(llvm_type, ptr);
       }
     }
 
     case TOKEN_AMPERSAND: {
-      // Address-of: &var
-      // Get the address of the operand
-      auto operand_options = make_shared<CodegenOptions>(false, true);
       return LLVMCodegen::codegen(context, expression->expression,
-                                  operand_options);
+                                  make_shared<CodegenOptions>(false, true));
     }
 
     case TOKEN_MINUS: {
-      // Unary minus: -value
       auto value = LLVMCodegen::codegen(context, expression->expression);
-      if (!value) return nullptr;
+      if (!value) {
+        Logger::error("Failed to generate low level code for value",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
+      }
 
       if (TypeHelper::is_int(type)) {
         return context->builder->CreateNeg(value);
@@ -54,27 +57,34 @@ llvm::Value* UnaryExpressionCodegen::codegen(
     }
 
     case TOKEN_PLUS: {
-      // Unary plus: +value (just return the value)
       return LLVMCodegen::codegen(context, expression->expression);
     }
 
     case TOKEN_BANG: {
-      // Logical not: !value
       auto value = LLVMCodegen::codegen(context, expression->expression);
-      if (!value) return nullptr;
+      if (!value) {
+        Logger::error("Failed to generate low level code for value",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
+      }
+
       return context->builder->CreateNot(value);
     }
 
     case TOKEN_MINUSMINUS: {
-      // Decrement: --var (prefix) or var-- (postfix)
-      auto var_options = make_shared<CodegenOptions>(false, true);
-      auto var_address =
-          LLVMCodegen::codegen(context, expression->expression, var_options);
-      if (!var_address) return nullptr;
+      auto ptr = LLVMCodegen::codegen(context, expression->expression,
+                                      make_shared<CodegenOptions>(false, true));
+      if (!ptr) {
+        Logger::error("Failed to generate low level code for pointer",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
+      }
 
-      auto current_value = context->builder->CreateLoad(llvm_type, var_address);
+      auto current_value = context->builder->CreateLoad(llvm_type, ptr);
+
       llvm::Value* new_value = nullptr;
-
       if (TypeHelper::is_int(type)) {
         new_value = context->builder->CreateSub(
             current_value, llvm::ConstantInt::get(llvm_type, 1));
@@ -83,23 +93,32 @@ llvm::Value* UnaryExpressionCodegen::codegen(
             current_value, llvm::ConstantFP::get(llvm_type, 1.0));
       }
 
-      if (new_value) {
-        context->builder->CreateStore(new_value, var_address);
-        return new_value;
+      if (!new_value) {
+        Logger::error("Failed to generate low level code for minus minus",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
       }
+
+      context->builder->CreateStore(new_value, ptr);
+      return new_value;
+
       break;
     }
 
     case TOKEN_PLUSPLUS: {
-      // Increment: ++var (prefix) or var++ (postfix)
-      auto var_options = make_shared<CodegenOptions>(false, true);
-      auto var_address =
-          LLVMCodegen::codegen(context, expression->expression, var_options);
-      if (!var_address) return nullptr;
+      auto ptr = LLVMCodegen::codegen(context, expression->expression,
+                                      make_shared<CodegenOptions>(false, true));
+      if (!ptr) {
+        Logger::error("Failed to generate low level code for pointer",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
+      }
 
-      auto current_value = context->builder->CreateLoad(llvm_type, var_address);
+      auto current_value = context->builder->CreateLoad(llvm_type, ptr);
+
       llvm::Value* new_value = nullptr;
-
       if (TypeHelper::is_int(type)) {
         new_value = context->builder->CreateAdd(
             current_value, llvm::ConstantInt::get(llvm_type, 1));
@@ -108,10 +127,16 @@ llvm::Value* UnaryExpressionCodegen::codegen(
             current_value, llvm::ConstantFP::get(llvm_type, 1.0));
       }
 
-      if (new_value) {
-        context->builder->CreateStore(new_value, var_address);
-        return new_value;
+      if (!new_value) {
+        Logger::error("Failed to generate low level code for plus plus",
+                      LogTypes::Error::INTERNAL,
+                      expression->expression->get_position());
+        return nullptr;
       }
+
+      context->builder->CreateStore(new_value, ptr);
+      return new_value;
+
       break;
     }
 

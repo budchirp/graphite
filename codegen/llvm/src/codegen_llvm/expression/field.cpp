@@ -30,7 +30,7 @@ llvm::Value* FieldExpressionCodegen::codegen(
   auto field_ptr = context->builder->CreateStructGEP(
       LLVMCodegenUtils::type_to_llvm_type(context,
                                           expression->get_struct_type()),
-      struct_ptr, static_cast<unsigned int>(idx));
+      struct_ptr, static_cast<unsigned>(idx));
 
   if (options && !options->load_variable) {
     return field_ptr;

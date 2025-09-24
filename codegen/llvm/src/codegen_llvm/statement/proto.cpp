@@ -2,6 +2,7 @@
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/Support/Casting.h>
 
 #include <memory>
 
@@ -9,22 +10,23 @@
 
 llvm::Value *ProtoStatementCodegen::codegen() const { return codegen_proto(); }
 llvm::Function *ProtoStatementCodegen::codegen_proto() const {
-  auto name = statement->name->value;
+  auto function = context->get_env()->get_function(statement->name->value);
 
-  auto function = llvm::Function::Create(
-      static_cast<llvm::FunctionType *>(LLVMCodegenUtils::type_to_llvm_type(
-          context, context->get_env()->get_function(name)->type)),
-      context->get_env()->get_function(name)->visibility ==
-              SymbolVisibility::Value::PUBLIC
-          ? llvm::Function::ExternalLinkage
-          : llvm::Function::InternalLinkage,
-      name, context->module.get());
+  auto linkage = function->visibility == SymbolVisibility::Value::PUBLIC
+                     ? llvm::Function::ExternalLinkage
+                     : llvm::Function::InternalLinkage;
+
+  auto llvm_function_type = static_cast<llvm::FunctionType *>(
+      LLVMCodegenUtils::type_to_llvm_type(context, function->type));
+
+  auto llvm_function = llvm::Function::Create(
+      llvm_function_type, linkage, function->name, context->module.get());
 
   size_t idx = 0;
-  for (auto &argument : function->args())
+  for (auto &argument : llvm_function->args())
     argument.setName(statement->parameters[idx++].first->value);
 
-  llvm::verifyFunction(*function);
+  llvm::verifyFunction(*llvm_function);
 
-  return function;
+  return llvm_function;
 }

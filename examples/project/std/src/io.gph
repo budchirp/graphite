@@ -1,0 +1,8 @@
+extern printf(str: string) -> void
+
+extern malloc(size: i32) -> *mut ptr
+extern free(ptr: *ptr) -> void
+
+public fun print(str: string) -> void {
+  printf(str)
+}

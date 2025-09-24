@@ -132,7 +132,9 @@ llvm::Type *LLVMCodegenUtils::type_to_llvm_type(
   }
 
   if (auto pointer_type = dynamic_pointer_cast<PointerType>(type)) {
-    return llvm::PointerType::get(*context->llvm_context, 0);
+    return pointer_type->pointee_type
+               ? llvm::PointerType::get(*context->llvm_context, 0)
+               : nullptr;
   }
 
   if (auto string_type = dynamic_pointer_cast<StringType>(type)) {

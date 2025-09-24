@@ -37,3 +37,4 @@
 - [ ] Switch expression
 - [ ] CLI (graphite, graphitec)
 - [ ] OOP
+- [ ] Extern fn and var

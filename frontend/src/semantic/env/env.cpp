@@ -11,6 +11,7 @@
 #include "types/float.hpp"
 #include "types/int.hpp"
 #include "types/null.hpp"
+#include "types/pointer.hpp"
 #include "types/string.hpp"
 #include "types/void.hpp"
 
@@ -60,6 +61,10 @@ Env::Env() {
   types.emplace(
       "void", make_shared<TypeSymbol>("void", SymbolVisibility::Value::PRIVATE,
                                       make_shared<VoidType>()));
+
+  types.emplace(
+      "ptr", make_shared<TypeSymbol>("ptr", SymbolVisibility::Value::PRIVATE,
+                                     make_shared<PointerType>(nullptr, false)));
 
   auto global_scope = make_shared<Scope>("global", nullptr);
   add_scope("global", global_scope);

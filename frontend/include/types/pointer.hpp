@@ -22,10 +22,12 @@ class PointerType : public Type {
   string get_name() const override { return name; }
 
   string to_string() const override {
-    return (is_mutable ? "mut *" : "*") + pointee_type->to_string();
+    return (is_mutable ? "mut *" : "*") +
+           (pointee_type ? pointee_type->to_string() : "ptr");
   };
   string to_string_tree() const override {
-    return "PointerType(pointee_type: " + pointee_type->to_string_tree() +
+    return "PointerType(pointee_type: " +
+           (pointee_type ? pointee_type->to_string_tree() : "ptr") +
            ", is_mutable: '" + ::to_string(is_mutable) + "')";
   };
 };
