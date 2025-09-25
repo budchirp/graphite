@@ -1,10 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 
 #include "ast/statement.hpp"
-#include "ast/statement/proto.hpp"
 #include "position.hpp"
 #include "types/void.hpp"
 
@@ -17,11 +17,11 @@ class ExternStatement : public Statement {
  public:
   SymbolVisibility::Value visibility;
 
-  shared_ptr<ProtoStatement> proto;
+  shared_ptr<Statement> proto;
 
   explicit ExternStatement(const Position &position,
                            const SymbolVisibility::Value &visibility,
-                           const shared_ptr<ProtoStatement> &proto)
+                           const shared_ptr<Statement> &proto)
       : position(position), visibility(visibility), proto(proto) {};
 
   void validate(const shared_ptr<ProgramContext> &context) override;

@@ -21,13 +21,13 @@ class FunctionStatement : public Statement {
 
   SymbolVisibility::Value visibility;
 
-  shared_ptr<ProtoStatement> proto;
+  shared_ptr<FunctionProtoStatement> proto;
   shared_ptr<BlockStatement> body;
 
   explicit FunctionStatement(const Position &position,
                              const shared_ptr<Scope> &scope,
                              const SymbolVisibility::Value &visibility,
-                             const shared_ptr<ProtoStatement> &proto,
+                             const shared_ptr<FunctionProtoStatement> &proto,
                              const shared_ptr<BlockStatement> &body)
       : position(position),
         scope(scope),

@@ -121,7 +121,7 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
   }
   if (auto string_expression =
           dynamic_pointer_cast<StringExpression>(expression)) {
-    return context->builder->CreateGlobalStringPtr(
+    return context->builder->CreateGlobalString(
         llvm::StringRef(string_expression->value), "str", 0,
         context->module.get());
   }
@@ -170,8 +170,13 @@ llvm::Value *LLVMCodegen::codegen(const shared_ptr<LLVMCodegenContext> &context,
           dynamic_pointer_cast<IncludeStatement>(statement)) {
     return IncludeStatementCodegen(context, include_statement).codegen();
   }
-  if (auto proto_statement = dynamic_pointer_cast<ProtoStatement>(statement)) {
-    return ProtoStatementCodegen(context, proto_statement).codegen();
+  if (auto proto_statement =
+          dynamic_pointer_cast<FunctionProtoStatement>(statement)) {
+    return FunctionProtoStatementCodegen(context, proto_statement).codegen();
+  }
+  if (auto proto_statement =
+          dynamic_pointer_cast<VarProtoStatement>(statement)) {
+    return VarProtoStatementCodegen(context, proto_statement).codegen();
   }
   if (auto return_statement =
           dynamic_pointer_cast<ReturnStatement>(statement)) {

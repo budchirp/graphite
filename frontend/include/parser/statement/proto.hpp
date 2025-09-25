@@ -7,13 +7,24 @@
 
 using namespace std;
 
-class ProtoStatementParser {
+class FunctionProtoStatementParser {
  private:
   shared_ptr<Parser> parser;
 
  public:
-  explicit ProtoStatementParser(const shared_ptr<Parser> &parser)
+  explicit FunctionProtoStatementParser(const shared_ptr<Parser> &parser)
       : parser(parser) {};
 
-  shared_ptr<ProtoStatement> parse();
+  shared_ptr<FunctionProtoStatement> parse();
+};
+
+class VarProtoStatementParser {
+ private:
+  shared_ptr<Parser> parser;
+
+ public:
+  explicit VarProtoStatementParser(const shared_ptr<Parser> &parser)
+      : parser(parser) {};
+
+  shared_ptr<VarProtoStatement> parse();
 };

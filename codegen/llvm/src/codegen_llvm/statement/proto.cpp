@@ -8,8 +8,10 @@
 
 #include "codegen_llvm/utils.hpp"
 
-llvm::Value *ProtoStatementCodegen::codegen() const { return codegen_proto(); }
-llvm::Function *ProtoStatementCodegen::codegen_proto() const {
+llvm::Value *FunctionProtoStatementCodegen::codegen() const {
+  return codegen_proto();
+}
+llvm::Function *FunctionProtoStatementCodegen::codegen_proto() const {
   auto function = context->get_env()->get_function(statement->name->value);
 
   auto linkage = function->visibility == SymbolVisibility::Value::PUBLIC
@@ -29,4 +31,12 @@ llvm::Function *ProtoStatementCodegen::codegen_proto() const {
   llvm::verifyFunction(*llvm_function);
 
   return llvm_function;
+}
+
+llvm::Value *VarProtoStatementCodegen::codegen() const {
+  return new llvm::GlobalVariable(
+      *context->module,
+      LLVMCodegenUtils::type_to_llvm_type(context, statement->get_type()),
+      false, llvm::GlobalValue::ExternalLinkage, nullptr,
+      statement->name->value);
 }

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-class ProtoStatement : public Statement {
+class FunctionProtoStatement : public Statement {
  private:
   Position position;
 
@@ -22,7 +22,7 @@ class ProtoStatement : public Statement {
       parameters;
   shared_ptr<TypeExpression> return_type;
 
-  explicit ProtoStatement(
+  explicit FunctionProtoStatement(
       const Position &position, const shared_ptr<IdentifierExpression> &name,
       const vector<pair<shared_ptr<IdentifierExpression>,
                         shared_ptr<TypeExpression>>> &parameters,
@@ -40,6 +40,30 @@ class ProtoStatement : public Statement {
   shared_ptr<Type> get_type() const override {
     return make_shared<VoidType>();
   };
+
+  string to_string() const override;
+  string to_string_tree() const override;
+};
+
+class VarProtoStatement : public Statement {
+ private:
+  Position position;
+
+ public:
+  shared_ptr<IdentifierExpression> name;
+  shared_ptr<TypeExpression> type;
+
+  explicit VarProtoStatement(const Position &position,
+                             const shared_ptr<IdentifierExpression> &name,
+                             const shared_ptr<TypeExpression> &type)
+      : position(position), name(name), type(type) {};
+
+  void validate(const shared_ptr<ProgramContext> &context) override;
+  void resolve_types(const shared_ptr<ProgramContext> &context) override;
+
+  Position *get_position() override { return &position; };
+
+  shared_ptr<Type> get_type() const override { return type->get_type(); };
 
   string to_string() const override;
   string to_string_tree() const override;

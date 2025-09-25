@@ -32,9 +32,7 @@ class TypeStatement : public Statement {
 
   Position *get_position() override { return &position; };
 
-  shared_ptr<Type> get_type() const override {
-    return make_shared<VoidType>();
-  };
+  shared_ptr<Type> get_type() const override { return type->get_type(); };
 
   string to_string() const override;
   string to_string_tree() const override;

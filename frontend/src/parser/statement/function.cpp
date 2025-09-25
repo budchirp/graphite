@@ -24,7 +24,7 @@ shared_ptr<FunctionStatement> FunctionStatementParser::parse(
     return nullptr;
   }
 
-  auto proto_statement = ProtoStatementParser(parser).parse();
+  auto proto_statement = FunctionProtoStatementParser(parser).parse();
   if (!proto_statement) {
     parser->get_logger()->error("Failed to parse statement",
                                 LogTypes::Error::INTERNAL);

@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <llvm/IR/Value.h>
@@ -11,17 +10,33 @@
 
 using namespace std;
 
-class ProtoStatementCodegen : public StatementCodegen {
+class FunctionProtoStatementCodegen : public StatementCodegen {
  private:
   shared_ptr<LLVMCodegenContext> context;
 
-  shared_ptr<ProtoStatement> statement;
+  shared_ptr<FunctionProtoStatement> statement;
 
  public:
-  explicit ProtoStatementCodegen(const shared_ptr<LLVMCodegenContext>& context,
-                                 const shared_ptr<ProtoStatement>& statement)
+  explicit FunctionProtoStatementCodegen(
+      const shared_ptr<LLVMCodegenContext>& context,
+      const shared_ptr<FunctionProtoStatement>& statement)
       : context(context), statement(statement) {};
 
   llvm::Value* codegen() const override;
   llvm::Function* codegen_proto() const;
+};
+
+class VarProtoStatementCodegen : public StatementCodegen {
+ private:
+  shared_ptr<LLVMCodegenContext> context;
+
+  shared_ptr<VarProtoStatement> statement;
+
+ public:
+  explicit VarProtoStatementCodegen(
+      const shared_ptr<LLVMCodegenContext>& context,
+      const shared_ptr<VarProtoStatement>& statement)
+      : context(context), statement(statement) {};
+
+  llvm::Value* codegen() const override;
 };

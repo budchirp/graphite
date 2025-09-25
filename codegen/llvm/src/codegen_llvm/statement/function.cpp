@@ -16,8 +16,8 @@ llvm::Function *FunctionStatementCodegen::codegen_function() const {
     Logger::warn("Function `" + name + "` exists", LogTypes::Warn::SUGGESTION,
                  statement->proto->name->get_position());
   } else {
-    llvm_function =
-        ProtoStatementCodegen(context, statement->proto).codegen_proto();
+    llvm_function = FunctionProtoStatementCodegen(context, statement->proto)
+                        .codegen_proto();
     if (!llvm_function) {
       Logger::error(
           "Failed to generate low level code for function `" + name + "`",

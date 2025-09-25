@@ -1,13 +1,15 @@
-extern printf(str: string) -> void
-extern print_number(number: i32) -> void
+extern fn printf(str: string) -> void
+extern fn print_number(number: i32) -> void
 
-extern malloc(size: i32) -> *mut ptr
-extern free(ptr: *ptr) -> void
+extern fn malloc(size: i32) -> *mut ptr
+extern fn free(ptr: *ptr) -> void
 
 include "add"
 include "car"
 
 var global = 16
+
+extern var x: i32
 
 type string_array = string[]
 

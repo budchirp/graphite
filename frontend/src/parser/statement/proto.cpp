@@ -8,7 +8,7 @@
 #include "parser/expression/identifier.hpp"
 #include "parser/expression/type.hpp"
 
-shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
+shared_ptr<FunctionProtoStatement> FunctionProtoStatementParser::parse() {
   if (parser->current_token.type != TOKEN_IDENTIFIER) {
     parser->get_logger()->error("Expected identifier as prototype name",
                                 LogTypes::Error::SYNTAX);
@@ -19,8 +19,8 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
 
   auto identifier_expression_parser = IdentifierExpressionParser(parser);
 
-  auto namen_expression = identifier_expression_parser.parse_identifier();
-  if (!namen_expression) {
+  auto name_expression = identifier_expression_parser.parse_identifier();
+  if (!name_expression) {
     parser->get_logger()->error("Failed to parse the name of the proto",
                                 LogTypes::Error::INTERNAL);
     return nullptr;
@@ -95,6 +95,43 @@ shared_ptr<ProtoStatement> ProtoStatementParser::parse() {
     return nullptr;
   }
 
-  return make_shared<ProtoStatement>(position, namen_expression, parameters,
-                                     return_type_expression);
+  return make_shared<FunctionProtoStatement>(
+      position, name_expression, parameters, return_type_expression);
+}
+
+shared_ptr<VarProtoStatement> VarProtoStatementParser::parse() {
+  if (parser->current_token.type != TOKEN_IDENTIFIER) {
+    parser->get_logger()->error("Expected identifier as prototype name",
+                                LogTypes::Error::SYNTAX);
+    return nullptr;
+  }
+
+  const auto position = *parser->get_lexer()->position;
+
+  auto identifier_expression_parser = IdentifierExpressionParser(parser);
+
+  auto name_expression = identifier_expression_parser.parse_identifier();
+  if (!name_expression) {
+    parser->get_logger()->error("Failed to parse the name of the proto",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
+
+  if (parser->current_token.type != TOKEN_COLON) {
+    parser->get_logger()->error("Expected : after identifier",
+                                LogTypes::Error::SYNTAX);
+    return nullptr;
+  }
+
+  parser->eat_token();  // eat :
+
+  auto type_expression = TypeExpressionParser(parser).parse_type();
+  if (!type_expression) {
+    parser->get_logger()->error("Failed to parse type",
+                                LogTypes::Error::INTERNAL);
+    return nullptr;
+  }
+
+  return make_shared<VarProtoStatement>(position, name_expression,
+                                        type_expression);
 }
